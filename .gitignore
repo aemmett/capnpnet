@@ -1,0 +1,5 @@
+/.vs/capnpnet/v15/*.suo
+/.vs
+obj
+bin
+/packages
