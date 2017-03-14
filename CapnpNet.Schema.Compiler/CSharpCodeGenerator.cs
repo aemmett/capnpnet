@@ -1,21 +1,24 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Editing;
-using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis.Options;
-using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CapnpNet.Schema.Compiler
 {
+  // TOOD: generate AST from FormattableString?
   public class CSharpCodeGenerator
   {
     // TODO: annotations for namespace, name overrides, and doc comments
     public const ulong NamespaceAnnotationId = ~0UL; // TODO
+
+    // TODO: although it is auto-generated, I would like to remove excess qualification...
+    public const string StructType = "global::CapnpNet.Struct";
+    public const string MessageType = "global::CapnpNet.Message";
 
     private readonly CodeGeneratorRequest _request;
     private readonly SyntaxGenerator _generator;
@@ -32,6 +35,7 @@ namespace CapnpNet.Schema.Compiler
       _request = request;
       this.DefaultNamespace = defaultNamespace;
       _generator = SyntaxGenerator.GetGenerator(new AdhocWorkspace(), LanguageNames.CSharp);
+      
     }
 
     public IEnumerable<string> NodePath => _nodePath;
@@ -39,7 +43,7 @@ namespace CapnpNet.Schema.Compiler
     public string DefaultNamespace { get; set; }
     public OptionKey CSharpFormattingOption { get; private set; }
 
-    public IReadOnlyDictionary<string, string> GenerateSource()
+    public IReadOnlyDictionary<string, string> GenerateSources()
     {
       return _request.requestedFiles
         .Select(f => new
@@ -81,8 +85,10 @@ namespace {GetNamespace(node)}
 
       public override SyntaxNode VisitBlock(BlockSyntax node)
       {
-        if (node.Parent is ConstructorDeclarationSyntax
-          || node.Parent is AccessorDeclarationSyntax)
+        if (node.Statements.Count == 1
+          /*&& (node.Parent is ConstructorDeclarationSyntax
+            || node.Parent is AccessorDeclarationSyntax
+            || node.Parent is MethodDeclarationSyntax)*/)
         {
           node = node.ReplaceToken(node.OpenBraceToken, node.OpenBraceToken.WithoutTrivia());
           node = node.ReplaceToken(node.CloseBraceToken, node.CloseBraceToken
@@ -120,15 +126,17 @@ namespace {GetNamespace(node)}
     {
       var name = _generator.IdentifierName(node.displayName.ToString().Substring((int)node.displayNamePrefixLength)).ToString();
 
-      if (node.Is(out Node.structGroup s))
+      if (node.Is(out Node.Struct s))
       {
         return $@"
           {GetDocComment(node)}
           public struct {name} : IStruct
           {{
-            private Struct _s;
-            public {name}(Struct s) {{ _s = s; }}
-            Struct IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}
+            private {StructType} _s;
+            public {name}({MessageType} m) : this(m, {s.dataWordCount.ToString()}, {s.pointerCount.ToString()}) {{ }}
+            public {name}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWors, pointers)) {{ }}
+            public {name}({StructType} s) {{ _s = s; }}
+            {StructType} IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}
 
             {string.Join("\n", GenerateMembers(s))}
 
@@ -270,7 +278,7 @@ namespace {GetNamespace(node)}
 
     private string ToName(Text name) => _generator.IdentifierName(name.ToString()).ToString();
 
-    private IEnumerable<string> GenerateMembers(Node.structGroup s)
+    private IEnumerable<string> GenerateMembers(Node.Struct s)
     {
       if (s.discriminantCount > 0)
       {
@@ -286,11 +294,12 @@ namespace {GetNamespace(node)}
         foreach (var field in unionFieldList.Where(f => f.which == Field.Union.group))
         {
           var groupName = this.GetTypeName(field.group.typeId);
+          var groupTypeName = ToGroupName(groupName);
           yield return $@"
-            public bool Is(out {groupName}Group {groupName})
+            public bool Is(out {groupTypeName} {groupName})
             {{
               var ret = this.which == Union.{ToName(field.name)};
-              {groupName} = new {groupName}Group(ret ? _s : default(Struct));
+              {groupName} = new {groupTypeName}(ret ? _s : default({StructType}));
               return ret;
             }}";
         }
@@ -364,13 +373,15 @@ namespace {GetNamespace(node)}
         }
         else if (field.which == Field.Union.group)
         {
+          string groupName = ToGroupName(name);
+
           yield return $@"
             {GetDocComment(field.annotations)}
-            public {name}Group {name} => new {name}Group(_s);
-            public struct {name}Group
+            public {groupName} {name} => new {groupName}(_s);
+            public struct {groupName}
             {{
-              private readonly Struct _s;
-              public {name}Group(Struct s) {{ _s = s; }}
+              private readonly {StructType} _s;
+              public {groupName}({StructType} s) {{ _s = s; }}
             ";
           foreach (var member in this.GenerateMembers(field.group.typeId))
           {
@@ -386,6 +397,21 @@ namespace {GetNamespace(node)}
 
         _nodePath.Pop();
       }
+    }
+
+    private static string ToGroupName(string name)
+    {
+      var groupName = name.TrimStart('@');
+      //if (groupName[0] >= 'a' && groupName[0] <= 'z')
+      //{
+      //  groupName = char.ToUpperInvariant(groupName[0]) + groupName.Substring(1);
+      //}
+      //else
+      {
+        groupName += "Group";
+      }
+
+      return groupName;
     }
 
     private string GetTypeName(ulong typeId) => this.GetTypeName(_request.nodes.First(n => n.id == typeId));

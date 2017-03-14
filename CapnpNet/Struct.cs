@@ -3,6 +3,72 @@ using System.Runtime.CompilerServices;
 
 namespace CapnpNet
 {
+  public interface IStruct
+  {
+    Struct Struct { get; set; }
+  }
+
+  public static class StructExtensions
+  {
+    public static T As<T>(this Struct s) where T : struct, IStruct => new T { Struct = s };
+
+    public static Struct GetStruct<T>(this T structObj) where T : struct, IStruct => structObj.Struct;
+
+    public static bool Compact<T>(this T structObj, bool dataOnly = true) where T : struct, IStruct
+    {
+      // FIXME: check for upgraded list struct
+      var s = structObj.Struct;
+      var originalEnd = s.StructWordOffset + s.DataWords + s.PointerWords;
+      int savedWords = 0;
+
+      var dw = s.DataWords;
+      while (dw > 0 && s.ReadInt64(dw - 1) == 0)
+      {
+        dw--;
+        savedWords++;
+      }
+
+      var pw = s.PointerWords;
+      if (dataOnly == false)
+      {
+        while (pw > 0 && s.ReadRawPointer(pw - 1).RawValue == 0)
+        {
+          pw--;
+          savedWords++;
+        }
+      }
+
+      if (savedWords == 0) return false;
+
+      var newStruct = new Struct(s.Segment, s.StructWordOffset, dw, pw, 0);
+
+      var pointerShift = s.DataWords - dw;
+      if (pointerShift > 0)
+      {
+        // need to shift pointers over
+        for (int i = 0; i < pw; i++)
+        {
+          var ptr = s.ReadRawPointer(i);
+          if (ptr.Type == PointerType.Struct || ptr.Type == PointerType.List) ptr.WordOffset += pointerShift;
+
+          newStruct.WriteRawPointer(i, ptr);
+        }
+      }
+
+      var seg = s.Segment;
+      for (int i = 0; i < savedWords; i++)
+      {
+        seg[originalEnd - i - 1 | Word.unit] = 0;
+      }
+      
+      structObj.Struct = newStruct;
+
+      seg.TryReclaim(originalEnd, savedWords);
+
+      return true;
+    }
+  }
+
   public struct Struct
   {
     private readonly Segment _segment;
@@ -43,11 +109,13 @@ namespace CapnpNet
         return ret;
       }
     }
-    
+
+#if SPAN
     // <summary>
     // Note, when _upgradedListElementOffset > 0, Span will be one word long, and may comprise of multiple structs.
     // </summary>
-    //public Span<ulong> Span => _segment.Span.Slice((int)_structWordOffset, _dataWords + _pointerWords);
+    public Span<ulong> Span => _segment.Span.Slice((int)_structWordOffset, _dataWords + _pointerWords);
+#endif
 
     public int StructWordOffset => _structWordOffset;
     public Segment Segment => _segment;
@@ -62,7 +130,7 @@ namespace CapnpNet
       return ref Unsafe.As<ulong, Pointer>(ref _segment[_structWordOffset + _dataWords + index | Word.unit]);
     }
 
-    #region Read methods
+#region Read methods
     public Pointer ReadRawPointer(int pointerIndex)
     {
       Check.Positive(pointerIndex);
@@ -248,9 +316,9 @@ namespace CapnpNet
       return (_segment[_structWordOffset + wordIndex | Word.unit] & mask) > 0 != defaultValue;
     }
 
-    #endregion Read methods
+#endregion Read methods
 
-    #region Write methods
+#region Write methods
     public void WriteRawPointer(int pointerIndex, Pointer pointer)
     {
       if (pointerIndex < 0 || pointerIndex >= this.PointerWords)
@@ -464,6 +532,6 @@ namespace CapnpNet
       }
     }
 
-    #endregion Write methods
+#endregion Write methods
   }
 }

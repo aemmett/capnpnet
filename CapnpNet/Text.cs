@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace CapnpNet
@@ -7,6 +8,40 @@ namespace CapnpNet
   {
     private readonly Segment _segment;
     private readonly int _listWordOffset, _elementCount;
+    
+    public Text(Message msg, int bytesWithNulTerminator)
+    {
+      _elementCount = bytesWithNulTerminator;
+      msg.Allocate(bytesWithNulTerminator / sizeof(ulong), out _listWordOffset, out _segment);
+    }
+    
+    public Text(Message msg, string str)
+    {
+      _elementCount = Encoding.UTF8.GetByteCount(str) + 1;
+      msg.Allocate(_elementCount / sizeof(ulong), out _listWordOffset, out _segment);
+      if (_segment.Is(out ArraySegment<byte> arrSeg))
+      {
+        Encoding.UTF8.GetBytes(str, 0, str.Length, arrSeg.Array, arrSeg.Offset);
+        arrSeg.Array[arrSeg.Offset + arrSeg.Count - 1] = 0;
+      }
+      else if (_segment.IsFixedMemory)
+      {
+        unsafe
+        {
+          fixed (char* chars = str)
+          {
+            var ptr = (byte*)Unsafe.AsPointer(ref _segment[_listWordOffset | Word.unit]);
+            Encoding.UTF8.GetBytes(chars, str.Length, ptr, _elementCount - 1);
+            ptr[_elementCount - 1] = 0;
+          }
+        }
+      }
+      else
+      {
+        // TODO: ask for pin
+        throw new NotImplementedException();
+      }
+    }
 
     public Text(Segment segment, int baseWordOffset, ListPointer listPointer)
     {

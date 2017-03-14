@@ -11,6 +11,14 @@ namespace CapnpNet
     private readonly Segment _segment;
     private readonly int _tagOffset, _elementCount;
     private readonly ushort _dataWords, _pointerWords;
+    
+    public CompositeList(Message msg, StructPointer tag, int count)
+    {
+      _elementCount = count;
+      _dataWords = tag.DataWords;
+      _pointerWords = tag.PointerWords;
+      msg.Allocate(_dataWords + _pointerWords + 1, out _tagOffset, out _segment);
+    }
 
     public CompositeList(Segment segment, int baseOffset, ListPointer listPointer)
     {

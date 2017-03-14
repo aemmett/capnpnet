@@ -4,24 +4,29 @@ using System.Runtime.CompilerServices;
 
 namespace CapnpNet
 {
-  public class Message : IDisposable
+  public partial class Message : IDisposable
   {
-    // TODO: readable vs. writable?
-    // TODO: how is empty message represented?
-    // TODO: incremental reads?
-    private Segment _firstSegment;
+    // TODO: Segment pooling
+    // move this factory to the Segment class?
+    public static Func<int, Segment> DefaultSegmentFactory { get; set; }
+      = minRequiredSize => new Segment(new ArraySegment<byte>(new byte[Math.Min(minRequiredSize, 4008)]));
+    
+    private Segment _firstSegment, _lastSegment;
     
     public Message()
     {
       this.WordsToLive = 64*1024*1024/8; // 64MB
+      this.SegmentFactory = Message.DefaultSegmentFactory;
     }
     
     public Message(Segment firstSegment)
       : this()
     {
-      _firstSegment = firstSegment;
+      _firstSegment = _lastSegment = firstSegment;
     }
     
+    public Func<int, Segment> SegmentFactory { get; set; }
+
     public SegmentList Segments => new SegmentList(_firstSegment);
 
     public long WordsToLive { get; set; }
@@ -34,32 +39,50 @@ namespace CapnpNet
         return new Struct(_firstSegment, 1, (StructPointer)rootPointer);
       }
     }
-    
-    public T GetRoot<T>() where T : struct, IStruct
+
+    public T GetRoot<T>() where T : struct, IStruct => this.Root.As<T>();
+
+    public Struct Allocate(ushort dataWords, ushort pointerWords)
     {
-      return new T
-      {
-        Struct = this.Root,
-      };
+      this.Allocate(dataWords + pointerWords, out int offset, out Segment segment);
+      return new Struct(segment, offset, dataWords, pointerWords, 0);
     }
 
-    public void AddSegment(ArraySegment<byte> memory) // TODO: read vs. write
+    public void Allocate(int words, out int offset, out Segment segment)
     {
-      var lastSegment = this.Segments.LastOrDefault();
-      // TODO: pool
-      var segment = new Segment(memory)
+      if (_lastSegment.TryAllocate(words, out offset))
       {
-        Message = this,
-        SegmentIndex = lastSegment?.SegmentIndex + 1 ?? 0,
-      };
+        segment = _lastSegment;
+      }
+      
+      this.AddSegment(this.SegmentFactory(words));
+      
+      if (_lastSegment.TryAllocate(words, out offset))
+      {
+        segment = _lastSegment;
+      }
 
-      if (lastSegment == null)
+      throw new InvalidOperationException("Cannot allocate");
+    }
+    
+    public void AddSegment(byte[] memory) => this.AddSegment(new ArraySegment<byte>(memory, 0, memory.Length));
+
+    public void AddSegment(ArraySegment<byte> memory) => this.AddSegment(new Segment(memory));
+
+    private void AddSegment(Segment segment)
+    {
+      var prevSegment = _lastSegment;
+      _lastSegment = segment;
+      segment.Message = this;
+      segment.SegmentIndex = prevSegment?.SegmentIndex + 1 ?? 0;
+
+      if (prevSegment == null)
       {
-        _firstSegment = segment;
+        _firstSegment = _lastSegment;
       }
       else
       {
-        lastSegment.Next = segment;
+        prevSegment.Next = _lastSegment;
       }
     }
 

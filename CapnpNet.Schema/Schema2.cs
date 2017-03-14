@@ -149,9 +149,9 @@ namespace CapnpNet.Schema
 
   public struct Node : IStruct
   {
-    private Struct _s;
-    public Node(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    private CapnpNet.Struct _s;
+    public Node(CapnpNet.Struct s) { _s = s; }
+    CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -167,38 +167,38 @@ namespace CapnpNet.Schema
       annotation = 5,
     }
 
-    public bool Is(out @structGroup @struct)
+    public bool Is(out Struct @struct)
     {
       var ret = this.which == Union.@struct;
-      @struct = new @structGroup(ret ? _s : default (Struct));
+      @struct = new Struct(ret ? _s : default (CapnpNet.Struct));
       return ret;
     }
 
     public bool Is(out @enumGroup @enum)
     {
       var ret = this.which == Union.@enum;
-      @enum = new @enumGroup(ret ? _s : default (Struct));
+      @enum = new enumGroup(ret ? _s : default (CapnpNet.Struct));
       return ret;
     }
 
     public bool Is(out @interfaceGroup @interface)
     {
       var ret = this.which == Union.@interface;
-      @interface = new @interfaceGroup(ret ? _s : default (Struct));
+      @interface = new interfaceGroup(ret ? _s : default (CapnpNet.Struct));
       return ret;
     }
 
     public bool Is(out @constGroup @const)
     {
       var ret = this.which == Union.@const;
-      @const = new @constGroup(ret ? _s : default (Struct));
+      @const = new constGroup(ret ? _s : default (CapnpNet.Struct));
       return ret;
     }
 
     public bool Is(out annotationGroup annotation)
     {
       var ret = this.which == Union.annotation;
-      annotation = new annotationGroup(ret ? _s : default (Struct));
+      annotation = new annotationGroup(ret ? _s : default (CapnpNet.Struct));
       return ret;
     }
 
@@ -244,11 +244,11 @@ namespace CapnpNet.Schema
       set { _s.WritePointer(2, value); }
     }
 
-    public @structGroup @struct => new @structGroup(_s);
-    public struct @structGroup
+    public Struct @struct => new Struct(_s);
+    public struct Struct
     {
-      private readonly Struct _s;
-      public @structGroup(Struct s) { _s = s; }
+      private readonly CapnpNet.Struct _s;
+      public Struct(CapnpNet.Struct s) { _s = s; }
       public ushort dataWordCount
       {
         get { return _s.ReadUInt16(7); }
@@ -295,8 +295,8 @@ namespace CapnpNet.Schema
     public @enumGroup @enum => new @enumGroup(_s);
     public struct @enumGroup
     {
-      private readonly Struct _s;
-      public @enumGroup(Struct s) { _s = s; }
+      private readonly CapnpNet.Struct _s;
+      public @enumGroup(CapnpNet.Struct s) { _s = s; }
       public CompositeList<Enumerant> enumerants
       {
         get { return _s.DereferenceCompositeList<Enumerant>(3); }
@@ -307,8 +307,8 @@ namespace CapnpNet.Schema
     public @interfaceGroup @interface => new @interfaceGroup(_s);
     public struct @interfaceGroup
     {
-      private readonly Struct _s;
-      public @interfaceGroup(Struct s) { _s = s; }
+      private readonly CapnpNet.Struct _s;
+      public @interfaceGroup(CapnpNet.Struct s) { _s = s; }
       public CompositeList<Method> methods
       {
         get { return _s.DereferenceCompositeList<Method>(3); }
@@ -325,8 +325,8 @@ namespace CapnpNet.Schema
     public @constGroup @const => new @constGroup(_s);
     public struct @constGroup
     {
-      private readonly Struct _s;
-      public @constGroup(Struct s) { _s = s; }
+      private readonly CapnpNet.Struct _s;
+      public @constGroup(CapnpNet.Struct s) { _s = s; }
       public Type type
       {
         get { return _s.DereferenceStruct<Type>(3); }
@@ -343,8 +343,8 @@ namespace CapnpNet.Schema
     public annotationGroup annotation => new annotationGroup(_s);
     public struct annotationGroup
     {
-      private readonly Struct _s;
-      public annotationGroup(Struct s) { _s = s; }
+      private readonly CapnpNet.Struct _s;
+      public annotationGroup(CapnpNet.Struct s) { _s = s; }
       public Type type
       {
         get { return _s.DereferenceStruct<Type>(3); }
@@ -426,9 +426,9 @@ namespace CapnpNet.Schema
 
     public struct NestedNode : IStruct
     {
-      private Struct _s;
-      public NestedNode(Struct s) { _s = s; }
-      Struct IStruct.Struct
+      private CapnpNet.Struct _s;
+      public NestedNode(CapnpNet.Struct s) { _s = s; }
+      CapnpNet.Struct IStruct.Struct
       {
         get { return _s; }
         set { _s = value; }

@@ -8,6 +8,14 @@ namespace CapnpNet
   public struct PrimitiveList<T> : IEnumerable<T>
     where T : struct
   {
+    public PrimitiveList(Message msg, StructPointer tag, int count)
+    {
+      msg.Allocate(count * Unsafe.SizeOf<T>() / sizeof(ulong), out int offset, out Segment seg);
+      this.Segment = seg;
+      this.ListWordOffset = offset;
+      this.Count = count;
+    }
+
     public PrimitiveList(Segment segment, int baseWordOffset, ListPointer listPointer)
     {
       TypeHelpers.AssertSize<T>(listPointer.ElementSize);

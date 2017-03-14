@@ -1,15 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace CapnpNet.Schema.Compiler
 {
-  class Program
+  public class Program
   {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
+      Message msg;
+      using (var stdin = Console.OpenStandardInput())
+      {
+        msg = Message.DecodeAsync(stdin).Result;
+      }
+
+      var codeGenerator = new CSharpCodeGenerator(msg.GetRoot<CodeGeneratorRequest>());
+      var outputs = codeGenerator.GenerateSources();
+      foreach (var kvp in outputs)
+      {
+        File.WriteAllText(kvp.Key + ".cs", kvp.Value);
+      }
     }
   }
 }

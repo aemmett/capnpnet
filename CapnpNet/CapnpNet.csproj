@@ -7,8 +7,8 @@
     <ProjectGuid>{E83F472A-663E-4B5E-815D-90D066681352}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>capnpnet</RootNamespace>
-    <AssemblyName>capnpnet</AssemblyName>
+    <RootNamespace>CapnpNet</RootNamespace>
+    <AssemblyName>CapnpNet</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -47,8 +47,8 @@
     <Compile Include="BoolList.cs" />
     <Compile Include="CompositeList.cs" />
     <Compile Include="Check.cs" />
-    <Compile Include="FrameDecoder.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="Index.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="OrdinalAttribute.cs" />
     <Compile Include="Pointer.cs" />
@@ -63,6 +63,7 @@
     <Compile Include="Text.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Message.Framing.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

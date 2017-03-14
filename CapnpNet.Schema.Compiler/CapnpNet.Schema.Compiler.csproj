@@ -7,7 +7,7 @@
     <ProjectGuid>{920CA392-B6BB-460C-A66D-A0EF0963B4E5}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>CapnpNet.Schema.Compiler</RootNamespace>
-    <AssemblyName>CapnpNet.Schema.Compiler</AssemblyName>
+    <AssemblyName>capnpc-csharp</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

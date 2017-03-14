@@ -8,6 +8,12 @@ namespace CapnpNet
   {
     private readonly Segment _segment;
     private readonly int _listWordOffset, _count;
+    
+    public BoolList(Message msg, int count)
+    {
+      _count = count;
+      msg.Allocate((count + 63) / 64, out _listWordOffset, out _segment);
+    }
 
     public BoolList(Segment segment, int baseWordOffset, ListPointer listPointer)
     {
