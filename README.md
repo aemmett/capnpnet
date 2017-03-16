@@ -1,8 +1,16 @@
-Currently work in progress. Another C# implementation of [Cap'n Proto][].
+Another C# implementation of [Cap'n Proto][].
 
-This implementation is based around the ability to perform pointer arithmatic
+Status
+------
+
+Currently work in progress. Still hacking on the code, but it appears the
+schema compiler is working at least. There are still some known bugs.
+
+This implementation is based around the ability to perform pointer arithmetic
 and reinterpret casts on "managed pointers" (`ref` keyword), allowing one
-internal mechanism that can work with managed and unmanaged memory.
+internal mechanism that can work with managed and unmanaged memory. In thoery,
+this means generated schema code's accessors consist of direct calls that can
+potentially be inlined by the JITter up to the point of raw memory access.
 
 Usage
 -----
@@ -14,11 +22,6 @@ Acquisition: (for now) build from source.
 
 (TODO: basic overview / getting started)
 
-Features
---------
-
-- Supports `byte[]` segments or `SafeBuffer`s
-
 Building
 --------
 
@@ -29,30 +32,36 @@ Features (that should be mostly working)
 
 - Schema generation
 - Reading unpacked messages and their contents
+  - Supports `byte[]` and `SafeBuffer`
+- (to be documented)
 
 TODO
 ----
 
 (in no particular order)
 
+- RPC layer
+- Higher-level convenience APIs (setting up connections, etc.)
 - Tests / documentation
   - Check for integer overflows. I'm pretty sure there's a lot of them when
     dealing with >2GB (possibly smaller) messages, may potentially compromise
     memory safety / process stability
 - Missing edge cases (upgrade list structs, etc.)
 - Equals, GetHashCode boilerplate
+- Packing/unpacking
 - Codegen improvements
   - annotations to control codegen
   - metadata attributes
 - dynamic API
 - VS integration 
 - .Net Core compatibility
+  - what does this entail? Do I need to make unsafe code optional?
+- Portability improvements (data alignment, big endian support)
 - Project name
 - More optimizations: object pooling, inlining improvements?
 - Performance analysis
-- RPC layer
-- Generalize segment memory (or wait until )
 - Re-incorporate `Span<T>`-based APIs
-- support for incremental reads?
+- Support for incremental reads?
+- Find some tool to inline/prune all the compiler dependencies?
 
-[Cap'n Proto] : https://capnproto.org
+[Cap'n Proto]: https://capnproto.org
