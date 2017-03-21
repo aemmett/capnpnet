@@ -4,18 +4,21 @@ using System.Runtime.InteropServices;
 
 namespace CapnpNet
 {
-  public sealed class Segment
+  public sealed class Segment : IDisposable
   {
     // TODO: other memory modes, or a unified representation (span-like pinnable + offset)
     private ArraySegment<byte> _array;
-    private SafeBuffer _safeBuf;
-    private IntPtr _offset;
-    private IntPtr _length;
 
-    public Segment(ArraySegment<byte> memory) => this.Init(memory);
-    public Segment(SafeBuffer safeBuffer) => this.Init(safeBuffer);
+    // or fixed memory:
+    private object _fixedMemHandle;
+    private IntPtr _fixedMemPointer;
 
-    public Message Message { get; set; }
+    // used by both:
+    private int _byteLength;
+
+    private IDisposable _disposer;
+    
+    public Message Message { get; private set; }
     public int SegmentIndex { get; set; }
     public Segment Next { get; set; }
     
@@ -23,11 +26,17 @@ namespace CapnpNet
 #if SPAN
     public Span<ulong> Span => new Span(_memory).Cast<byte, ulong>();
 #endif
-    public int WordCapacity => _length.ToInt32() / sizeof(ulong);
+    public int WordCapacity => _byteLength / sizeof(ulong);
     public int AllocationIndex { get; set; }
 
-    public bool IsFixedMemory => _safeBuf != null;
-
+    public bool IsFixedMemory => _fixedMemPointer != IntPtr.Zero;
+    
+    // TODO: get rid of int wrappers and just have GetByteRef / GetWordRef methods.
+    // Although, now that I look at where I ended up, the managed pointers doesn't seem
+    // that useful over some generic Read<T>/Write<T> methods that do the pointer arithmetic
+    // and reinterpret-casting internally. The best use case for the managed pointer seems to be
+    // to avoid redundant bounds checks, but currently I haven't built the rigor into the code to
+    // do the ahead-of-time bounds checks at construction.
     internal ref ulong this[Index<Word> wordIndex] => ref Unsafe.As<byte, ulong>(ref this[wordIndex * sizeof(ulong) | Byte.unit]);
     internal ref byte this[Index<Byte> byteIndex]
     {
@@ -38,52 +47,76 @@ namespace CapnpNet
         {
           unsafe
           {
-            Check.Range(byteIndex, _length.ToInt32());
-            return ref Unsafe.AsRef<byte>((byte*)_offset.ToPointer() + byteIndex);
+            Check.Range(byteIndex, _byteLength);
+            return ref Unsafe.AsRef<byte>((byte*)_fixedMemPointer.ToPointer() + byteIndex);
           }
         };
       }
     }
 
-    public void Init(byte[] memory) => this.Init(memory, 0, memory.Length);
+    public Segment Init(Message message, byte[] memory) => this.Init(message, memory, 0, memory.Length);
 
-    public void Init(byte[] memory, int offset, int length) => this.Init(new ArraySegment<byte>(memory, offset, length));
+    public Segment Init(Message message, byte[] memory, int offset, int length) => this.Init(message, new ArraySegment<byte>(memory, offset, length));
 
-    public void Init(ArraySegment<byte> memory)
+    public Segment Init(Message message, ArraySegment<byte> memory, IDisposable disposer = null)
     {
+      if (this.Message != null) throw new InvalidOperationException("Segment already initialized");
+
       if (memory.Count % 8 != 0) throw new ArgumentException("Memory length must be a multiple of 8 bytes");
 
+      this.Message = message;
       _array = memory;
-      _length = (IntPtr)memory.Count;
+      _byteLength = memory.Count;
+      _disposer = disposer;
+      return this;
     }
 
-    public void Init(SafeBuffer safeBuffer)
+    public Segment Init(Message message, SafeBuffer safeBuffer)
     {
+      if (this.Message != null) throw new InvalidOperationException("Segment already initialized");
+
       if (safeBuffer.ByteLength % 8 != 0) throw new ArgumentException("Memory length must be a multiple of 8 bytes");
 
-      _safeBuf = safeBuffer;
-      _length = new IntPtr((long)safeBuffer.ByteLength);
+      this.Message = message;
+      _byteLength = (int)safeBuffer.ByteLength;
+      
+      _fixedMemHandle = safeBuffer;
       unsafe
       {
         byte* ptr = null;
-        safeBuffer.AcquirePointer(ref ptr);
-        _offset = new IntPtr(ptr);
+        try
+        {
+          // TODO: can we just use DangerousGetHandle?
+          safeBuffer.AcquirePointer(ref ptr);
+          _disposer = new SafeBufferReleaser(safeBuffer);
+          _fixedMemPointer = new IntPtr(ptr);
+          return this;
+        }
+        finally
+        {
+          if (ptr != null)
+          {
+            if (_disposer == null) _disposer.Dispose();
+            else safeBuffer.ReleasePointer();
+          }
+        }
       }
     }
-
-    public void Reset()
+    
+    public void Dispose()
     {
-      if (_safeBuf != null)
-      {
-        _safeBuf.ReleasePointer();
-      }
-
+      _disposer?.Dispose();
+      
+      _disposer = null;
       _array = default(ArraySegment<byte>);
-      _safeBuf = null;
-      _offset = IntPtr.Zero;
-      _length = IntPtr.Zero;
+      _fixedMemHandle = null;
+      _fixedMemPointer = IntPtr.Zero;
+      _byteLength = 0;
+      this.Message = null;
+      this.Next = null;
+      this.AllocationIndex = 0;
     }
-
+    
     public bool Is(out ArraySegment<byte> arraySegment)
     {
       arraySegment = _array;
@@ -92,8 +125,14 @@ namespace CapnpNet
 
     public bool Is(out SafeBuffer safeBuffer)
     {
-      safeBuffer = _safeBuf;
+      safeBuffer = _fixedMemHandle as SafeBuffer;
       return safeBuffer != null;
+    }
+
+    public bool Is(out (IntPtr offset, IntPtr length) fixedMemroy)
+    {
+      fixedMemroy = (_fixedMemPointer, (IntPtr)_byteLength);
+      return this.IsFixedMemory;
     }
 
     public bool TryAllocate(int words, out int offset)

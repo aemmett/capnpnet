@@ -126,16 +126,19 @@ namespace {GetNamespace(node)}
     {
       var name = _generator.IdentifierName(node.displayName.ToString().Substring((int)node.displayNamePrefixLength)).ToString();
 
-      if (node.Is(out Node.Struct s))
+      if (node.Is(out Node.structGroup s))
       {
         return $@"
           {GetDocComment(node)}
           public struct {name} : IStruct
           {{
+            public const int KNOWN_DATA_WORDS = {s.dataWordCount.ToString()};
+            public const int KNOWN_POINTER_WORDS = {s.pointerCount.ToString()};
             private {StructType} _s;
-            public {name}({MessageType} m) : this(m, {s.dataWordCount.ToString()}, {s.pointerCount.ToString()}) {{ }}
-            public {name}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWors, pointers)) {{ }}
+            public {name}({MessageType} m) : this(m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS) {{ }}
+            public {name}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWords, pointers)) {{ }}
             public {name}({StructType} s) {{ _s = s; }}
+
             {StructType} IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}
 
             {string.Join("\n", GenerateMembers(s))}
@@ -278,7 +281,7 @@ namespace {GetNamespace(node)}
 
     private string ToName(Text name) => _generator.IdentifierName(name.ToString()).ToString();
 
-    private IEnumerable<string> GenerateMembers(Node.Struct s)
+    private IEnumerable<string> GenerateMembers(Node.structGroup s)
     {
       if (s.discriminantCount > 0)
       {

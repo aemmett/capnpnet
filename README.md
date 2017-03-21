@@ -38,21 +38,30 @@ Features (that should be mostly working)
 TODO
 ----
 
-(in no particular order)
+### Bugs / unimplemented cases
+- Missing edge cases
+  - Upgraded list structs
+  - Pointer field defaults
+- Codegen improvements
+  - annotations to control codegen (namespace, etc.)
+  - missing metadata
+- Equals, GetHashCode boilerplate
+- APIs to support easier writing
+  - struct copying, size measurements
+  - Implement more standard interfaces?
+- Runtime and compiler version safety checks
 
+### Missing features
 - RPC layer
 - Higher-level convenience APIs (setting up connections, etc.)
 - Tests / documentation
   - Check for integer overflows. I'm pretty sure there's a lot of them when
     dealing with >2GB (possibly smaller) messages, may potentially compromise
     memory safety / process stability
-- Missing edge cases (upgrade list structs, etc.)
-- Equals, GetHashCode boilerplate
 - Packing/unpacking
-- Codegen improvements
-  - annotations to control codegen
-  - metadata attributes
 - dynamic API
+
+### Nice to haves
 - VS integration 
 - .Net Core compatibility
   - what does this entail? Do I need to make unsafe code optional?

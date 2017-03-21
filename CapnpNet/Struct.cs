@@ -265,8 +265,6 @@ namespace CapnpNet
       return true;
     }
     
-    // grr... upgraded list struct. Let's see if this works: segment is the single word, offset is in bytes and dataWords is the max allowed size;
-    // use null message to indicate this situation?
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private T GetOrDefault<T>(int index)
       where T : struct

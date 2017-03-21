@@ -35,7 +35,7 @@ namespace CapnpNet
     // TODO: packing
     public static async Task<Message> DecodeAsync(Stream s, CancellationToken ct = default(CancellationToken))
     {
-      var msg = new Message();
+      var msg = new Message().Init(null);
       var intBuf = new byte[4]; // pool scrach buffers?
       var bytesRead = await s.ReadAsync(intBuf, 0, intBuf.Length, ct);
       if (bytesRead < intBuf.Length) throw new InvalidOperationException("Expected more data");
@@ -62,7 +62,7 @@ namespace CapnpNet
     {
       if (array.Length <= 8) throw new ArgumentException("array too small", nameof(array));
 
-      var msg = new Message();
+      var msg = new Message().Init(null);
 
       ref int ptr = ref Unsafe.As<byte, int>(ref array[0]);
       int segmentCount = ptr + 1;

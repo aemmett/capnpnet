@@ -4,9 +4,19 @@ namespace CapnpNet.Schema
 {
   public struct CodeGeneratorRequest : IStruct
   {
-    private Struct _s;
-    public CodeGeneratorRequest(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 0;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public CodeGeneratorRequest(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public CodeGeneratorRequest(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public CodeGeneratorRequest(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -26,9 +36,19 @@ namespace CapnpNet.Schema
 
     public struct RequestedFile : IStruct
     {
-      private Struct _s;
-      public RequestedFile(Struct s) { _s = s; }
-      Struct IStruct.Struct
+      public const int KNOWN_DATA_WORDS = 1;
+      public const int KNOWN_POINTER_WORDS = 2;
+      private global::CapnpNet.Struct _s;
+      public RequestedFile(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+      {
+      }
+
+      public RequestedFile(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+      {
+      }
+
+      public RequestedFile(global::CapnpNet.Struct s) { _s = s; }
+      global::CapnpNet.Struct IStruct.Struct
       {
         get { return _s; }
         set { _s = value; }
@@ -54,9 +74,19 @@ namespace CapnpNet.Schema
 
       public struct Import : IStruct
       {
-        private Struct _s;
-        public Import(Struct s) { _s = s; }
-        Struct IStruct.Struct
+        public const int KNOWN_DATA_WORDS = 1;
+        public const int KNOWN_POINTER_WORDS = 1;
+        private global::CapnpNet.Struct _s;
+        public Import(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+        {
+        }
+
+        public Import(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+        {
+        }
+
+        public Import(global::CapnpNet.Struct s) { _s = s; }
+        global::CapnpNet.Struct IStruct.Struct
         {
           get { return _s; }
           set { _s = value; }
@@ -79,9 +109,19 @@ namespace CapnpNet.Schema
 
   public struct Method : IStruct
   {
-    private Struct _s;
-    public Method(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 3;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public Method(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Method(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Method(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -120,9 +160,19 @@ namespace CapnpNet.Schema
 
   public struct Enumerant : IStruct
   {
-    private Struct _s;
-    public Enumerant(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public Enumerant(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Enumerant(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Enumerant(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -149,9 +199,19 @@ namespace CapnpNet.Schema
 
   public struct Node : IStruct
   {
-    private CapnpNet.Struct _s;
-    public Node(CapnpNet.Struct s) { _s = s; }
-    CapnpNet.Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 5;
+    public const int KNOWN_POINTER_WORDS = 5;
+    private global::CapnpNet.Struct _s;
+    public Node(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Node(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Node(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -167,38 +227,38 @@ namespace CapnpNet.Schema
       annotation = 5,
     }
 
-    public bool Is(out Struct @struct)
+    public bool Is(out structGroup @struct)
     {
       var ret = this.which == Union.@struct;
-      @struct = new Struct(ret ? _s : default (CapnpNet.Struct));
+      @struct = new structGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
-    public bool Is(out @enumGroup @enum)
+    public bool Is(out enumGroup @enum)
     {
       var ret = this.which == Union.@enum;
-      @enum = new enumGroup(ret ? _s : default (CapnpNet.Struct));
+      @enum = new enumGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
-    public bool Is(out @interfaceGroup @interface)
+    public bool Is(out interfaceGroup @interface)
     {
       var ret = this.which == Union.@interface;
-      @interface = new interfaceGroup(ret ? _s : default (CapnpNet.Struct));
+      @interface = new interfaceGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
-    public bool Is(out @constGroup @const)
+    public bool Is(out constGroup @const)
     {
       var ret = this.which == Union.@const;
-      @const = new constGroup(ret ? _s : default (CapnpNet.Struct));
+      @const = new constGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
     public bool Is(out annotationGroup annotation)
     {
       var ret = this.which == Union.annotation;
-      annotation = new annotationGroup(ret ? _s : default (CapnpNet.Struct));
+      annotation = new annotationGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
@@ -244,11 +304,11 @@ namespace CapnpNet.Schema
       set { _s.WritePointer(2, value); }
     }
 
-    public Struct @struct => new Struct(_s);
-    public struct Struct
+    public structGroup @struct => new structGroup(_s);
+    public struct structGroup
     {
-      private readonly CapnpNet.Struct _s;
-      public Struct(CapnpNet.Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public structGroup(global::CapnpNet.Struct s) { _s = s; }
       public ushort dataWordCount
       {
         get { return _s.ReadUInt16(7); }
@@ -292,11 +352,11 @@ namespace CapnpNet.Schema
       }
     }
 
-    public @enumGroup @enum => new @enumGroup(_s);
-    public struct @enumGroup
+    public enumGroup @enum => new enumGroup(_s);
+    public struct enumGroup
     {
-      private readonly CapnpNet.Struct _s;
-      public @enumGroup(CapnpNet.Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public enumGroup(global::CapnpNet.Struct s) { _s = s; }
       public CompositeList<Enumerant> enumerants
       {
         get { return _s.DereferenceCompositeList<Enumerant>(3); }
@@ -304,11 +364,11 @@ namespace CapnpNet.Schema
       }
     }
 
-    public @interfaceGroup @interface => new @interfaceGroup(_s);
-    public struct @interfaceGroup
+    public interfaceGroup @interface => new interfaceGroup(_s);
+    public struct interfaceGroup
     {
-      private readonly CapnpNet.Struct _s;
-      public @interfaceGroup(CapnpNet.Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public interfaceGroup(global::CapnpNet.Struct s) { _s = s; }
       public CompositeList<Method> methods
       {
         get { return _s.DereferenceCompositeList<Method>(3); }
@@ -322,11 +382,11 @@ namespace CapnpNet.Schema
       }
     }
 
-    public @constGroup @const => new @constGroup(_s);
-    public struct @constGroup
+    public constGroup @const => new constGroup(_s);
+    public struct constGroup
     {
-      private readonly CapnpNet.Struct _s;
-      public @constGroup(CapnpNet.Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public constGroup(global::CapnpNet.Struct s) { _s = s; }
       public Type type
       {
         get { return _s.DereferenceStruct<Type>(3); }
@@ -343,8 +403,8 @@ namespace CapnpNet.Schema
     public annotationGroup annotation => new annotationGroup(_s);
     public struct annotationGroup
     {
-      private readonly CapnpNet.Struct _s;
-      public annotationGroup(CapnpNet.Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public annotationGroup(global::CapnpNet.Struct s) { _s = s; }
       public Type type
       {
         get { return _s.DereferenceStruct<Type>(3); }
@@ -426,9 +486,19 @@ namespace CapnpNet.Schema
 
     public struct NestedNode : IStruct
     {
-      private CapnpNet.Struct _s;
-      public NestedNode(CapnpNet.Struct s) { _s = s; }
-      CapnpNet.Struct IStruct.Struct
+      public const int KNOWN_DATA_WORDS = 1;
+      public const int KNOWN_POINTER_WORDS = 1;
+      private global::CapnpNet.Struct _s;
+      public NestedNode(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+      {
+      }
+
+      public NestedNode(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+      {
+      }
+
+      public NestedNode(global::CapnpNet.Struct s) { _s = s; }
+      global::CapnpNet.Struct IStruct.Struct
       {
         get { return _s; }
         set { _s = value; }
@@ -450,9 +520,19 @@ namespace CapnpNet.Schema
 
   public struct Value : IStruct
   {
-    private Struct _s;
-    public Value(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 2;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Value(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Value(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Value(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -604,9 +684,19 @@ namespace CapnpNet.Schema
 
   public struct Type : IStruct
   {
-    private Struct _s;
-    public Type(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 2;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Type(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Type(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Type(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -638,28 +728,28 @@ namespace CapnpNet.Schema
     public bool Is(out listGroup list)
     {
       var ret = this.which == Union.list;
-      list = new listGroup(ret ? _s : default (Struct));
+      list = new listGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
-    public bool Is(out @enumGroup @enum)
+    public bool Is(out enumGroup @enum)
     {
       var ret = this.which == Union.@enum;
-      @enum = new @enumGroup(ret ? _s : default (Struct));
+      @enum = new enumGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
-    public bool Is(out @structGroup @struct)
+    public bool Is(out structGroup @struct)
     {
       var ret = this.which == Union.@struct;
-      @struct = new @structGroup(ret ? _s : default (Struct));
+      @struct = new structGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
-    public bool Is(out @interfaceGroup @interface)
+    public bool Is(out interfaceGroup @interface)
     {
       var ret = this.which == Union.@interface;
-      @interface = new @interfaceGroup(ret ? _s : default (Struct));
+      @interface = new interfaceGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
@@ -672,8 +762,8 @@ namespace CapnpNet.Schema
     public listGroup list => new listGroup(_s);
     public struct listGroup
     {
-      private readonly Struct _s;
-      public listGroup(Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public listGroup(global::CapnpNet.Struct s) { _s = s; }
       public Type elementType
       {
         get { return _s.DereferenceStruct<Type>(0); }
@@ -681,11 +771,11 @@ namespace CapnpNet.Schema
       }
     }
 
-    public @enumGroup @enum => new @enumGroup(_s);
-    public struct @enumGroup
+    public enumGroup @enum => new enumGroup(_s);
+    public struct enumGroup
     {
-      private readonly Struct _s;
-      public @enumGroup(Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public enumGroup(global::CapnpNet.Struct s) { _s = s; }
       public ulong typeId
       {
         get { return _s.ReadUInt64(1); }
@@ -693,11 +783,11 @@ namespace CapnpNet.Schema
       }
     }
 
-    public @structGroup @struct => new @structGroup(_s);
-    public struct @structGroup
+    public structGroup @struct => new structGroup(_s);
+    public struct structGroup
     {
-      private readonly Struct _s;
-      public @structGroup(Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public structGroup(global::CapnpNet.Struct s) { _s = s; }
       public ulong typeId
       {
         get { return _s.ReadUInt64(1); }
@@ -705,11 +795,11 @@ namespace CapnpNet.Schema
       }
     }
 
-    public @interfaceGroup @interface => new @interfaceGroup(_s);
-    public struct @interfaceGroup
+    public interfaceGroup @interface => new interfaceGroup(_s);
+    public struct interfaceGroup
     {
-      private readonly Struct _s;
-      public @interfaceGroup(Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public interfaceGroup(global::CapnpNet.Struct s) { _s = s; }
       public ulong typeId
       {
         get { return _s.ReadUInt64(1); }
@@ -720,9 +810,19 @@ namespace CapnpNet.Schema
 
   public struct Field : IStruct
   {
-    private Struct _s;
-    public Field(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 3;
+    public const int KNOWN_POINTER_WORDS = 4;
+    private global::CapnpNet.Struct _s;
+    public Field(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Field(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Field(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }
@@ -737,14 +837,14 @@ namespace CapnpNet.Schema
     public bool Is(out slotGroup slot)
     {
       var ret = this.which == Union.slot;
-      slot = new slotGroup(ret ? _s : default (Struct));
+      slot = new slotGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
     public bool Is(out groupGroup group)
     {
       var ret = this.which == Union.group;
-      group = new groupGroup(ret ? _s : default (Struct));
+      group = new groupGroup(ret ? _s : default (global::CapnpNet.Struct));
       return ret;
     }
 
@@ -781,8 +881,8 @@ namespace CapnpNet.Schema
     public slotGroup slot => new slotGroup(_s);
     public struct slotGroup
     {
-      private readonly Struct _s;
-      public slotGroup(Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public slotGroup(global::CapnpNet.Struct s) { _s = s; }
       public uint offset
       {
         get { return _s.ReadUInt32(1); }
@@ -811,8 +911,8 @@ namespace CapnpNet.Schema
     public groupGroup group => new groupGroup(_s);
     public struct groupGroup
     {
-      private readonly Struct _s;
-      public groupGroup(Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public groupGroup(global::CapnpNet.Struct s) { _s = s; }
       public ulong typeId
       {
         get { return _s.ReadUInt64(2); }
@@ -823,8 +923,8 @@ namespace CapnpNet.Schema
     public ordinalGroup ordinal => new ordinalGroup(_s);
     public struct ordinalGroup
     {
-      private readonly Struct _s;
-      public ordinalGroup(Struct s) { _s = s; }
+      private readonly global::CapnpNet.Struct _s;
+      public ordinalGroup(global::CapnpNet.Struct s) { _s = s; }
       public enum Union : ushort
       {
         @implicit = 0,
@@ -849,9 +949,19 @@ namespace CapnpNet.Schema
 
   public struct Annotation : IStruct
   {
-    private Struct _s;
-    public Annotation(Struct s) { _s = s; }
-    Struct IStruct.Struct
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Annotation(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Annotation(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Annotation(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
       set { _s = value; }

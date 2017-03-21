@@ -22,7 +22,11 @@ namespace CapnpNet
 
     public CompositeList(Segment segment, int baseOffset, ListPointer listPointer)
     {
-      // TODO: check pointer element size, may need to create upgraded structs
+      if (listPointer.ElementSize != ElementSize.Composite)
+      {
+        throw new NotSupportedException("Element size not composite (upgraded struct lists not fully supported)");
+      }
+
       _segment = segment;
       _tagOffset = baseOffset + listPointer.WordOffset;
       var tag = Unsafe.As<ulong, StructPointer>(ref _segment[_tagOffset | Word.unit]);

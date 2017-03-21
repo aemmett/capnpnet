@@ -1,22 +1,20 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CapnpNet
 {
   public partial class Message : IDisposable
   {
-    // TODO: Segment pooling
-    // move this factory to the Segment class?
-    public static Func<int, Segment> DefaultSegmentFactory { get; set; }
-      = minRequiredSize => new Segment(new ArraySegment<byte>(new byte[Math.Min(minRequiredSize, 4008)]));
-    
+    private ISegmentFactory _segmentFactory;
+
+    // go back to List?
     private Segment _firstSegment, _lastSegment;
     
     public Message()
     {
-      this.WordsToLive = 64*1024*1024/8; // 64MB
-      this.SegmentFactory = Message.DefaultSegmentFactory;
     }
     
     public Message(Segment firstSegment)
@@ -24,8 +22,13 @@ namespace CapnpNet
     {
       _firstSegment = _lastSegment = firstSegment;
     }
-    
-    public Func<int, Segment> SegmentFactory { get; set; }
+
+    public Message(ISegmentFactory segmentFactory)
+    {
+      _segmentFactory = segmentFactory;
+    }
+
+    public ISegmentFactory SegmentFactory => _segmentFactory;
 
     public SegmentList Segments => new SegmentList(_firstSegment);
 
@@ -42,6 +45,13 @@ namespace CapnpNet
 
     public T GetRoot<T>() where T : struct, IStruct => this.Root.As<T>();
 
+    public Message Init(ISegmentFactory segmentFactory)
+    {
+      _segmentFactory = segmentFactory;
+      this.WordsToLive = 64*1024*1024/8; // 64MB
+      return this;
+    }
+
     public Struct Allocate(ushort dataWords, ushort pointerWords)
     {
       this.Allocate(dataWords + pointerWords, out int offset, out Segment segment);
@@ -54,26 +64,38 @@ namespace CapnpNet
       {
         segment = _lastSegment;
       }
-      
-      this.AddSegment(this.SegmentFactory(words));
-      
-      if (_lastSegment.TryAllocate(words, out offset))
+
+      segment = _segmentFactory.TryCreatePrompt(this, words);
+      if (segment == null)
       {
-        segment = _lastSegment;
+        // TODO: different exception type
+        throw new InvalidOperationException("Temporary allocation failure");
       }
 
-      throw new InvalidOperationException("Cannot allocate");
+      this.AddSegment(segment);
+      
+      if (segment.TryAllocate(words, out offset) == false)
+      {
+        throw new InvalidOperationException("Newly created segment was not big enough");
+      }
+    }
+
+    public async Task CreateAndAddSegmentAsync(
+      int? sizeHint,
+      CancellationToken cancellationToken = default(CancellationToken))
+    {
+      var segment = await _segmentFactory.CreateAsync(this, sizeHint, cancellationToken);
+      this.AddSegment(segment);
     }
     
     public void AddSegment(byte[] memory) => this.AddSegment(new ArraySegment<byte>(memory, 0, memory.Length));
 
-    public void AddSegment(ArraySegment<byte> memory) => this.AddSegment(new Segment(memory));
+    public void AddSegment(ArraySegment<byte> memory) => this.AddSegment(new Segment().Init(this, memory));
 
     private void AddSegment(Segment segment)
     {
       var prevSegment = _lastSegment;
       _lastSegment = segment;
-      segment.Message = this;
       segment.SegmentIndex = prevSegment?.SegmentIndex + 1 ?? 0;
 
       if (prevSegment == null)
@@ -164,6 +186,17 @@ namespace CapnpNet
     
     public void Dispose()
     {
+      var segment = _firstSegment;
+      while (segment != null)
+      {
+        var nextSegment = segment.Next;
+        segment.Dispose();
+        segment = nextSegment;
+      }
+
+      _firstSegment = null;
+      _lastSegment = null;
+      _segmentFactory = null;
     }
   }
 }
