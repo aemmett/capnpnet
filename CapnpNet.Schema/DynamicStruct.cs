@@ -10,6 +10,8 @@ namespace CapnpNet.Schema
 {
   public class DynamicStruct : IDynamicMetaObjectProvider
   {
+    private Struct _s;
+
     public DynamicMetaObject GetMetaObject(Expression parameter)
     {
       return new DynamicStructMetaObject(parameter);

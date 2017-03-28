@@ -48,7 +48,7 @@ namespace CapnpNet.Schema.Compiler
       return _request.requestedFiles
         .Select(f => new
         {
-          name = Path.GetFileNameWithoutExtension(f.filename.ToString()) + ".designer",
+          name = Path.GetFileNameWithoutExtension(f.filename.ToString()),
           content = this.GenerateContent(f),
         })
         .ToDictionary(
@@ -294,16 +294,45 @@ namespace {GetNamespace(node)}
           {{
             {string.Join("\n", unionFieldList.Select(f => $"{ToName(f.name)} = {f.discriminantValue},"))}
           }}";
+        var complexUnionMembers = unionFieldList
+          .Where(f => f.which == Field.Union.group)
+          .Select(f =>
+          (
+            discriminantName: ToName(f.name),
+            type: ToGroupName(this.GetTypeName(f.group.typeId))
+          ))
+          .Union(unionFieldList
+            .Where(f => f.Is(out Field.slotGroup slot) && slot.type.which == Type.Union.@struct)
+            .Select(f =>
+            (
+              discriminantName: ToName(f.name),
+              type: this.GetTypeName(f.slot.type.@struct.typeId)
+            )));
         foreach (var field in unionFieldList.Where(f => f.which == Field.Union.group))
         {
-          var groupName = this.GetTypeName(field.group.typeId);
-          var groupTypeName = ToGroupName(groupName);
+          var discriminantName = this.ToName(field.name);
+          var type = ToGroupName(this.GetTypeName(field.group.typeId));
+          var returnValueName = discriminantName == "ret" ? "ret1" : "ret";
           yield return $@"
-            public bool Is(out {groupTypeName} {groupName})
+            public bool Is(out {type} {discriminantName})
             {{
-              var ret = this.which == Union.{ToName(field.name)};
-              {groupName} = new {groupTypeName}(ret ? _s : default({StructType}));
-              return ret;
+              var {returnValueName} = this.which == Union.{discriminantName};
+              {discriminantName} = new {type}({returnValueName} ? _s : default({StructType}));
+              return {returnValueName};
+            }}";
+        }
+        foreach (var field in unionFieldList
+            .Where(f => f.Is(out Field.slotGroup slot) && slot.type.which == Type.Union.@struct))
+        {
+          var discriminantName = this.ToName(field.name);
+          var type = this.GetTypeName(field.slot.type.@struct.typeId);
+          var returnValueName = discriminantName == "ret" ? "ret1" : "ret";
+          yield return $@"
+            public bool Is(out {type} {discriminantName})
+            {{
+              var {returnValueName} = this.which == Union.{discriminantName};
+              {discriminantName} = {returnValueName} ? this.{discriminantName} : default({type});
+              return {returnValueName};
             }}";
         }
         yield return $@"

@@ -10,22 +10,24 @@ namespace CapnpNet
   [StructLayout(LayoutKind.Explicit)]
   public struct Pack64B<T> where T : struct
   {
+    public const int NUM_BYTES = 64;
+
     [FieldOffset(0)]
-    private byte _b0;
-    [FieldOffset(63)]
+    private T _b0;
+    [FieldOffset(NUM_BYTES - 1)]
     private byte _b63;
 
     public T this[int index]
     {
       get
       {
-        Check.Range(index, 64 / Unsafe.SizeOf<T>());
-        return Unsafe.Add(ref Unsafe.As<byte, T>(ref _b0), index);
+        Check.Range(index, NUM_BYTES / Unsafe.SizeOf<T>());
+        return Unsafe.Add(ref _b0, index);
       }
       set
       {
-        Check.Range(index, 64 / Unsafe.SizeOf<T>());
-        Unsafe.Add(ref Unsafe.As<byte, T>(ref _b0), index) = value;
+        Check.Range(index, NUM_BYTES / Unsafe.SizeOf<T>());
+        Unsafe.Add(ref _b0, index) = value;
       }
     }
   }
@@ -44,6 +46,16 @@ namespace CapnpNet
       intBuf = segmentCount != 1 ? new byte[segmentCount * 4] : intBuf;
       bytesRead = await s.ReadAsync(intBuf, 0, intBuf.Length, ct);
       if (bytesRead < intBuf.Length) throw new InvalidOperationException("Expected more data");
+      
+      if (segmentCount % 2 == 0)
+      {
+        if (s.CanSeek) s.Seek(4, SeekOrigin.Current);
+        else
+        {
+          bytesRead = await s.ReadAsync(new byte[4], 0, 4);
+          if (bytesRead < 4) throw new InvalidOperationException("Expected more data");
+        }
+      }
 
       for (int i = 0; i < segmentCount; i++)
       {

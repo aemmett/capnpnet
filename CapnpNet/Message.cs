@@ -17,12 +17,6 @@ namespace CapnpNet
     {
     }
     
-    public Message(Segment firstSegment)
-      : this()
-    {
-      _firstSegment = _lastSegment = firstSegment;
-    }
-
     public Message(ISegmentFactory segmentFactory)
     {
       _segmentFactory = segmentFactory;

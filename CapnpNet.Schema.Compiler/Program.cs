@@ -17,7 +17,7 @@ namespace CapnpNet.Schema.Compiler
       var outputs = codeGenerator.GenerateSources();
       foreach (var kvp in outputs)
       {
-        File.WriteAllText(kvp.Key + ".cs", kvp.Value);
+        File.WriteAllText(kvp.Key + ".g.cs", kvp.Value);
       }
     }
   }
