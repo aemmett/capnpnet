@@ -1,6 +1,6 @@
 using CapnpNet;
 
-namespace Schema
+namespace CapnpNet.Rpc
 {
   public struct ThirdPartyCapDescriptor : IStruct
   {

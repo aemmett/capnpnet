@@ -63,7 +63,7 @@ namespace CapnpNet
         var array = new byte[len];
         bytesRead = await s.ReadAsync(array, 0, len);
         if (bytesRead < len) throw new InvalidOperationException("Expected more data");
-
+        
         msg.AddSegment(array);
       }
 

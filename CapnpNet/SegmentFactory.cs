@@ -11,7 +11,7 @@ namespace CapnpNet
   // TODO: require Message at segment construction/init time? (i.e. eliminate the above rare case)
   // TODO: disallow return of null in (Try)CreatePrompt, and instead opt for more explicit intent?
   //       Behavior flags?
-  public interface ISegmentFactory
+  public interface ISegmentFactory // disposable?
   {
     /// <summary>
     /// Try to create (or reuse a pooled) Segment. This should not block, may return null if
