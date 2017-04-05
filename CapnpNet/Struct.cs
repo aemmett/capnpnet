@@ -67,6 +67,11 @@ namespace CapnpNet
 
       return true;
     }
+
+    public static T CopyTo<T>(this T structObj, Message dest) where T : struct, IStruct
+    {
+      return new T() { Struct = structObj.Struct.CopyTo(dest) };
+    }
   }
 
   public struct Struct
@@ -123,6 +128,66 @@ namespace CapnpNet
     public ushort PointerWords => _pointerWords;
 
     public override string ToString() => $"Struct(O={_structWordOffset}, DW={_dataWords}, PW={_pointerWords})";
+    
+    public Struct CopyTo(Message dest)
+    {
+      if (this.Segment.Message == dest) return this;
+
+      var newS = dest.Allocate(this.DataWords, this.PointerWords);
+      var destSeg = newS.Segment;
+      var srcSeg = this.Segment;
+      var srcMsg = srcSeg.Message;
+
+      // copy data
+      for (int i = 0; i < this.DataWords; i++)
+      {
+        destSeg[newS.StructWordOffset + i | Word.unit] = srcSeg[this.StructWordOffset + 1 | Word.unit];
+      }
+
+      for (int i = 0; i < this.PointerWords; i++)
+      {
+        var ptr = this.ReadRawPointer(i);
+        var dataSeg = srcSeg;
+        srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
+        
+        if (ptr.Type == PointerType.Struct)
+        {
+          newS.WritePointer(i, this.DereferenceRawStruct(i).CopyTo(dest));
+        }
+        else if (ptr.Is(out ListPointer list))
+        {
+          int elementsPerWord;
+          if (list.ElementSize == ElementSize.OneBit) elementsPerWord = 64;
+          else if (list.ElementSize == ElementSize.OneByte) elementsPerWord = 8;
+          else if (list.ElementSize == ElementSize.TwoBytes) elementsPerWord = 4;
+          else if (list.ElementSize == ElementSize.FourBytes) elementsPerWord = 2;
+          else if (list.ElementSize >= ElementSize.EightBytesNonPointer) elementsPerWord = 1;
+          else throw new NotSupportedException();
+
+          var words = ((int)list.ElementCount + elementsPerWord - 1) / elementsPerWord;
+          if (list.ElementSize == ElementSize.Composite) words++;
+          
+          dest.Allocate(words, out int offset, out Segment newSeg);
+          
+          // copy data
+          ref ulong src = ref dataSeg[ptr.WordOffset | Word.unit];
+          ref ulong dst = ref newSeg[offset | Word.unit];
+          for (int j = 0; j < words; j++)
+          {
+            Unsafe.Add(ref dst, j) = Unsafe.Add(ref src, j);
+          }
+          
+          newS.WritePointerCore(i, newSeg, offset, list);
+        }
+        else
+        {
+          // TODO: semantics for copying other pointers? delegate parameter?
+          newS.WriteRawPointer(i, ptr);
+        }
+      }
+
+      return newS;
+    }
 
     private ref Pointer Pointer(int index)
     {
@@ -356,7 +421,7 @@ namespace CapnpNet
         });
     }
 
-    public void WritePointer<T>(int pointerIndex, BoolList dest)
+    public void WritePointer(int pointerIndex, BoolList dest)
     {
       this.WritePointerCore(
         pointerIndex,

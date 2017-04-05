@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace CapnpNet
 {
@@ -72,6 +73,20 @@ namespace CapnpNet
         }
 #endif
       }
+    }
+
+    public BoolList CopyTo(Message dest)
+    {
+      var ret = new BoolList(dest, this.Count);
+      
+      ref ulong src = ref _segment[_listWordOffset | Word.unit];
+      ref ulong dst = ref ret._segment[ret._listWordOffset | Word.unit];
+      for (int i = 0; i < (_count + 63) / 64; i++)
+      {
+        Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
+      }
+
+      return ret;
     }
 
     // TODO: implement same APIs as Spans?

@@ -35,7 +35,7 @@ namespace CapnpNet.Rpc
       }
     }
 
-    private void Process(Message msg)
+    private async Task Process(Message msg)
     {
       //if (msg.Is(out Message unimplemented))
       //{
@@ -67,11 +67,12 @@ namespace CapnpNet.Rpc
         var senderMsg = msg.GetStruct().Segment.Message;
         // TODO: copy data, or just move segments?
         var reply = new CapnpNet.Message().Init(_segFactory);
-        var replyMsg = new Message(reply)
+        reply.AddSegment(await _segFactory.CreateAsync(reply, senderMsg.TotalCapcity));
+        reply.Allocate(0, 1).WritePointer(0, new Message(reply)
         {
           which = Message.Union.unimplemented,
-          unimplemented = msg,
-        };
+          unimplemented = msg.CopyTo(reply),
+        });
       }
     }
 
@@ -121,7 +122,11 @@ namespace CapnpNet.Rpc
         seg.Is(out ArraySegment<byte> arrSeg);
         bytesRead = await _stream.ReadAsync(arrSeg.Array, arrSeg.Offset, len);
         if (bytesRead < len) throw new InvalidOperationException("Expected more data");
+
+        msg.AddSegment(seg);
       }
+
+      ArrayPool<byte>.Shared.Return(intBuf);
       
       return msg;
     }

@@ -65,6 +65,7 @@ namespace CapnpNet
       if (memory.Count % 8 != 0) throw new ArgumentException("Memory length must be a multiple of 8 bytes");
 
       this.Message = message;
+      message.AddSegment(this);
       _array = memory;
       _byteLength = memory.Count;
       _disposer = disposer;

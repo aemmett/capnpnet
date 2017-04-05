@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -37,34 +38,32 @@ namespace CapnpNet
     // TODO: packing
     public static async Task<Message> DecodeAsync(Stream s, CancellationToken ct = default(CancellationToken))
     {
-      var msg = new Message().Init(null);
-      var intBuf = new byte[4]; // pool scrach buffers?
-      var bytesRead = await s.ReadAsync(intBuf, 0, intBuf.Length, ct);
-      if (bytesRead < intBuf.Length) throw new InvalidOperationException("Expected more data");
+      var segmentFactory = new ArrayPoolSegmentFactory();
+      var msg = new Message().Init(segmentFactory);
+      var intBuf = ArrayPool<byte>.Shared.Rent(16);
+      var bytesRead = await s.ReadAsync(intBuf, 0, 4, ct);
+      if (bytesRead < 4) throw new InvalidOperationException("Expected more data");
 
       var segmentCount = BitConverter.ToInt32(intBuf, 0) + 1;
-      intBuf = segmentCount != 1 ? new byte[segmentCount * 4] : intBuf;
-      bytesRead = await s.ReadAsync(intBuf, 0, intBuf.Length, ct);
-      if (bytesRead < intBuf.Length) throw new InvalidOperationException("Expected more data");
-      
-      if (segmentCount % 2 == 0)
+      var readLen = segmentCount * 4 + (segmentCount % 2 == 0 ? 4 : 0);
+      if (intBuf.Length < readLen)
       {
-        if (s.CanSeek) s.Seek(4, SeekOrigin.Current);
-        else
-        {
-          bytesRead = await s.ReadAsync(new byte[4], 0, 4);
-          if (bytesRead < 4) throw new InvalidOperationException("Expected more data");
-        }
+        ArrayPool<byte>.Shared.Return(intBuf);
+        intBuf = ArrayPool<byte>.Shared.Rent(segmentCount * 4 + 4);
       }
-
+      
+      bytesRead = await s.ReadAsync(intBuf, 0, readLen, ct);
+      if (bytesRead < readLen) throw new InvalidOperationException("Expected more data");
+      
       for (int i = 0; i < segmentCount; i++)
       {
         var len = BitConverter.ToInt32(intBuf, i * 4) * 8;
-        var array = new byte[len];
-        bytesRead = await s.ReadAsync(array, 0, len);
+        var seg = await segmentFactory.CreateAsync(msg, len);
+        seg.Is(out ArraySegment<byte> arrSeg);
+        bytesRead = await s.ReadAsync(arrSeg.Array, arrSeg.Offset, len);
         if (bytesRead < len) throw new InvalidOperationException("Expected more data");
-        
-        msg.AddSegment(array);
+
+        msg.AddSegment(seg);
       }
 
       return msg;
@@ -85,7 +84,7 @@ namespace CapnpNet
       for (int i = 0; i < segmentCount; i++)
       {
         var len = Unsafe.Add(ref ptr, i + 1) * 8;
-        msg.AddSegment(new ArraySegment<byte>(array, startOffset, len));
+        msg.AddSegment(new Segment().Init(msg, new ArraySegment<byte>(array, startOffset, len)));
         startOffset += len;
       }
 

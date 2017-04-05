@@ -5,19 +5,25 @@ using System.Runtime.CompilerServices;
 
 namespace CapnpNet
 {
+  public struct AnyStruct : IStruct
+  {
+    public Struct Struct { get; set; }
+  }
+
   public struct CompositeList<T> : IEnumerable<T>
     where T : struct, IStruct
   {
     private readonly Segment _segment;
     private readonly int _tagOffset, _elementCount;
     private readonly ushort _dataWords, _pointerWords;
-    
-    public CompositeList(Message msg, StructPointer tag, int count)
+
+    public CompositeList(Message msg, StructPointer tag)
     {
-      _elementCount = count;
+      _elementCount = tag.WordOffset;
       _dataWords = tag.DataWords;
       _pointerWords = tag.PointerWords;
       msg.Allocate(_dataWords + _pointerWords + 1, out _tagOffset, out _segment);
+      _segment[_tagOffset | Word.unit] = tag.RawValue;
     }
 
     public CompositeList(Segment segment, int baseOffset, ListPointer listPointer)
@@ -54,6 +60,28 @@ namespace CapnpNet
     public int ElementWordSize => _dataWords + _pointerWords;
     public int Count => _elementCount;
 
+    public CompositeList<T> CopyTo(Message dest)
+    {
+      var ret = new CompositeList<T>(
+        dest,
+        new StructPointer
+        {
+          WordOffset = this.Count,
+          DataWords = _dataWords,
+          PointerWords = _pointerWords
+        });
+      
+      // TODO: block copy method on Segment?
+      ref ulong src = ref _segment[_tagOffset + 1 | Word.unit];
+      ref ulong dst = ref ret._segment[ret._tagOffset + 1 | Word.unit];
+      for (int i = 0; i < (_dataWords + _pointerWords) * _elementCount; i++)
+      {
+        Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
+      }
+
+      return ret;
+    }
+
     public IEnumerator<T> GetEnumerator() // TODO: non-allocating enumerator
     {
       for (int i = 0; i < this.Count; i++)
@@ -61,7 +89,7 @@ namespace CapnpNet
         yield return this[i];
       }
     }
-    
+
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
   }
 }

@@ -8,9 +8,10 @@ namespace CapnpNet
   public struct PrimitiveList<T> : IEnumerable<T>
     where T : struct
   {
-    public PrimitiveList(Message msg, StructPointer tag, int count)
+    public PrimitiveList(Message msg, int count)
     {
-      msg.Allocate(count * Unsafe.SizeOf<T>() / sizeof(ulong), out int offset, out Segment seg);
+      var divisor = sizeof(ulong) / Unsafe.SizeOf<T>();
+      msg.Allocate((count + divisor - 1) / divisor, out int offset, out Segment seg);
       this.Segment = seg;
       this.ListWordOffset = offset;
       this.Count = count;
@@ -47,6 +48,20 @@ namespace CapnpNet
       }
     }
 #endif
+
+    public PrimitiveList<T> CopyTo(Message dest)
+    {
+      var ret = new PrimitiveList<T>(dest, this.Count);
+      
+      ref ulong src = ref this.Segment[this.ListWordOffset | Word.unit];
+      ref ulong dst = ref ret.Segment[ret.ListWordOffset  | Word.unit];
+      for (int i = 0; i < this.Count * Unsafe.SizeOf<T>() / sizeof(ulong); i++)
+      {
+        Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
+      }
+
+      return ret;
+    }
 
     public IEnumerator<T> GetEnumerator()
     {

@@ -94,6 +94,48 @@ namespace CapnpNet
       return !(a == b);
     }
 
+    public bool Is(out StructPointer structPtr)
+    {
+      if (this.Type == PointerType.Struct)
+      {
+        structPtr = (StructPointer)this;
+        return true;
+      }
+      else
+      {
+        structPtr = default(StructPointer);
+        return false;
+      }
+    }
+    
+    public bool Is(out ListPointer listPtr)
+    {
+      if (this.Type == PointerType.List)
+      {
+        listPtr = (ListPointer)this;
+        return true;
+      }
+      else
+      {
+        listPtr = default(ListPointer);
+        return false;
+      }
+    }
+
+    public bool Is(out FarPointer farPtr)
+    {
+      if (this.Type == PointerType.Far)
+      {
+        farPtr = (FarPointer)this;
+        return true;
+      }
+      else
+      {
+        farPtr = default(FarPointer);
+        return false;
+      }
+    }
+
     /// <summary>
     /// Offset to content, relative to the word after this pointer.
     /// </summary>
@@ -200,6 +242,8 @@ namespace CapnpNet
 
       _p = p;
     }
+
+    public ulong RawValue => _p.RawValue;
 
     public PointerType Type
     {

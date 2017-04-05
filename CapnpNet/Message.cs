@@ -27,6 +27,20 @@ namespace CapnpNet
     public SegmentList Segments => new SegmentList(_firstSegment);
 
     public long WordsToLive { get; set; }
+    
+    public int TotalCapcity
+    {
+      get
+      {
+        int sum = 0;
+        foreach (var seg in this.Segments)
+        {
+          sum += seg.WordCapacity;
+        }
+
+        return sum;
+      }
+    }
 
     public Struct Root
     {
@@ -36,11 +50,12 @@ namespace CapnpNet
         return new Struct(_firstSegment, 1, (StructPointer)rootPointer);
       }
     }
-
+    
     public T GetRoot<T>() where T : struct, IStruct => this.Root.As<T>();
 
     public Message Init(ISegmentFactory segmentFactory)
     {
+      // throw on null?
       _segmentFactory = segmentFactory;
       this.WordsToLive = 64*1024*1024/8; // 64MB
       return this;
@@ -82,11 +97,7 @@ namespace CapnpNet
       this.AddSegment(segment);
     }
     
-    public void AddSegment(byte[] memory) => this.AddSegment(new ArraySegment<byte>(memory, 0, memory.Length));
-
-    public void AddSegment(ArraySegment<byte> memory) => this.AddSegment(new Segment().Init(this, memory));
-
-    private void AddSegment(Segment segment)
+    public void AddSegment(Segment segment)
     {
       var prevSegment = _lastSegment;
       _lastSegment = segment;
