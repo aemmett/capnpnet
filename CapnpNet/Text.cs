@@ -12,17 +12,20 @@ namespace CapnpNet
     public Text(Message msg, int bytesWithNulTerminator)
     {
       _elementCount = bytesWithNulTerminator;
-      msg.Allocate(bytesWithNulTerminator / sizeof(ulong), out _listWordOffset, out _segment);
+      var words = (_elementCount + 7) / 8;
+      msg.Allocate(words, out _listWordOffset, out _segment);
     }
     
     public Text(Message msg, string str)
     {
       _elementCount = Encoding.UTF8.GetByteCount(str) + 1;
-      msg.Allocate(_elementCount / sizeof(ulong), out _listWordOffset, out _segment);
+      var words = (_elementCount + 7) / 8;
+      msg.Allocate(words, out _listWordOffset, out _segment);
       if (_segment.Is(out ArraySegment<byte> arrSeg))
       {
-        Encoding.UTF8.GetBytes(str, 0, str.Length, arrSeg.Array, arrSeg.Offset);
-        arrSeg.Array[arrSeg.Offset + arrSeg.Count - 1] = 0;
+        var writeOffset = arrSeg.Offset + _listWordOffset * sizeof(ulong);
+        Encoding.UTF8.GetBytes(str, 0, str.Length, arrSeg.Array, writeOffset);
+        arrSeg.Array[writeOffset + _elementCount - 1] = 0; // null terminator
       }
       else if (_segment.IsFixedMemory)
       {

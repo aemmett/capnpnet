@@ -62,7 +62,7 @@ namespace CapnpNet
 
     public Segment TryCreatePrompt(Message msg, int? sizeHint = default(int?))
     {
-      var buf = _pool.Rent(sizeHint ?? 4096); // TODO: tune
+      var buf = _pool.Rent(sizeHint * sizeof(ulong) ?? 4096); // TODO: tune
 
       // TODO: pooling
       var returner = new ArrayReturner();
@@ -70,6 +70,7 @@ namespace CapnpNet
       
       var seg = new Segment();
       seg.Init(msg, new ArraySegment<byte>(buf), returner);
+      seg.AllocationIndex = 0;
 
       return seg;
     }

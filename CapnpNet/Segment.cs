@@ -138,7 +138,7 @@ namespace CapnpNet
 
     public bool TryAllocate(int words, out int offset)
     {
-      if (this.AllocationIndex + words >= this.WordCapacity)
+      if (this.AllocationIndex + words > this.WordCapacity)
       {
         offset = -1;
         return false;

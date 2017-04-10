@@ -17,17 +17,26 @@ namespace CapnpNet
     {
     }
     
-    public Message(ISegmentFactory segmentFactory)
-    {
-      _segmentFactory = segmentFactory;
-    }
-
     public ISegmentFactory SegmentFactory => _segmentFactory;
 
     public SegmentList Segments => new SegmentList(_firstSegment);
 
     public long WordsToLive { get; set; }
     
+    public int TotalAllocated
+    {
+      get
+      {
+        int sum = 0;
+        foreach (var seg in this.Segments)
+        {
+          sum += seg.AllocationIndex;
+        }
+
+        return sum;
+      }
+    }
+
     public int TotalCapcity
     {
       get
@@ -52,6 +61,8 @@ namespace CapnpNet
     }
     
     public T GetRoot<T>() where T : struct, IStruct => this.Root.As<T>();
+    
+    public int CalculateSize() => this.Root.CalculateSize();
 
     public Message Init(ISegmentFactory segmentFactory)
     {
@@ -69,9 +80,10 @@ namespace CapnpNet
 
     public void Allocate(int words, out int offset, out Segment segment)
     {
-      if (_lastSegment.TryAllocate(words, out offset))
+      if (_lastSegment != null && _lastSegment.TryAllocate(words, out offset))
       {
         segment = _lastSegment;
+        return;
       }
 
       segment = _segmentFactory.TryCreatePrompt(this, words);
@@ -80,8 +92,6 @@ namespace CapnpNet
         // TODO: different exception type
         throw new InvalidOperationException("Temporary allocation failure");
       }
-
-      this.AddSegment(segment);
       
       if (segment.TryAllocate(words, out offset) == false)
       {
@@ -93,15 +103,22 @@ namespace CapnpNet
       int? sizeHint,
       CancellationToken cancellationToken = default(CancellationToken))
     {
-      var segment = await _segmentFactory.CreateAsync(this, sizeHint, cancellationToken);
-      this.AddSegment(segment);
+      await _segmentFactory.CreateAsync(this, sizeHint, cancellationToken);
     }
     
     public void AddSegment(Segment segment)
     {
+      var seg = _firstSegment;
+      while (seg != null)
+      {
+        if (seg == segment) throw new ArgumentException("Segment already added");
+
+        seg = seg.Next;
+      }
+      
       var prevSegment = _lastSegment;
       _lastSegment = segment;
-      segment.SegmentIndex = prevSegment?.SegmentIndex + 1 ?? 0;
+      segment.SegmentIndex = (prevSegment?.SegmentIndex + 1) ?? 0;
 
       if (prevSegment == null)
       {
@@ -110,6 +127,23 @@ namespace CapnpNet
       else
       {
         prevSegment.Next = _lastSegment;
+      }
+    }
+
+    public void PreAllocate(int words)
+    {
+      if (_lastSegment == null || _lastSegment.WordCapacity - _lastSegment.AllocationIndex < words)
+      {
+        var segment = _segmentFactory.TryCreatePrompt(this, words);
+        if (segment == null) throw new InvalidOperationException("Temporary allocation failure"); // TODO: different type
+      }
+    }
+    
+    public async Task PreAllocateAsync(int words)
+    {
+      if (_lastSegment == null || _lastSegment.WordCapacity - _lastSegment.AllocationIndex < words)
+      {
+        await _segmentFactory.CreateAsync(this, words);
       }
     }
 
@@ -175,7 +209,7 @@ namespace CapnpNet
         var padFarPointer = (FarPointer)landingPadPointer;
         // check !padFarPointer.IsDoubleFar
         segment = this.Segments[(int)landingPadPointer.TargetSegmentId];
-        baseOffset = landingPadOffset;
+        baseOffset = landingPadOffset; // TODO: bug?
         pointer = Unsafe.As<ulong, Pointer>(ref segment[landingPadOffset + 1 | Word.unit]);
         // check listPointer.WordOffset == 0
       }

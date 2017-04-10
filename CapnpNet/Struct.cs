@@ -127,8 +127,45 @@ namespace CapnpNet
     public ushort DataWords => _dataWords;
     public ushort PointerWords => _pointerWords;
 
-    public override string ToString() => $"Struct(O={_structWordOffset}, DW={_dataWords}, PW={_pointerWords})";
+    public override string ToString() => $"Struct(S={_segment.SegmentIndex}, O={_structWordOffset}, DW={_dataWords}, PW={_pointerWords})";
     
+    public int CalculateSize()
+    {
+      // TODO: traversal depth limit
+      var size = this.DataWords + this.PointerWords;
+
+      for (int i = 0; i < this.PointerWords; i++)
+      {
+        var ptr = this.ReadRawPointer(i);
+        var dataSeg = _segment;
+        var srcMsg = _segment.Message;
+        // TODO: only dereference far; don't count against transversal limit
+        srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
+        
+        if (ptr.Type == PointerType.Struct)
+        {
+          size += this.DereferenceRawStruct(i).CalculateSize();
+        }
+        else if (ptr.Is(out ListPointer list))
+        {
+          int elementsPerWord;
+          if (list.ElementSize == ElementSize.OneBit) elementsPerWord = 64;
+          else if (list.ElementSize == ElementSize.OneByte) elementsPerWord = 8;
+          else if (list.ElementSize == ElementSize.TwoBytes) elementsPerWord = 4;
+          else if (list.ElementSize == ElementSize.FourBytes) elementsPerWord = 2;
+          else if (list.ElementSize >= ElementSize.EightBytesNonPointer) elementsPerWord = 1;
+          else throw new NotSupportedException();
+
+          var words = ((int)list.ElementCount + elementsPerWord - 1) / elementsPerWord;
+          if (list.ElementSize == ElementSize.Composite) words++;
+
+          size += words;
+        }
+      }
+
+      return size;
+    }
+
     public Struct CopyTo(Message dest)
     {
       if (this.Segment.Message == dest) return this;
@@ -141,14 +178,15 @@ namespace CapnpNet
       // copy data
       for (int i = 0; i < this.DataWords; i++)
       {
-        destSeg[newS.StructWordOffset + i | Word.unit] = srcSeg[this.StructWordOffset + 1 | Word.unit];
+        destSeg[newS.StructWordOffset + i | Word.unit] = srcSeg[this.StructWordOffset + i | Word.unit];
       }
 
       for (int i = 0; i < this.PointerWords; i++)
       {
         var ptr = this.ReadRawPointer(i);
         var dataSeg = srcSeg;
-        srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
+        var isFar = srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
+        if (!isFar) baseOffset = _structWordOffset + _dataWords + i + 1;
         
         if (ptr.Type == PointerType.Struct)
         {
@@ -170,7 +208,7 @@ namespace CapnpNet
           dest.Allocate(words, out int offset, out Segment newSeg);
           
           // copy data
-          ref ulong src = ref dataSeg[ptr.WordOffset | Word.unit];
+          ref ulong src = ref dataSeg[baseOffset + ptr.WordOffset | Word.unit];
           ref ulong dst = ref newSeg[offset | Word.unit];
           for (int j = 0; j < words; j++)
           {
@@ -516,33 +554,43 @@ namespace CapnpNet
         else
         {
           // double-far pointer
-          int segmentIndex = -1;
-          foreach (var segment in _segment.Message.Segments)
+          //int segmentIndex = -1;
+          //foreach (var segment in _segment.Message.Segments)
+          //{
+          //  if (segment.TryAllocate(2, out padOffset))
+          //  {
+          //    segment[padOffset | Word.unit] = new FarPointer
+          //    {
+          //      Type = PointerType.Far,
+          //      LandingPadOffset = (uint)absOffset,
+          //      TargetSegmentId = (uint)destSegment.SegmentIndex,
+          //    }.RawValue;
+          //    tag.WordOffset = 0;
+          //    segment[padOffset + 1 | Word.unit] = tag.RawValue;
+
+          //    segmentIndex = segment.SegmentIndex;
+          //    break;
+          //  }
+          //}
+          
+          //if (segmentIndex == -1) throw new InvalidOperationException("Cannot allocate far pointer");
+          
+          _segment.Message.Allocate(2, out padOffset, out Segment segment);
+          segment[padOffset | Word.unit] = new FarPointer
           {
-            if (segment.TryAllocate(2, out padOffset))
-            {
-              segment[padOffset | Word.unit] = new FarPointer
-              {
-                Type = PointerType.Far,
-                LandingPadOffset = (uint)absOffset,
-                TargetSegmentId = (uint)destSegment.SegmentIndex,
-              }.RawValue;
-              tag.WordOffset = 0;
-              segment[padOffset + 1 | Word.unit] = tag.RawValue;
-
-              segmentIndex = segment.SegmentIndex;
-              break;
-            }
-          }
-
-          if (segmentIndex == -1) throw new InvalidOperationException("Cannot allocate far pointer");
+            Type = PointerType.Far,
+            LandingPadOffset = (uint)absOffset,
+            TargetSegmentId = (uint)destSegment.SegmentIndex
+          }.RawValue;
+          tag.WordOffset = 0;
+          segment[padOffset + 1 | Word.unit] = tag.RawValue;
 
           resultPointer = new FarPointer
           {
             Type = PointerType.Far,
             IsDoubleFar = true,
             LandingPadOffset = (uint)padOffset,
-            TargetSegmentId = (uint)segmentIndex,
+            TargetSegmentId = (uint)segment.SegmentIndex,
           };
         }
       }

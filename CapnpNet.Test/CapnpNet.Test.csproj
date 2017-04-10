@@ -55,6 +55,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CapnpNet.Rpc\CapnpNet.Rpc.csproj">
+      <Project>{26D8C724-C963-4151-8041-6AD7B96D3382}</Project>
+      <Name>CapnpNet.Rpc</Name>
+    </ProjectReference>
     <ProjectReference Include="..\capnpnet\CapnpNet.csproj">
       <Project>{e83f472a-663e-4b5e-815d-90d066681352}</Project>
       <Name>CapnpNet</Name>

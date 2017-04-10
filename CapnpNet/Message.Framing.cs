@@ -62,8 +62,6 @@ namespace CapnpNet
         seg.Is(out ArraySegment<byte> arrSeg);
         bytesRead = await s.ReadAsync(arrSeg.Array, arrSeg.Offset, len);
         if (bytesRead < len) throw new InvalidOperationException("Expected more data");
-
-        msg.AddSegment(seg);
       }
 
       return msg;
@@ -84,7 +82,7 @@ namespace CapnpNet
       for (int i = 0; i < segmentCount; i++)
       {
         var len = Unsafe.Add(ref ptr, i + 1) * 8;
-        msg.AddSegment(new Segment().Init(msg, new ArraySegment<byte>(array, startOffset, len)));
+        new Segment().Init(msg, new ArraySegment<byte>(array, startOffset, len));
         startOffset += len;
       }
 
