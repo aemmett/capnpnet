@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -120,6 +121,10 @@ namespace CapnpNet
       _lastSegment = segment;
       segment.SegmentIndex = (prevSegment?.SegmentIndex + 1) ?? 0;
 
+#if TRACE
+      unsafe { Trace.WriteLine($"Adding segment {(long)Unsafe.AsPointer(ref segment[0 | Byte.unit]):X8}"); }
+#endif
+
       if (prevSegment == null)
       {
         _firstSegment = _lastSegment;
@@ -207,11 +212,11 @@ namespace CapnpNet
       {
         // the pointer is in another castle
         var padFarPointer = (FarPointer)landingPadPointer;
-        // check !padFarPointer.IsDoubleFar
-        segment = this.Segments[(int)landingPadPointer.TargetSegmentId];
-        baseOffset = landingPadOffset; // TODO: bug?
+        Debug.Assert(padFarPointer.IsDoubleFar == false);
         pointer = Unsafe.As<ulong, Pointer>(ref segment[landingPadOffset + 1 | Word.unit]);
-        // check listPointer.WordOffset == 0
+        segment = this.Segments[(int)padFarPointer.TargetSegmentId];
+        baseOffset = (int)padFarPointer.LandingPadOffset;
+        Debug.Assert(pointer.WordOffset == 0);
       }
       else
       {
