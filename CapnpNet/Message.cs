@@ -1,4 +1,6 @@
+using CapnpNet.Rpc;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,13 +13,15 @@ namespace CapnpNet
   {
     private ISegmentFactory _segmentFactory;
 
-    // go back to List?
+    // go back to List? pooled arrays?
     private Segment _firstSegment, _lastSegment;
     
     public Message()
     {
     }
     
+    internal List<ICapability> LocalCaps { get; private set; }
+
     public ISegmentFactory SegmentFactory => _segmentFactory;
 
     public SegmentList Segments => new SegmentList(_firstSegment);
@@ -67,8 +71,10 @@ namespace CapnpNet
 
     public Message Init(ISegmentFactory segmentFactory)
     {
-      // throw on null?
+      Check.NotNull(segmentFactory, nameof(segmentFactory));
+
       _segmentFactory = segmentFactory;
+      this.LocalCaps = new List<ICapability>();
       this.WordsToLive = 64*1024*1024/8; // 64MB
       return this;
     }
@@ -241,6 +247,7 @@ namespace CapnpNet
       _firstSegment = null;
       _lastSegment = null;
       _segmentFactory = null;
+      this.LocalCaps = null;
     }
   }
 }

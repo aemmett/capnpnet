@@ -1,3 +1,4 @@
+using CapnpNet.Rpc;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -80,6 +81,24 @@ namespace CapnpNet
     private readonly int _structWordOffset; // in the encoding spec, technically this is a uint, but currently I bottom out at an API that uses int :(
     private readonly ushort _dataWords, _pointerWords;
     private readonly byte _upgradedListElementByteOffset; // FIXME seems like this will have trouble detecting first element in a word
+
+    public static bool operator ==(Struct a, Struct b)
+    {
+      return a._segment == b._segment
+        && a._structWordOffset == b._structWordOffset
+        && a._dataWords == b._dataWords
+        && a._pointerWords == b._pointerWords
+        && a._upgradedListElementByteOffset == b._upgradedListElementByteOffset;
+    }
+
+    public static bool operator !=(Struct a, Struct b) => !(a == b);
+    
+    public override bool Equals(object obj) => obj is Struct s && this == s;
+    
+    public override int GetHashCode()
+    {
+      return _segment.GetHashCode() * 17 + _structWordOffset;
+    }
 
     public Struct(Segment segment, int pointerOffset, StructPointer pointer)
       : this(
@@ -168,6 +187,8 @@ namespace CapnpNet
 
     public Struct CopyTo(Message dest)
     {
+      //if (this == default(Struct)) 
+
       if (this.Segment.Message == dest) return this;
 
       var newS = dest.Allocate(this.DataWords, this.PointerWords);
@@ -183,48 +204,145 @@ namespace CapnpNet
 
       for (int i = 0; i < this.PointerWords; i++)
       {
-        var ptr = this.ReadRawPointer(i);
+        CopyPointer(ref this, i, this.ReadRawPointer(i));
+      }
+
+      return newS;
+
+      void CopyPointer(ref Struct @this, int i, Pointer ptr)
+      {
         var dataSeg = srcSeg;
         var isFar = srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
-        if (!isFar) baseOffset = _structWordOffset + _dataWords + i + 1;
-        
+        if (!isFar) baseOffset = @this._structWordOffset + @this._dataWords + i + 1;
+
         if (ptr.Type == PointerType.Struct)
         {
-          newS.WritePointer(i, this.DereferenceRawStruct(i).CopyTo(dest));
+          newS.WritePointer(i, @this.DereferenceRawStruct(i).CopyTo(dest));
         }
         else if (ptr.Is(out ListPointer list))
         {
+          ref ulong src = ref dataSeg[baseOffset + ptr.WordOffset | Word.unit];
+
           int elementsPerWord;
           if (list.ElementSize == ElementSize.OneBit) elementsPerWord = 64;
           else if (list.ElementSize == ElementSize.OneByte) elementsPerWord = 8;
           else if (list.ElementSize == ElementSize.TwoBytes) elementsPerWord = 4;
           else if (list.ElementSize == ElementSize.FourBytes) elementsPerWord = 2;
           else if (list.ElementSize >= ElementSize.EightBytesNonPointer) elementsPerWord = 1;
-          else throw new NotSupportedException();
+          else
+          {
+            throw new NotSupportedException(); // zero
+          }
+          
+          if (list.ElementSize == ElementSize.EightBytesPointer)
+          {
+            ref Pointer pointers = ref Unsafe.As<ulong, Pointer>(ref src);
+            for (int j = 0; j < ptr.ElementCount; j++)
+            {
+            }
+          }
 
           var words = ((int)list.ElementCount + elementsPerWord - 1) / elementsPerWord;
           if (list.ElementSize == ElementSize.Composite) words++;
-          
+
           dest.Allocate(words, out int offset, out Segment newSeg);
           
-          // copy data
-          ref ulong src = ref dataSeg[baseOffset + ptr.WordOffset | Word.unit];
           ref ulong dst = ref newSeg[offset | Word.unit];
-          for (int j = 0; j < words; j++)
+
+          // TODO: follow pointers in payload according to tag
+          if (list.ElementSize == ElementSize.Composite)
           {
-            Unsafe.Add(ref dst, j) = Unsafe.Add(ref src, j);
+            var tag = Unsafe.As<ulong, StructPointer>(ref src);
+            var wordsPerStruct = tag.DataWords + tag.PointerWords;
+            dst = src; // copy tag
+            var elemOffset = 0;
+            while (elemOffset < words - 1)
+            {
+              if (elemOffset % wordsPerStruct < tag.DataWords)
+              {
+                Unsafe.Add(ref dst, j + 1) = Unsafe.Add(ref src, j + 1);
+              }
+              else
+              {
+
+              }
+            }
+            
           }
-          
+          else
+          {
+            // simply copy data
+            for (int j = 0; j < words; j++)
+            {
+              Unsafe.Add(ref dst, j) = Unsafe.Add(ref src, j);
+            }
+          }
+
           newS.WritePointerCore(i, newSeg, offset, list);
+        }
+        else if (ptr.Is(out OtherPointer other))
+        {
+          if (other.OtherPointerType == OtherPointerType.Capability)
+          {
+            newS.WritePointer(i, srcMsg.LocalCaps[(int)other.CapabilityId]);
+          }
+          else
+          {
+            // TODO: throw? some kind of warning?
+            throw new NotSupportedException("Unexpected OtherPointerType");
+            //newS.WriteRawPointer(i, ptr);
+          }
         }
         else
         {
-          // TODO: semantics for copying other pointers? delegate parameter?
-          newS.WriteRawPointer(i, ptr);
+          throw new InvalidOperationException(); // should be unreachable
         }
       }
+    }
+    
+    internal void ReplaceCaps(Func<uint, ICapability, uint> capReplacer)
+    {
+      //if (this == default(Struct)) 
+      
+      var srcSeg = this.Segment;
+      var srcMsg = srcSeg.Message;
 
-      return newS;
+      for (int i = 0; i < this.PointerWords; i++)
+      {
+        var ptr = this.ReadRawPointer(i);
+        var dataSeg = srcSeg;
+        var isFar = srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
+        if (!isFar) baseOffset = _structWordOffset + _dataWords + i + 1;
+
+        if (ptr.Type == PointerType.Struct)
+        {
+          this.DereferenceRawStruct(i).ReplaceCaps(capReplacer);
+        }
+        else if (ptr.Is(out ListPointer list))
+        {
+          // TODO
+          throw new NotSupportedException();
+        }
+        else if (ptr.Is(out OtherPointer other))
+        {
+          if (isFar) throw new NotSupportedException();
+
+          if (other.OtherPointerType == OtherPointerType.Capability)
+          {
+            var cap = srcMsg.LocalCaps[(int)other.CapabilityId];
+            var newId = capReplacer(other.CapabilityId, cap);
+            this.Pointer(i).CapabilityId = newId;
+          }
+          else
+          {
+            throw new NotSupportedException();
+          }
+        }
+        else
+        {
+          throw new InvalidOperationException(); // should be unreachable
+        }
+      }
     }
 
     private ref Pointer Pointer(int index)
@@ -422,6 +540,7 @@ namespace CapnpNet
 #region Write methods
     public void WriteRawPointer(int pointerIndex, Pointer pointer)
     {
+      // TODO: disallow writing arbitrary capability pointers
       if (pointerIndex < 0 || pointerIndex >= this.PointerWords)
       {
         throw new ArgumentOutOfRangeException("pointerIndex", "Pointer index out of range");
@@ -514,6 +633,28 @@ namespace CapnpNet
           DataWords = s.DataWords,
           PointerWords = s.PointerWords,
         });
+    }
+
+    public void WritePointer(int pointerIndex, ICapability cap)
+    {
+      Check.NotNull(cap, nameof(cap));
+      
+      var localCaps = this.Segment.Message.LocalCaps;
+      var id = localCaps.IndexOf(cap);
+      if (id == -1)
+      {
+        id = localCaps.Count;
+        localCaps.Add(cap);
+      }
+
+      var p = new Pointer()
+      {
+        Type = PointerType.Other,
+        OtherPointerType = OtherPointerType.Capability,
+        CapabilityId = (uint)id
+      };
+
+      _segment[_structWordOffset + this.DataWords + pointerIndex | Word.unit] = p.RawValue;
     }
 
     private void WritePointerCore(int pointerIndex, Segment destSegment, int absOffset, Pointer tag)

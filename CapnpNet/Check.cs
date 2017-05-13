@@ -1,4 +1,5 @@
 ﻿using System;
+using CapnpNet.Rpc;
 
 namespace CapnpNet
 {
@@ -12,6 +13,11 @@ namespace CapnpNet
     public static void Range(int index, int count)
     {
       if (index < 0 || index > count) throw new ArgumentOutOfRangeException();
+    }
+
+    public static void NotNull(object obj, string name)
+    {
+      if (obj == null) throw new ArgumentNullException(name);
     }
   }
 }

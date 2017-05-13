@@ -42,24 +42,28 @@ TODO
 - Missing edge cases
   - Upgraded list structs
   - Pointer field defaults
+  - Copying messages with lists containing pointers
 - Codegen improvements
   - annotations to control codegen (namespace, etc.)
   - missing metadata
 - Equals, GetHashCode boilerplate
+- Better AnyPointer support
 - APIs to support easier writing
   - struct copying, size measurements
   - Implement more standard interfaces?
+  - Automatic discriminant setting/validation?
 - Runtime and compiler version safety checks
 
 ### Missing features
-- RPC layer
-- Higher-level convenience APIs (setting up connections, etc.)
 - Tests / documentation
   - Check for integer overflows. I'm pretty sure there's a lot of them when
     dealing with >2GB (possibly smaller) messages, may potentially compromise
     memory safety / process stability
 - Packing/unpacking
 - dynamic API
+
+#### RPC Layer
+- How to embed capabilities into messages?
 
 ### Nice to haves
 - VS integration 

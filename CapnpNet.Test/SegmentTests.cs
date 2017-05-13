@@ -23,14 +23,13 @@ namespace CapnpNet.Test
       msg.PreAllocate(10);
       msg.Allocate(0, 1).WritePointer(0, new Rpc.Message(msg)
       {
-        which = Rpc.Message.Union.abort,
-        abort = new Rpc.Exception(msg)
+        which = Rpc.Message.Union.join,
+        join = new Join(msg)
         {
-          type = Exception.Type.failed,
-          reason = new Text(msg, "Echo test")
+          questionId = 123
         }
       });
-
+      
       Assert.AreEqual(
         msg.Segments[0][0 | Word.unit],
         new StructPointer
@@ -50,18 +49,16 @@ namespace CapnpNet.Test
       
       var ms2 = new MemoryStream();
       var rc = new RpcConnection();
-      rc.Init(null, ms2);
+      rc.Init(null, ms2, null);
       rc.ProcessAsync(msg).Wait();
 
       ms2.Position = 0;
       var msg2 = Message.DecodeAsync(ms2).Result;
       Assert.AreEqual(
         msg2.GetRoot<Rpc.Message>()
-          .unimplemented
-          .abort
-          .reason
-          .ToString(),
-        "Echo test");
+          .join
+          .questionId,
+        123);
     }
   }
 }

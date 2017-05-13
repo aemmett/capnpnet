@@ -11,7 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapnpNet.Schema", "CapnpNet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapnpNet.Schema.Compiler", "CapnpNet.Schema.Compiler\CapnpNet.Schema.Compiler.csproj", "{920CA392-B6BB-460C-A66D-A0EF0963B4E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapnpNet.Rpc", "CapnpNet.Rpc\CapnpNet.Rpc.csproj", "{26D8C724-C963-4151-8041-6AD7B96D3382}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{09DCB2D4-6DEF-4F58-B8C3-3E4662CAB3D9}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +39,6 @@ Global
 		{920CA392-B6BB-460C-A66D-A0EF0963B4E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{920CA392-B6BB-460C-A66D-A0EF0963B4E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{920CA392-B6BB-460C-A66D-A0EF0963B4E5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{26D8C724-C963-4151-8041-6AD7B96D3382}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{26D8C724-C963-4151-8041-6AD7B96D3382}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{26D8C724-C963-4151-8041-6AD7B96D3382}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{26D8C724-C963-4151-8041-6AD7B96D3382}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

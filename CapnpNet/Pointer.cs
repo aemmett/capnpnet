@@ -135,6 +135,20 @@ namespace CapnpNet
         return false;
       }
     }
+    
+    public bool Is(out OtherPointer otherPtr) // or specifically a capability pointer?
+    {
+      if (this.Type == PointerType.Other)
+      {
+        otherPtr = (OtherPointer)this;
+        return true;
+      }
+      else
+      {
+        otherPtr = default(OtherPointer);
+        return false;
+      }
+    }
 
     /// <summary>
     /// Offset to content, relative to the word after this pointer.
@@ -364,6 +378,48 @@ namespace CapnpNet
     {
       get { return _p.TargetSegmentId; }
       set { _p.TargetSegmentId = value; }
+    }
+  }
+
+  public struct OtherPointer
+  {
+    private Pointer _p;
+
+    public static implicit operator Pointer(OtherPointer p)
+    {
+      return p._p;
+    }
+
+    public static explicit operator OtherPointer(Pointer p)
+    {
+      return new OtherPointer(p);
+    }
+
+    public OtherPointer(Pointer p)
+    {
+      if (p.Type != PointerType.Other) throw new ArgumentException("Expected pointer type of Other", nameof(p));
+
+      _p = p;
+    }
+    
+    public ulong RawValue => _p.RawValue;
+
+    public PointerType Type
+    {
+      get { return _p.Type; }
+      set { _p.Type = value; }
+    }
+
+    public OtherPointerType OtherPointerType
+    {
+      get { return _p.OtherPointerType; }
+      set { _p.OtherPointerType = value; }
+    }
+
+    public uint CapabilityId
+    {
+      get { return _p.CapabilityId; }
+      set { _p.CapabilityId = value; }
     }
   }
 }
