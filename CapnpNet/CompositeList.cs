@@ -59,7 +59,7 @@ namespace CapnpNet
     public int TagWordOffset => _tagOffset;
     public int ElementWordSize => _dataWords + _pointerWords;
     public int Count => _elementCount;
-
+    
     public CompositeList<T> CopyTo(Message dest)
     {
       var ret = new CompositeList<T>(

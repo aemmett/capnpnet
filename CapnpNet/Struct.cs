@@ -146,6 +146,8 @@ namespace CapnpNet
     public ushort DataWords => _dataWords;
     public ushort PointerWords => _pointerWords;
 
+    public bool IsEmpty => _dataWords == 0 && _pointerWords == 0;
+
     public override string ToString() => $"Struct(S={_segment.SegmentIndex}, O={_structWordOffset}, DW={_dataWords}, PW={_pointerWords})";
     
     public int CalculateSize()
@@ -185,9 +187,17 @@ namespace CapnpNet
       return size;
     }
 
+    public AbsPointer ToAbsPointer() => new AbsPointer(_segment, 0, new StructPointer
+    {
+      Type = PointerType.Struct,
+      WordOffset = _structWordOffset,
+      DataWords = _dataWords,
+      PointerWords = _pointerWords,
+    });
+
     public Struct CopyTo(Message dest)
     {
-      //if (this == default(Struct)) 
+      if (this.IsEmpty) return default(Struct);
 
       if (this.Segment.Message == dest) return this;
 
@@ -197,107 +207,24 @@ namespace CapnpNet
       var srcMsg = srcSeg.Message;
 
       // copy data
+      ref ulong src = ref srcSeg[this.StructWordOffset | Word.unit];
+      ref ulong dst = ref destSeg[newS.StructWordOffset | Word.unit];
       for (int i = 0; i < this.DataWords; i++)
       {
-        destSeg[newS.StructWordOffset + i | Word.unit] = srcSeg[this.StructWordOffset + i | Word.unit];
+        Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
       }
 
+      int pointerBase = _structWordOffset + _dataWords + 1;
       for (int i = 0; i < this.PointerWords; i++)
       {
-        CopyPointer(ref this, i, this.ReadRawPointer(i));
+        Unsafe.Add(ref dst, _dataWords + i) =
+          new AbsPointer(_segment, pointerBase + i, this.Pointer(i))
+            .CopyTo(dest)
+            .ToPointer(destSeg, pointerBase + i)
+            .RawValue;
       }
 
       return newS;
-
-      void CopyPointer(ref Struct @this, int i, Pointer ptr)
-      {
-        var dataSeg = srcSeg;
-        var isFar = srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
-        if (!isFar) baseOffset = @this._structWordOffset + @this._dataWords + i + 1;
-
-        if (ptr.Type == PointerType.Struct)
-        {
-          newS.WritePointer(i, @this.DereferenceRawStruct(i).CopyTo(dest));
-        }
-        else if (ptr.Is(out ListPointer list))
-        {
-          ref ulong src = ref dataSeg[baseOffset + ptr.WordOffset | Word.unit];
-
-          int elementsPerWord;
-          if (list.ElementSize == ElementSize.OneBit) elementsPerWord = 64;
-          else if (list.ElementSize == ElementSize.OneByte) elementsPerWord = 8;
-          else if (list.ElementSize == ElementSize.TwoBytes) elementsPerWord = 4;
-          else if (list.ElementSize == ElementSize.FourBytes) elementsPerWord = 2;
-          else if (list.ElementSize >= ElementSize.EightBytesNonPointer) elementsPerWord = 1;
-          else
-          {
-            throw new NotSupportedException(); // zero
-          }
-          
-          if (list.ElementSize == ElementSize.EightBytesPointer)
-          {
-            ref Pointer pointers = ref Unsafe.As<ulong, Pointer>(ref src);
-            for (int j = 0; j < ptr.ElementCount; j++)
-            {
-            }
-          }
-
-          var words = ((int)list.ElementCount + elementsPerWord - 1) / elementsPerWord;
-          if (list.ElementSize == ElementSize.Composite) words++;
-
-          dest.Allocate(words, out int offset, out Segment newSeg);
-          
-          ref ulong dst = ref newSeg[offset | Word.unit];
-
-          // TODO: follow pointers in payload according to tag
-          if (list.ElementSize == ElementSize.Composite)
-          {
-            var tag = Unsafe.As<ulong, StructPointer>(ref src);
-            var wordsPerStruct = tag.DataWords + tag.PointerWords;
-            dst = src; // copy tag
-            var elemOffset = 0;
-            while (elemOffset < words - 1)
-            {
-              if (elemOffset % wordsPerStruct < tag.DataWords)
-              {
-                Unsafe.Add(ref dst, j + 1) = Unsafe.Add(ref src, j + 1);
-              }
-              else
-              {
-
-              }
-            }
-            
-          }
-          else
-          {
-            // simply copy data
-            for (int j = 0; j < words; j++)
-            {
-              Unsafe.Add(ref dst, j) = Unsafe.Add(ref src, j);
-            }
-          }
-
-          newS.WritePointerCore(i, newSeg, offset, list);
-        }
-        else if (ptr.Is(out OtherPointer other))
-        {
-          if (other.OtherPointerType == OtherPointerType.Capability)
-          {
-            newS.WritePointer(i, srcMsg.LocalCaps[(int)other.CapabilityId]);
-          }
-          else
-          {
-            // TODO: throw? some kind of warning?
-            throw new NotSupportedException("Unexpected OtherPointerType");
-            //newS.WriteRawPointer(i, ptr);
-          }
-        }
-        else
-        {
-          throw new InvalidOperationException(); // should be unreachable
-        }
-      }
     }
     
     internal void ReplaceCaps(Func<uint, ICapability, uint> capReplacer)
@@ -674,9 +601,8 @@ namespace CapnpNet
       if (this.Segment == destSegment)
       {
         int pointerWordOffset = this.StructWordOffset + this.DataWords + pointerIndex + 1;
-        int relWordOffset = absOffset - pointerWordOffset;
-        tag.WordOffset = relWordOffset;
         resultPointer = tag;
+        resultPointer.WordOffset = absOffset - pointerWordOffset;
       }
       else
       {
@@ -694,28 +620,6 @@ namespace CapnpNet
         }
         else
         {
-          // double-far pointer
-          //int segmentIndex = -1;
-          //foreach (var segment in _segment.Message.Segments)
-          //{
-          //  if (segment.TryAllocate(2, out padOffset))
-          //  {
-          //    segment[padOffset | Word.unit] = new FarPointer
-          //    {
-          //      Type = PointerType.Far,
-          //      LandingPadOffset = (uint)absOffset,
-          //      TargetSegmentId = (uint)destSegment.SegmentIndex,
-          //    }.RawValue;
-          //    tag.WordOffset = 0;
-          //    segment[padOffset + 1 | Word.unit] = tag.RawValue;
-
-          //    segmentIndex = segment.SegmentIndex;
-          //    break;
-          //  }
-          //}
-          
-          //if (segmentIndex == -1) throw new InvalidOperationException("Cannot allocate far pointer");
-          
           _segment.Message.Allocate(2, out padOffset, out Segment segment);
           segment[padOffset | Word.unit] = new FarPointer
           {

@@ -54,11 +54,19 @@ namespace CapnpNet.Test
 
       ms2.Position = 0;
       var msg2 = Message.DecodeAsync(ms2).Result;
+      var rpcMsg2 = msg2.GetRoot<Rpc.Message>();
       Assert.AreEqual(
-        msg2.GetRoot<Rpc.Message>()
+        Rpc.Message.Union.unimplemented,
+        rpcMsg2.which);
+      Assert.AreEqual(
+        Rpc.Message.Union.join,
+        rpcMsg2.unimplemented.which);
+      Assert.AreEqual(
+        123,
+        rpcMsg2
+          .unimplemented
           .join
-          .questionId,
-        123);
+          .questionId);
     }
   }
 }
