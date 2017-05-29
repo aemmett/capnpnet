@@ -214,13 +214,14 @@ namespace CapnpNet
         Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
       }
 
-      int pointerBase = _structWordOffset + _dataWords + 1;
+      int srcPointerBase = _structWordOffset + _dataWords + 1;
+      int dstPointerBase = newS.StructWordOffset + newS.DataWords + 1;
       for (int i = 0; i < this.PointerWords; i++)
       {
         Unsafe.Add(ref dst, _dataWords + i) =
-          new AbsPointer(_segment, pointerBase + i, this.Pointer(i))
+          new AbsPointer(_segment, srcPointerBase + i, this.Pointer(i))
             .CopyTo(dest)
-            .ToPointer(destSeg, pointerBase + i)
+            .ToPointer(destSeg, dstPointerBase + i)
             .RawValue;
       }
 

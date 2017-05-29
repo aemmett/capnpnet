@@ -62,7 +62,7 @@ namespace CapnpNet.Test
         Rpc.Message.Union.join,
         rpcMsg2.unimplemented.which);
       Assert.AreEqual(
-        123,
+        123U,
         rpcMsg2
           .unimplemented
           .join
