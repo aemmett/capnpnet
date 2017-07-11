@@ -85,6 +85,7 @@
     <Compile Include="Helpers.cs" />
     <Compile Include="Rpc\ICapability.cs" />
     <Compile Include="Index.cs" />
+    <Compile Include="Rpc\MessageStream.cs" />
     <Compile Include="Rpc\RpcConnection.cs" />
     <Compile Include="Rpc\Schemas\rpc-twoparty.g.cs" />
     <Compile Include="Rpc\Schemas\rpc.g.cs" />

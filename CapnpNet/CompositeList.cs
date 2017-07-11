@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace CapnpNet
@@ -10,19 +11,77 @@ namespace CapnpNet
     public Struct Struct { get; set; }
   }
 
+  public struct AllocationContext
+  {
+    private int _nextOffset;
+
+    public AllocationContext(Segment segment, int startOffset, int count)
+    {
+      this.Segment = segment;
+      _nextOffset = startOffset;
+      this.EndOffset = startOffset + count;
+    }
+
+    public Segment Segment { get; }
+    public int NextOffset => _nextOffset;
+    public int EndOffset { get; }
+    
+    public Struct Allocate(ushort dataWords, ushort pointerWords)
+    {
+      if (_nextOffset + dataWords + pointerWords > this.EndOffset)
+      {
+        throw new InvalidOperationException("");
+      }
+
+      var offset = _nextOffset;
+      _nextOffset += dataWords + pointerWords;
+      return new Struct(this.Segment, offset, dataWords, pointerWords, 0);
+    }
+  }
+
+  internal static class WordsReflectionCache<T>
+  {
+    public static readonly ushort KnownDataWords;
+    public static readonly ushort KnownPointerWords;
+
+    static WordsReflectionCache()
+    {
+      KnownDataWords = (ushort)(int)typeof(T).GetField("KNOWN_DATA_WORDS").GetValue(null);
+      KnownPointerWords = (ushort)(int)typeof(T).GetField("KNOWN_POINTER_WORDS").GetValue(null);
+    }
+  }
+  
   public struct CompositeList<T> : IEnumerable<T>
     where T : struct, IStruct
   {
     private readonly Segment _segment;
     private readonly int _tagOffset, _elementCount;
     private readonly ushort _dataWords, _pointerWords;
+    
+    public CompositeList(Message msg, int count, out AllocationContext allocContext)
+    {
+      var tag = new StructPointer
+      {
+        Type = PointerType.Struct,
+        WordOffset = 0,
+        DataWords = WordsReflectionCache<T>.KnownDataWords,
+        PointerWords = WordsReflectionCache<T>.KnownPointerWords,
+      };
+      _elementCount = 0;
+      _dataWords = tag.DataWords;
+      _pointerWords = tag.PointerWords;
+      var elementWords = count * (_dataWords + _pointerWords);
+      msg.Allocate(elementWords + 1, out _tagOffset, out _segment);
+      allocContext = new AllocationContext(_segment, _tagOffset + 1, elementWords);
+      _segment[_tagOffset | Word.unit] = tag.RawValue;
+    }
 
     public CompositeList(Message msg, StructPointer tag)
     {
       _elementCount = tag.WordOffset;
       _dataWords = tag.DataWords;
       _pointerWords = tag.PointerWords;
-      msg.Allocate(_dataWords + _pointerWords + 1, out _tagOffset, out _segment);
+      msg.Allocate(_elementCount * (_dataWords + _pointerWords) + 1, out _tagOffset, out _segment);
       _segment[_tagOffset | Word.unit] = tag.RawValue;
     }
 
@@ -60,6 +119,20 @@ namespace CapnpNet
     public int ElementWordSize => _dataWords + _pointerWords;
     public int Count => _elementCount;
     
+    public void Add(T element)
+    {
+      // TODO: only check in debug builds?
+      var s = element.Struct;
+      if (s.Segment != this.Segment)
+      {
+        throw new ArgumentException("Element not allocated in same segment");
+      }
+      
+      // TODO: check element offset within list
+      // also check offset at multiple of EWS?
+      // TODO: modify _elementCount
+    }
+
     public CompositeList<T> CopyTo(Message dest)
     {
       var ret = new CompositeList<T>(

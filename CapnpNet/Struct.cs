@@ -75,6 +75,7 @@ namespace CapnpNet
     }
   }
 
+  // TODO: 
   public struct Struct
   {
     private readonly Segment _segment;
@@ -228,51 +229,6 @@ namespace CapnpNet
       return newS;
     }
     
-    internal void ReplaceCaps(Func<uint, ICapability, uint> capReplacer)
-    {
-      //if (this == default(Struct)) 
-      
-      var srcSeg = this.Segment;
-      var srcMsg = srcSeg.Message;
-
-      for (int i = 0; i < this.PointerWords; i++)
-      {
-        var ptr = this.ReadRawPointer(i);
-        var dataSeg = srcSeg;
-        var isFar = srcMsg.Traverse(ref ptr, ref dataSeg, out int baseOffset);
-        if (!isFar) baseOffset = _structWordOffset + _dataWords + i + 1;
-
-        if (ptr.Type == PointerType.Struct)
-        {
-          this.DereferenceRawStruct(i).ReplaceCaps(capReplacer);
-        }
-        else if (ptr.Is(out ListPointer list))
-        {
-          // TODO
-          throw new NotSupportedException();
-        }
-        else if (ptr.Is(out OtherPointer other))
-        {
-          if (isFar) throw new NotSupportedException();
-
-          if (other.OtherPointerType == OtherPointerType.Capability)
-          {
-            var cap = srcMsg.LocalCaps[(int)other.CapabilityId];
-            var newId = capReplacer(other.CapabilityId, cap);
-            this.Pointer(i).CapabilityId = newId;
-          }
-          else
-          {
-            throw new NotSupportedException();
-          }
-        }
-        else
-        {
-          throw new InvalidOperationException(); // should be unreachable
-        }
-      }
-    }
-
     private ref Pointer Pointer(int index)
     {
       Check.Range(index, _pointerWords);
@@ -381,6 +337,18 @@ namespace CapnpNet
 
       // TODO: how to handle default?
       return new CompositeList<T>();
+    }
+
+    public T ReadInterface<T>(int pointerIndex) where T : ICapability
+    {
+      if (_upgradedListElementByteOffset > 0 || pointerIndex >= this.PointerWords)
+      {
+        return default(T);
+      }
+
+      ref Pointer otherPointer = ref this.Pointer(pointerIndex);
+
+      return (T)this.Segment.Message.LocalCaps[otherPointer.CapabilityId].Capability;
     }
 
     // not sure about this factoring; does this reduce the amount of generated code for the generic methods?
@@ -568,18 +536,31 @@ namespace CapnpNet
       Check.NotNull(cap, nameof(cap));
       
       var localCaps = this.Segment.Message.LocalCaps;
-      var id = localCaps.IndexOf(cap);
-      if (id == -1)
+      uint? capId = null;
+      for (uint i = 0; i < localCaps.Count; i++)
       {
-        id = localCaps.Count;
-        localCaps.Add(cap);
+        ref Message.CapEntry capEntry = ref localCaps[i];
+        if (capEntry.Capability == cap)
+        {
+          capEntry.RefCount++;
+          capId = i;
+          break;
+        }
+      }
+      
+      if (capId == null)
+      {
+        ref Message.CapEntry capEntry = ref localCaps.Add(out var id);
+        capEntry.Capability = cap;
+        capEntry.RefCount = 1;
+        capId = id;
       }
 
       var p = new Pointer()
       {
         Type = PointerType.Other,
         OtherPointerType = OtherPointerType.Capability,
-        CapabilityId = (uint)id
+        CapabilityId = capId.Value
       };
 
       _segment[_structWordOffset + this.DataWords + pointerIndex | Word.unit] = p.RawValue;

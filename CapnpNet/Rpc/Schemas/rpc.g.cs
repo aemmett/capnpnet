@@ -693,6 +693,11 @@ namespace CapnpNet.Rpc
     public const int KNOWN_DATA_WORDS = 1;
     public const int KNOWN_POINTER_WORDS = 1;
     private global::CapnpNet.Struct _s;
+
+    public CapDescriptor(ref AllocationContext allocContext) : this(allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
     public CapDescriptor(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
     {
     }
@@ -706,6 +711,17 @@ namespace CapnpNet.Rpc
     {
       get { return _s; }
       set { _s = value; }
+    }
+
+    public static CompositeList<CapDescriptor> List(global::CapnpNet.Message msg, int count)
+    {
+      return new CompositeList<CapDescriptor>(msg, new StructPointer
+      {
+        Type = PointerType.Struct,
+        WordOffset = count,
+        DataWords = KNOWN_DATA_WORDS,
+        PointerWords = KNOWN_POINTER_WORDS
+      });
     }
 
     public enum Union : ushort
