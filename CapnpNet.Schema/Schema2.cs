@@ -1,4 +1,4 @@
-﻿using CapnpNet;
+﻿/*using CapnpNet;
 
 namespace CapnpNet.Schema
 {
@@ -981,3 +981,4 @@ namespace CapnpNet.Schema
   }
 }
 
+*/

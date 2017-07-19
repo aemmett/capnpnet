@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CapnpNet
 {
+  [StructLayout(LayoutKind.Auto)]
   public struct AbsPointer
   {
     private Segment _segment;
@@ -31,6 +33,35 @@ namespace CapnpNet
         else if (_tag.Is(out ListPointer l)) return l.ElementCount == 0;
         else return false;
       }
+    }
+
+    public static implicit operator AbsPointer(OtherPointer op) => new AbsPointer(null, 0, op);
+
+    public bool Is<T>(out T @struct) where T : struct, IStruct
+    {
+      if (this.Tag.Type == PointerType.Struct)
+      {
+        @struct = new T
+        {
+          Struct = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords, 0)
+        };
+        return true;
+      }
+
+      @struct = default(T);
+      return false;
+    }
+    
+    public bool IsStruct(out Struct @struct)
+    {
+      if (this.Tag.Type == PointerType.Struct)
+      {
+        @struct = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords, 0);
+        return true;
+      }
+
+      @struct = default(Struct);
+      return false;
     }
 
     public Pointer ToPointer(Segment srcSegment, int baseOffset)

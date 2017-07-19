@@ -636,10 +636,10 @@ namespace CapnpNet.Rpc
       set { _s = value; }
     }
 
-    public Pointer content
+    public AbsPointer content
     {
-      get { return _s.ReadRawPointer(0); }
-      set { _s.WriteRawPointer(0, value); }
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
     }
 
     public CompositeList<CapDescriptor> capTable

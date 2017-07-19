@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,145 +14,6 @@ using System.Threading.Tasks.Dataflow;
 
 namespace CapnpNet.Rpc
 {
-  public sealed class ExportTable<T>
-  {
-    private static T _empty;
-
-    private T[] _slots = new T[16]; // TODO: pool
-
-    // TODO: find a priority queue implementation
-    private SortedList<uint, uint> _freeList;
-
-    private uint _nextId;
-    
-    public ref T TryGet(uint key, out bool valid)
-    {
-      valid = key < _nextId && _freeList?.ContainsKey(key) == false;
-      if (!valid) return ref _empty;
-
-      return ref _slots[key];
-    }
-
-    private ref T GetOrAdd(uint key)
-    {
-      if (key < _slots.Length) return ref _slots[key];
-
-      Array.Resize(ref _slots, _slots.Length * 2);
-      return ref _slots[key];
-    }
-
-    public T Remove(uint key, ref T entry)
-    {
-      ref T val = ref this.TryGet(key, out bool valid);
-      if (!valid || !Unsafe.AreSame(ref val, ref entry))
-      {
-        throw new InvalidOperationException($"Entry not present at key ${key}");
-      }
-
-      T copy = val;
-      val = default(T);
-      if (_freeList == null) _freeList = new SortedList<uint, uint>();
-
-      _freeList.Add(key, key);
-      return copy;
-    }
-
-    public ref T Next(out uint id)
-    {
-      if (_freeList?.Count > 0)
-      {
-        id = _freeList.Keys[0];
-        _freeList.RemoveAt(0);
-      }
-      else
-      {
-        id = _nextId;
-        _nextId++;
-      }
-
-      return ref this.GetOrAdd(id);
-    }
-  }
-
-  public sealed class ImportTable<T>
-  {
-    private struct Entry
-    {
-      public uint key;
-      public T value;
-      public bool active;
-    }
-    
-    private Entry[] _entries;
-    
-    private T _empty;
-    private uint _count;
-    
-    public ref T TryGet(uint key, out bool valid)
-    {
-      for (int i = 0; i < _entries.Length; i++)
-      {
-        ref var entry = ref _entries[i];
-        if (entry.key == key && entry.active)
-        {
-          valid = true;
-          return ref entry.value;
-        }
-      }
-
-      valid = false;
-      return ref _empty;
-    }
-
-    private ref T GetOrAdd(uint key)
-    {
-      int? emptyIndex = null;
-      for (int i = 0; i < _entries.Length; i++)
-      {
-        ref var entry = ref _entries[i];
-        if (entry.key == key && entry.active)
-        {
-          return ref entry.value;
-        }
-        else if (entry.active == false && emptyIndex == null)
-        {
-          emptyIndex = i;
-        }
-      }
-
-      if (emptyIndex == null)
-      {
-        emptyIndex = _entries.Length;
-        Array.Resize(ref _entries, _entries.Length * 2);
-      }
-
-      ref var newEntry = ref _entries[emptyIndex.Value];
-      newEntry.key = key;
-      newEntry.active = true;
-      _count++;
-      return ref newEntry.value;
-    }
-
-    public T Remove(uint key)
-    {
-      for (int i = 0; i < _entries.Length; i++)
-      {
-        ref var entry = ref _entries[i];
-        if (entry.key == key && entry.active)
-        {
-          var copy = entry.value;
-          entry.key = 0;
-          entry.value = default(T);
-          entry.active = false;
-          _count--;
-          return copy;
-        }
-      }
-
-      throw new InvalidOperationException($"Entry with key {key} not found.");
-    }
-  }
-  
   public class RpcConnection : IDisposable
   {
     // question/answer/export/import tables
@@ -162,26 +23,29 @@ namespace CapnpNet.Rpc
     private AsyncCountdownEvent _inFlightCounter;
     private ConcurrentQueue<System.Exception> _exceptions;
 
+    [StructLayout(LayoutKind.Auto)]
     private struct Question
     {
       public List<uint> paramExports;
       public bool isAwaitingReturn;
       public bool isTailCall;
     }
+    [StructLayout(LayoutKind.Auto)]
     private struct Answer
     {
       public bool active;
-      // something about pipelines
-      //public Task<RpcResponse> redirectedResults;
+      public Task<CapnpNet.Message> task;
       //public RpcCallContext callContext;
       public List<uint> resultExports;
     }
+    [StructLayout(LayoutKind.Auto)]
     private struct Export
     {
       public uint refCount;
       public ICapability capability;
       public Task resolveOp;
     }
+    [StructLayout(LayoutKind.Auto)]
     private struct Import
     {
       //public ImportClient importClient;
@@ -216,7 +80,7 @@ namespace CapnpNet.Rpc
       while (ct.IsCancellationRequested == false)
       {
         var msg = await _msgStream.ReceiveAsync();
-        this.Consume(this.ProcessAsync(msg));
+        this.Process(msg);
       }
 
       _inFlightCounter.Signal();
@@ -227,6 +91,9 @@ namespace CapnpNet.Rpc
         throw new AggregateException(_exceptions);
       }
     }
+
+    private void Consume<T>(T state, Func<T, Task> task) => this.Consume(task(state));
+    private void Consume(Func<Task> task) => this.Consume(task());
 
     private void Consume(Task task)
     {
@@ -249,21 +116,21 @@ namespace CapnpNet.Rpc
       }
     }
 
-    internal async Task ProcessAsync(CapnpNet.Message message)
+    internal void Process(CapnpNet.Message rpcMessage)
     {
       try
       {
-        var msg = message.GetRoot<Message>();
-        if (msg.Is(out Message unimplemented))
+        var message = rpcMessage.GetRoot<Message>();
+        if (message.Is(out Message unimplemented))
         {
           // TODO: release resources
           throw new NotImplementedException();
         }
-        else if (msg.Is(out Exception abort))
+        else if (message.Is(out Exception abort))
         {
           throw new InvalidOperationException($"Connection aborted by remote: {abort.type.ToString()}: {abort.reason.ToString()}");
         }
-        else if (msg.Is(out Bootstrap bootstrap))
+        else if (message.Is(out Bootstrap bootstrap))
         {
           var reply = new CapnpNet.Message().Init(_segFactory);
           //await reply.PreAllocateAsync(senderMsg.CalculateSize() + 3);
@@ -289,47 +156,74 @@ namespace CapnpNet.Rpc
               }
             }
           });
-          message.Dispose();
-          message = null;
-          await _msgStream.WriteAsync(reply);
-          reply.Dispose();
-        }
-        else if (msg.Is(out Call call))
-        {
-          HandleCall();
-
-          void HandleCall()
+          rpcMessage.Dispose();
+          rpcMessage = null;
+          this.Consume((msgStream: _msgStream, reply: reply), async state =>
           {
-            bool valid;
-            ref Answer ans = ref _answers.TryGet(call.questionId, out valid);
+            await state.msgStream.WriteAsync(state.reply);
+            state.reply.Dispose();
+          });
+        }
+        else if (message.Is(out Call call))
+        {
+          bool valid;
+          ref Answer ans = ref _answers.TryGet(call.questionId, out valid);
+          if (!valid)
+          {
+            // TODO: return exception message
+          }
+
+          if (call.target.which == MessageTarget.Union.importedCap)
+          {
+            ref Export export = ref _exports.TryGet(call.target.importedCap, out valid);
             if (!valid)
             {
               // TODO: return exception message
             }
 
-            if (call.target.which == MessageTarget.Union.importedCap)
+            // TODO: read cap descriptors, look up corresponding imports, await any still pending
+
+            if (call.@params.content.IsStruct(out var @struct) == false)
             {
-              ref Export export = ref _exports.TryGet(call.target.importedCap, out valid);
-              if (!valid)
+              // TODO: return exception
+            }
+
+            switch (call.sendResultsTo.which)
+            {
+              case Call.sendResultsToGroup.Union.caller:
+                // set up return message
+                break;
+              case Call.sendResultsToGroup.Union.yourself:
+                // set aside memory to hold result
+                break;
+              case Call.sendResultsToGroup.Union.thirdParty:
+              default:
+                throw new NotImplementedException();
+            }
+
+            //ans.task = export.capability.DispatchCall(
+            //  call.interfaceId,
+            //  call.methodId,
+            //  new CallContext(call, this),
+            //  CancellationToken.None);
+
+            var callTask = ans.task;
+            this.Consume(async () =>
+            {
+              await callTask;
+              if (call.sendResultsTo.which == Call.sendResultsToGroup.Union.caller)
               {
-                // TODO: return exception message
+                
               }
-
-              // TODO: imports
-
-              export.capability.DispatchCall(
-                call.interfaceId,
-                call.methodId,
-                new CallContext(call.questionId, call.@params.content, this));
-            }
-            else if (call.target.Is(out PromisedAnswer promisedAnswer))
-            {
-              throw new NotImplementedException();
-            }
-            else
-            {
-              throw new NotSupportedException("Unknown call target");
-            }
+            });
+          }
+          else if (call.target.Is(out PromisedAnswer promisedAnswer))
+          {
+            throw new NotImplementedException();
+          }
+          else
+          {
+            throw new NotSupportedException("Unknown call target");
           }
         }
         //else if (msg.Is(out Return ret))
@@ -343,24 +237,28 @@ namespace CapnpNet.Rpc
         else
         {
           // level -1 RPC
-          var senderMsg = msg.GetStruct().Segment.Message;
-          // TODO: copy data, or just move segments?
-          var reply = this.CreateMessage();
-          await reply.PreAllocateAsync(senderMsg.CalculateSize() + 3);
-          reply.Allocate(0, 1).WritePointer(0, new Message(reply)
+          this.Consume((message, this.CreateMessage()), async state =>
           {
-            which = Message.Union.unimplemented,
-            unimplemented = msg.CopyTo(reply),
+            var (msg, reply) = state;
+            var senderMsg = msg.GetStruct().Segment.Message;
+            // TODO: copy data, or just move segments?
+            
+            await reply.PreAllocateAsync(senderMsg.CalculateSize() + 3);
+            reply.Allocate(0, 1).WritePointer(0, new Message(reply)
+            {
+              which = Message.Union.unimplemented,
+              unimplemented = msg.CopyTo(reply),
+            });
+            rpcMessage.Dispose();
+            rpcMessage = null;
+            await _msgStream.WriteAsync(reply);
+            reply.Dispose();
           });
-          message.Dispose();
-          message = null;
-          await _msgStream.WriteAsync(reply);
-          reply.Dispose();
         }
       }
       finally
       {
-        if (message != null) message.Dispose();
+        if (rpcMessage != null) rpcMessage.Dispose();
       }
     }
 
@@ -396,8 +294,14 @@ namespace CapnpNet.Rpc
       return list;
     }
 
-    public void SendAndDispose(CapnpNet.Message msg)
+    public void SendAndDispose(uint answerId, CapnpNet.Message msg)
     {
+      ref Answer answer = ref _answers.TryGet(answerId, out var valid);
+      if (!valid)
+      {
+        // TODO: exception
+      }
+      
       async Task Run(CapnpNet.Message m)
       {
         await _msgStream.WriteAsync(m);
@@ -440,52 +344,62 @@ namespace CapnpNet.Rpc
   public struct CallContext
   {
     private readonly uint _questionId;
-    private Struct _parameters;
+    private Call _call;
     private readonly RpcConnection _rpc;
+    private readonly Call.sendResultsToGroup.Union _sendResultsTo;
 
-    public CallContext(uint questionId, Struct parameters, RpcConnection rpc)
+    public CallContext(Call call, RpcConnection rpc)
     {
-      _questionId = questionId;
-      _parameters = parameters;
+      _questionId = call.questionId;
+      _sendResultsTo = call.sendResultsTo.which;
+      _call = call;
       _rpc = rpc;
     }
 
-    public Struct Parameters => _parameters;
+    public Struct Parameters => _call.@params.content.IsStruct(out var @struct) ? @struct : throw new InvalidOperationException("Call parameters not a struct");
     
     public void DisposeParameters()
     {
-      _parameters.Segment.Message.Dispose();
-      _parameters = default(Struct);
+      _call.GetStruct().Segment.Message.Dispose();
+      _call = default(Call);
     }
     
     public CapnpNet.Message CreateReply(int? sizeHint = null)
     {
-      var msg = _rpc.CreateMessage();
-      
-      msg.PreAllocate(3 + sizeHint ?? 5);
-      
-      msg.Allocate(0, 1).WritePointer(0, new Message(msg)
+      if (_sendResultsTo == Call.sendResultsToGroup.Union.caller)
       {
-        @return = new Return(msg)
+        var msg = _rpc.CreateMessage();
+
+        msg.PreAllocate(3 + sizeHint ?? 5);
+
+        msg.Allocate(0, 1).WritePointer(0, new Message(msg)
         {
-          answerId = _questionId
-        }
-      });
+          @return = new Return(msg)
+          {
+            answerId = _questionId
+          }
+        });
 
-      return msg;
+        return msg;
+      }
+      else
+      {
+        // TODO: allocate from scratch memory?
+        throw new NotImplementedException();
+      }
     }
-
+    
     public async ValueTask<CapnpNet.Message> CreateReplyAsync(int? sizeHint = null)
     {
       var msg = _rpc.CreateMessage();
       
       await msg.PreAllocateAsync(3 + sizeHint ?? 5); // TODO: tune
-      
+
       msg.Allocate(0, 1).WritePointer(0, new Message(msg)
       {
         @return = new Return(msg)
         {
-          answerId = _questionId,
+          answerId = _questionId
         }
       });
 
@@ -500,16 +414,18 @@ namespace CapnpNet.Rpc
 
   public struct ReplyContext
   {
-    private RpcConnection _rpc;
+    private readonly RpcConnection _rpc;
+    private readonly uint _answerId;
 
-    public ReplyContext(RpcConnection rpc, CapnpNet.Message msg)
+    public ReplyContext(RpcConnection rpc, uint answerId, CapnpNet.Message msg)
     {
       _rpc = rpc;
+      _answerId = answerId;
       this.Message = msg;
     }
 
     public CapnpNet.Message Message { get; }
-    
+
     public Payload PrepareReturn()
     {
       var ret = this.Message.GetRoot<Message>().@return;
@@ -517,7 +433,7 @@ namespace CapnpNet.Rpc
       return (ret.results = new Payload(this.Message));
     }
 
-    public void Return(Pointer returnPayload) // TODO: AnyPointer type? discriminated union of Struct, *List?
+    public void Return(AbsPointer returnPayload)
     {
       var ret = this.Message.GetRoot<Message>().@return;
       ret.which = Rpc.Return.Union.results;
@@ -543,6 +459,6 @@ namespace CapnpNet.Rpc
       this.Send();
     }
 
-    public void Send() => _rpc.SendAndDispose(this.Message);
+    public void Send() => _rpc.SendAndDispose(_answerId, this.Message);
   }
 }

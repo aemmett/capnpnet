@@ -1,12 +1,21 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CapnpNet.Rpc
 {
   public interface ICapability
   {
-    Task DispatchCall(ulong interfaceId, ushort methodId, CallContext callContext);
+    Task DispatchCall(ulong interfaceId, ushort methodId, CallContext callContext, CancellationToken ct);
+  }
+
+  public abstract class RpcBase : ICapability
+  {
+    public Task DispatchCall(ulong interfaceId, ushort methodId, CallContext callContext, CancellationToken ct)
+    {
+      throw new NotImplementedException();
+    }
   }
 
   public sealed class RpcTask<T>

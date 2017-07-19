@@ -43,6 +43,7 @@ TODO
   - Upgraded list structs
   - Pointer field defaults
   - Copying messages with lists containing pointers
+  - Primitive list -> struct list upgradability (merge PrimitiveList and CopositeList?)
 - Codegen improvements
   - annotations to control codegen (namespace, etc.)
   - missing metadata
@@ -61,9 +62,6 @@ TODO
     memory safety / process stability
 - Packing/unpacking
 - dynamic API
-
-#### RPC Layer
-- How to embed capabilities into messages?
 
 ### Nice to haves
 - VS integration 

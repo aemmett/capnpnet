@@ -74,8 +74,7 @@ namespace CapnpNet
       return new T() { Struct = structObj.Struct.CopyTo(dest) };
     }
   }
-
-  // TODO: 
+  
   public struct Struct
   {
     private readonly Segment _segment;
@@ -246,6 +245,17 @@ namespace CapnpNet
       return this.Pointer(pointerIndex);
     }
 
+    public AbsPointer DereferenceAbsPointer(int pointerIndex)
+    {
+      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
+      {
+        return new AbsPointer(targetSegment, baseOffset, pointer);
+      }
+
+      // TODO: how to handle default?
+      throw new NotImplementedException();
+    }
+
     public Struct DereferenceRawStruct(int pointerIndex)
     {
       if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
@@ -351,7 +361,7 @@ namespace CapnpNet
       return (T)this.Segment.Message.LocalCaps[otherPointer.CapabilityId].Capability;
     }
 
-    // not sure about this factoring; does this reduce the amount of generated code for the generic methods?
+    // TODO: replace with AbsPointer
     private bool DereferenceCore(int pointerIndex, out Pointer pointer, out int baseOffset, out Segment targetSegment)
     {
       Check.Positive(pointerIndex);
@@ -564,6 +574,15 @@ namespace CapnpNet
       };
 
       _segment[_structWordOffset + this.DataWords + pointerIndex | Word.unit] = p.RawValue;
+    }
+
+    public void WritePointer(int pointerIndex, AbsPointer p)
+    {
+      this.WritePointerCore(
+        pointerIndex,
+        p.Segment,
+        p.DataOffset,
+        p.Tag);
     }
 
     private void WritePointerCore(int pointerIndex, Segment destSegment, int absOffset, Pointer tag)

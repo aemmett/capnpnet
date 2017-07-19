@@ -83,8 +83,10 @@
     <Compile Include="CompositeList.cs" />
     <Compile Include="Check.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="Rpc\ExportTable.cs" />
     <Compile Include="Rpc\ICapability.cs" />
     <Compile Include="Index.cs" />
+    <Compile Include="Rpc\ImportTable.cs" />
     <Compile Include="Rpc\MessageStream.cs" />
     <Compile Include="Rpc\RpcConnection.cs" />
     <Compile Include="Rpc\Schemas\rpc-twoparty.g.cs" />

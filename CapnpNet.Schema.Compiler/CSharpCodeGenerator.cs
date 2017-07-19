@@ -19,6 +19,7 @@ namespace CapnpNet.Schema.Compiler
     // TODO: although it is auto-generated, I would like to remove excess qualification...
     public const string StructType = "global::CapnpNet.Struct";
     public const string MessageType = "global::CapnpNet.Message";
+    public const string CnNamespace = "global::CapnpNet";
 
     private readonly CodeGeneratorRequest _request;
     private readonly SyntaxGenerator _generator;
@@ -130,16 +131,17 @@ namespace {GetNamespace(node)}
       {
         return $@"
           {GetDocComment(node)}
-          public struct {name} : IStruct
+          public struct {name} : {CnNamespace}.IStruct
           {{
             public const int KNOWN_DATA_WORDS = {s.dataWordCount.ToString()};
             public const int KNOWN_POINTER_WORDS = {s.pointerCount.ToString()};
             private {StructType} _s;
+            public {name}(ref {CnNamespace}.AllocationContext allocContext) : this(allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)) {{ }}
             public {name}({MessageType} m) : this(m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS) {{ }}
             public {name}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWords, pointers)) {{ }}
             public {name}({StructType} s) {{ _s = s; }}
 
-            {StructType} IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}
+            {StructType} {CnNamespace}.IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}
 
             {string.Join("\n", GenerateMembers(s))}
 
@@ -164,7 +166,7 @@ namespace {GetNamespace(node)}
       {
         return $@"
           {this.GetDocComment(node)}
-          public interface {name} {this.GetSupertypes(i.extends)}
+          public interface {name} {this.GetSupertypes(i.superclasses)}
           {{
             {string.Join("\n", GenerateMethods(i.methods))}
           }}";
@@ -197,7 +199,7 @@ namespace {GetNamespace(node)}
       }
     }
 
-    private string GetSupertypes(PrimitiveList<ulong> extends)
+    private string GetSupertypes(CompositeList<Superclass> extends)
     {
       var names = string.Join(", ", extends.Select(this.GetTypeName));
       return string.IsNullOrEmpty(names) ? string.Empty : " : " + names;
@@ -226,7 +228,7 @@ namespace {GetNamespace(node)}
         case Type.Union.float64: type = "double"; accessor = "Float64"; break;
         case Type.Union.text: type = "Text"; accessor = "Text"; break;
         case Type.Union.data: type = "PrimitiveList<byte>"; accessor = "List<byte>"; break;
-        case Type.Union.anyPointer: type = "Pointer"; accessor = "RawPointer"; break;
+        case Type.Union.anyPointer: type = "AbsPointer"; accessor = "AbsPointer "; break;
         case Type.Union.list:
           var elemType = t.list.elementType;
           if (elemType.which == Type.Union.@bool)
@@ -372,7 +374,8 @@ namespace {GetNamespace(node)}
                 || slot.type.which == Type.Union.@interface
                 || slot.type.which == Type.Union.list
                 || slot.type.which == Type.Union.text
-                || slot.type.which == Type.Union.data)
+                || slot.type.which == Type.Union.data
+                || slot.type.which == Type.Union.anyPointer)
           {
             yield return $@"
               {GetDocComment(field.annotations)}
@@ -380,16 +383,6 @@ namespace {GetNamespace(node)}
               {{
                 get {{ return _s.Dereference{accessor}({slot.offset}); }}
                 set {{ _s.WritePointer({slot.offset}, value); }}
-              }}";
-          }
-          else if (slot.type.which == Type.Union.anyPointer)
-          {
-            yield return $@"
-              {GetDocComment(field.annotations)}
-              public {type} {name}
-              {{
-                get {{ return _s.Read{accessor}({slot.offset}); }}
-                set {{ _s.Write{accessor}({slot.offset}, value); }}
               }}";
           }
           else
@@ -446,10 +439,19 @@ namespace {GetNamespace(node)}
       return groupName;
     }
 
+    private string GetTypeName(Superclass super) => this.GetTypeName(_request.nodes.First(n => n.id == super.id));
+
     private string GetTypeName(ulong typeId) => this.GetTypeName(_request.nodes.First(n => n.id == typeId));
 
-    private string GetTypeName(Node node) => _generator.IdentifierName(node.displayName.ToString().Substring((int)node.displayNamePrefixLength)).ToString();
-    
+    private string GetTypeName(Node node)
+    {
+      var nodeFullName = node.displayName.ToString();
+      var prefix = node.scopeId != 0
+        ? _request.nodes.First(n => n.id == node.scopeId).displayNamePrefixLength
+        : node.displayNamePrefixLength;
+      return _generator.IdentifierName(nodeFullName.Substring((int)prefix)).ToString();
+    }
+
     private string GetDefaultLiteral(Value val, bool leadingComma = true)
     {
       string ret;
