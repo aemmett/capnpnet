@@ -50,7 +50,7 @@ namespace CapnpNet.Test
       var ms2 = new MemoryStream();
       var rc = new RpcConnection();
       rc.Init(null, ms2, null);
-      rc.ProcessAsync(msg).Wait();
+      //rc.ProcessAsync(msg).Wait();
 
       ms2.Position = 0;
       var msg2 = Message.DecodeAsync(ms2).Result;

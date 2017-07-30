@@ -2,328 +2,6 @@ using CapnpNet;
 
 namespace CapnpNet.Schema
 {
-  public struct CodeGeneratorRequest : global::CapnpNet.IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 0;
-    public const int KNOWN_POINTER_WORDS = 3;
-    private global::CapnpNet.Struct _s;
-    public CodeGeneratorRequest(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public CodeGeneratorRequest(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public CodeGeneratorRequest(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public CodeGeneratorRequest(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public CapnpVersion capnpVersion
-    {
-      get { return _s.DereferenceStruct<CapnpVersion>(2); }
-      set { _s.WritePointer(2, value); }
-    }
-
-    public CompositeList<Node> nodes
-    {
-      get { return _s.DereferenceCompositeList<Node>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public CompositeList<RequestedFile> requestedFiles
-    {
-      get { return _s.DereferenceCompositeList<RequestedFile>(1); }
-      set { _s.WritePointer(1, value); }
-    }
-
-    public struct RequestedFile : global::CapnpNet.IStruct
-    {
-      public const int KNOWN_DATA_WORDS = 1;
-      public const int KNOWN_POINTER_WORDS = 2;
-      private global::CapnpNet.Struct _s;
-      public RequestedFile(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-      {
-      }
-
-      public RequestedFile(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-      {
-      }
-
-      public RequestedFile(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-      {
-      }
-
-      public RequestedFile(global::CapnpNet.Struct s) { _s = s; }
-      global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-      {
-        get { return _s; }
-        set { _s = value; }
-      }
-
-      public ulong id
-      {
-        get { return _s.ReadUInt64(0); }
-        set { _s.WriteUInt64(0, value); }
-      }
-
-      public Text filename
-      {
-        get { return _s.DereferenceText(0); }
-        set { _s.WritePointer(0, value); }
-      }
-
-      public CompositeList<Import> imports
-      {
-        get { return _s.DereferenceCompositeList<Import>(1); }
-        set { _s.WritePointer(1, value); }
-      }
-
-      public struct Import : global::CapnpNet.IStruct
-      {
-        public const int KNOWN_DATA_WORDS = 1;
-        public const int KNOWN_POINTER_WORDS = 1;
-        private global::CapnpNet.Struct _s;
-        public Import(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-        {
-        }
-
-        public Import(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-        {
-        }
-
-        public Import(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-        {
-        }
-
-        public Import(global::CapnpNet.Struct s) { _s = s; }
-        global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-        {
-          get { return _s; }
-          set { _s = value; }
-        }
-
-        public ulong id
-        {
-          get { return _s.ReadUInt64(0); }
-          set { _s.WriteUInt64(0, value); }
-        }
-
-        public Text name
-        {
-          get { return _s.DereferenceText(0); }
-          set { _s.WritePointer(0, value); }
-        }
-      }
-    }
-  }
-
-  public struct CapnpVersion : global::CapnpNet.IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 0;
-    private global::CapnpNet.Struct _s;
-    public CapnpVersion(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public CapnpVersion(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public CapnpVersion(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public CapnpVersion(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public ushort major
-    {
-      get { return _s.ReadUInt16(0); }
-      set { _s.WriteUInt16(0, value); }
-    }
-
-    public byte minor
-    {
-      get { return _s.ReadUInt8(2); }
-      set { _s.WriteUInt8(2, value); }
-    }
-
-    public byte micro
-    {
-      get { return _s.ReadUInt8(3); }
-      set { _s.WriteUInt8(3, value); }
-    }
-  }
-
-  public struct Value : global::CapnpNet.IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 2;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Value(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public Value(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Value(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Value(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public enum Union : ushort
-    {
-      @void = 0,
-      @bool = 1,
-      int8 = 2,
-      int16 = 3,
-      int32 = 4,
-      int64 = 5,
-      uint8 = 6,
-      uint16 = 7,
-      uint32 = 8,
-      uint64 = 9,
-      float32 = 10,
-      float64 = 11,
-      text = 12,
-      data = 13,
-      list = 14,
-      @enum = 15,
-      @struct = 16,
-      @interface = 17,
-      anyPointer = 18,
-    }
-
-    public Union which
-    {
-      get { return (Union)_s.ReadUInt16(0); }
-      set { _s.WriteUInt16(0, (ushort)value); }
-    }
-
-    public bool @bool
-    {
-      get { return _s.ReadBool(16); }
-      set { _s.WriteBool(16, value); }
-    }
-
-    public sbyte int8
-    {
-      get { return _s.ReadInt8(2); }
-      set { _s.WriteInt8(2, value); }
-    }
-
-    public short int16
-    {
-      get { return _s.ReadInt16(1); }
-      set { _s.WriteInt16(1, value); }
-    }
-
-    public int int32
-    {
-      get { return _s.ReadInt32(1); }
-      set { _s.WriteInt32(1, value); }
-    }
-
-    public long int64
-    {
-      get { return _s.ReadInt64(1); }
-      set { _s.WriteInt64(1, value); }
-    }
-
-    public byte uint8
-    {
-      get { return _s.ReadUInt8(2); }
-      set { _s.WriteUInt8(2, value); }
-    }
-
-    public ushort uint16
-    {
-      get { return _s.ReadUInt16(1); }
-      set { _s.WriteUInt16(1, value); }
-    }
-
-    public uint uint32
-    {
-      get { return _s.ReadUInt32(1); }
-      set { _s.WriteUInt32(1, value); }
-    }
-
-    public ulong uint64
-    {
-      get { return _s.ReadUInt64(1); }
-      set { _s.WriteUInt64(1, value); }
-    }
-
-    public float float32
-    {
-      get { return _s.ReadFloat32(1); }
-      set { _s.WriteFloat32(1, value); }
-    }
-
-    public double float64
-    {
-      get { return _s.ReadFloat64(1); }
-      set { _s.WriteFloat64(1, value); }
-    }
-
-    public Text text
-    {
-      get { return _s.DereferenceText(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public PrimitiveList<byte> data
-    {
-      get { return _s.DereferenceList<byte>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public AbsPointer list
-    {
-      get { return _s.DereferenceAbsPointer(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public ushort @enum
-    {
-      get { return _s.ReadUInt16(1); }
-      set { _s.WriteUInt16(1, value); }
-    }
-
-    public AbsPointer @struct
-    {
-      get { return _s.DereferenceAbsPointer(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public AbsPointer anyPointer
-    {
-      get { return _s.DereferenceAbsPointer(0); }
-      set { _s.WritePointer(0, value); }
-    }
-  }
-
   public struct Node : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 5;
@@ -627,6 +305,37 @@ namespace CapnpNet.Schema
       }
     }
 
+    public struct Parameter : global::CapnpNet.IStruct
+    {
+      public const int KNOWN_DATA_WORDS = 0;
+      public const int KNOWN_POINTER_WORDS = 1;
+      private global::CapnpNet.Struct _s;
+      public Parameter(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+      {
+      }
+
+      public Parameter(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+      {
+      }
+
+      public Parameter(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+      {
+      }
+
+      public Parameter(global::CapnpNet.Struct s) { _s = s; }
+      global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+      {
+        get { return _s; }
+        set { _s = value; }
+      }
+
+      public Text name
+      {
+        get { return _s.DereferenceText(0); }
+        set { _s.WritePointer(0, value); }
+      }
+    }
+
     public struct NestedNode : global::CapnpNet.IStruct
     {
       public const int KNOWN_DATA_WORDS = 1;
@@ -662,74 +371,6 @@ namespace CapnpNet.Schema
         get { return _s.ReadUInt64(0); }
         set { _s.WriteUInt64(0, value); }
       }
-    }
-
-    public struct Parameter : global::CapnpNet.IStruct
-    {
-      public const int KNOWN_DATA_WORDS = 0;
-      public const int KNOWN_POINTER_WORDS = 1;
-      private global::CapnpNet.Struct _s;
-      public Parameter(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-      {
-      }
-
-      public Parameter(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-      {
-      }
-
-      public Parameter(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-      {
-      }
-
-      public Parameter(global::CapnpNet.Struct s) { _s = s; }
-      global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-      {
-        get { return _s; }
-        set { _s = value; }
-      }
-
-      public Text name
-      {
-        get { return _s.DereferenceText(0); }
-        set { _s.WritePointer(0, value); }
-      }
-    }
-  }
-
-  public struct Superclass : global::CapnpNet.IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Superclass(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public Superclass(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Superclass(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Superclass(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public ulong id
-    {
-      get { return _s.ReadUInt64(0); }
-      set { _s.WriteUInt64(0, value); }
-    }
-
-    public Brand brand
-    {
-      get { return _s.DereferenceStruct<Brand>(0); }
-      set { _s.WritePointer(0, value); }
     }
   }
 
@@ -876,16 +517,157 @@ namespace CapnpNet.Schema
     public const ushort noDiscriminant = 65535;
   }
 
-  public enum ElementSize : ushort
+  public struct Enumerant : global::CapnpNet.IStruct
   {
-    empty = 0,
-    bit = 1,
-    @byte = 2,
-    twoBytes = 3,
-    fourBytes = 4,
-    eightBytes = 5,
-    pointer = 6,
-    inlineComposite = 7
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public Enumerant(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Enumerant(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Enumerant(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Enumerant(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+      set { _s = value; }
+    }
+
+    public Text name
+    {
+      get { return _s.DereferenceText(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public ushort codeOrder
+    {
+      get { return _s.ReadUInt16(0); }
+      set { _s.WriteUInt16(0, value); }
+    }
+
+    public CompositeList<Annotation> annotations
+    {
+      get { return _s.DereferenceCompositeList<Annotation>(1); }
+      set { _s.WritePointer(1, value); }
+    }
+  }
+
+  public struct Superclass : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Superclass(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Superclass(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Superclass(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Superclass(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+      set { _s = value; }
+    }
+
+    public ulong id
+    {
+      get { return _s.ReadUInt64(0); }
+      set { _s.WriteUInt64(0, value); }
+    }
+
+    public Brand brand
+    {
+      get { return _s.DereferenceStruct<Brand>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  public struct Method : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 3;
+    public const int KNOWN_POINTER_WORDS = 5;
+    private global::CapnpNet.Struct _s;
+    public Method(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Method(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Method(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Method(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+      set { _s = value; }
+    }
+
+    public Text name
+    {
+      get { return _s.DereferenceText(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public ushort codeOrder
+    {
+      get { return _s.ReadUInt16(0); }
+      set { _s.WriteUInt16(0, value); }
+    }
+
+    public CompositeList<Node.Parameter> implicitParameters
+    {
+      get { return _s.DereferenceCompositeList<Node.Parameter>(4); }
+      set { _s.WritePointer(4, value); }
+    }
+
+    public ulong paramStructType
+    {
+      get { return _s.ReadUInt64(1); }
+      set { _s.WriteUInt64(1, value); }
+    }
+
+    public Brand paramBrand
+    {
+      get { return _s.DereferenceStruct<Brand>(2); }
+      set { _s.WritePointer(2, value); }
+    }
+
+    public ulong resultStructType
+    {
+      get { return _s.ReadUInt64(2); }
+      set { _s.WriteUInt64(2, value); }
+    }
+
+    public Brand resultBrand
+    {
+      get { return _s.DereferenceStruct<Brand>(3); }
+      set { _s.WritePointer(3, value); }
+    }
+
+    public CompositeList<Annotation> annotations
+    {
+      get { return _s.DereferenceCompositeList<Annotation>(1); }
+      set { _s.WritePointer(1, value); }
+    }
   }
 
   public struct Type : global::CapnpNet.IStruct
@@ -1054,24 +836,24 @@ namespace CapnpNet.Schema
         implicitMethodParameter = 2,
       }
 
-      public bool Is(out unconstrainedGroup unconstrained)
+      public bool Is(out anyPointerGroup.unconstrainedGroup unconstrained)
       {
         var ret = this.which == Union.unconstrained;
-        unconstrained = new unconstrainedGroup(ret ? _s : default (global::CapnpNet.Struct));
+        unconstrained = new anyPointerGroup.unconstrainedGroup(ret ? _s : default (global::CapnpNet.Struct));
         return ret;
       }
 
-      public bool Is(out parameterGroup parameter)
+      public bool Is(out anyPointerGroup.parameterGroup parameter)
       {
         var ret = this.which == Union.parameter;
-        parameter = new parameterGroup(ret ? _s : default (global::CapnpNet.Struct));
+        parameter = new anyPointerGroup.parameterGroup(ret ? _s : default (global::CapnpNet.Struct));
         return ret;
       }
 
-      public bool Is(out implicitMethodParameterGroup implicitMethodParameter)
+      public bool Is(out anyPointerGroup.implicitMethodParameterGroup implicitMethodParameter)
       {
         var ret = this.which == Union.implicitMethodParameter;
-        implicitMethodParameter = new implicitMethodParameterGroup(ret ? _s : default (global::CapnpNet.Struct));
+        implicitMethodParameter = new anyPointerGroup.implicitMethodParameterGroup(ret ? _s : default (global::CapnpNet.Struct));
         return ret;
       }
 
@@ -1130,165 +912,6 @@ namespace CapnpNet.Schema
           set { _s.WriteUInt16(5, value); }
         }
       }
-    }
-  }
-
-  public struct Annotation : global::CapnpNet.IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 2;
-    private global::CapnpNet.Struct _s;
-    public Annotation(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public Annotation(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Annotation(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Annotation(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public ulong id
-    {
-      get { return _s.ReadUInt64(0); }
-      set { _s.WriteUInt64(0, value); }
-    }
-
-    public Brand brand
-    {
-      get { return _s.DereferenceStruct<Brand>(1); }
-      set { _s.WritePointer(1, value); }
-    }
-
-    public Value value
-    {
-      get { return _s.DereferenceStruct<Value>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-  }
-
-  public struct Enumerant : global::CapnpNet.IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 2;
-    private global::CapnpNet.Struct _s;
-    public Enumerant(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public Enumerant(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Enumerant(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Enumerant(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public Text name
-    {
-      get { return _s.DereferenceText(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public ushort codeOrder
-    {
-      get { return _s.ReadUInt16(0); }
-      set { _s.WriteUInt16(0, value); }
-    }
-
-    public CompositeList<Annotation> annotations
-    {
-      get { return _s.DereferenceCompositeList<Annotation>(1); }
-      set { _s.WritePointer(1, value); }
-    }
-  }
-
-  public struct Method : global::CapnpNet.IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 3;
-    public const int KNOWN_POINTER_WORDS = 5;
-    private global::CapnpNet.Struct _s;
-    public Method(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public Method(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Method(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Method(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public Text name
-    {
-      get { return _s.DereferenceText(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public ushort codeOrder
-    {
-      get { return _s.ReadUInt16(0); }
-      set { _s.WriteUInt16(0, value); }
-    }
-
-    public CompositeList<Node.Parameter> implicitParameters
-    {
-      get { return _s.DereferenceCompositeList<Node.Parameter>(4); }
-      set { _s.WritePointer(4, value); }
-    }
-
-    public ulong paramStructType
-    {
-      get { return _s.ReadUInt64(1); }
-      set { _s.WriteUInt64(1, value); }
-    }
-
-    public Brand paramBrand
-    {
-      get { return _s.DereferenceStruct<Brand>(2); }
-      set { _s.WritePointer(2, value); }
-    }
-
-    public ulong resultStructType
-    {
-      get { return _s.ReadUInt64(2); }
-      set { _s.WriteUInt64(2, value); }
-    }
-
-    public Brand resultBrand
-    {
-      get { return _s.DereferenceStruct<Brand>(3); }
-      set { _s.WritePointer(3, value); }
-    }
-
-    public CompositeList<Annotation> annotations
-    {
-      get { return _s.DereferenceCompositeList<Annotation>(1); }
-      set { _s.WritePointer(1, value); }
     }
   }
 
@@ -1418,6 +1041,383 @@ namespace CapnpNet.Schema
       {
         get { return _s.DereferenceStruct<Type>(0); }
         set { _s.WritePointer(0, value); }
+      }
+    }
+  }
+
+  public struct Value : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 2;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Value(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Value(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Value(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Value(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+      set { _s = value; }
+    }
+
+    public enum Union : ushort
+    {
+      @void = 0,
+      @bool = 1,
+      int8 = 2,
+      int16 = 3,
+      int32 = 4,
+      int64 = 5,
+      uint8 = 6,
+      uint16 = 7,
+      uint32 = 8,
+      uint64 = 9,
+      float32 = 10,
+      float64 = 11,
+      text = 12,
+      data = 13,
+      list = 14,
+      @enum = 15,
+      @struct = 16,
+      @interface = 17,
+      anyPointer = 18,
+    }
+
+    public Union which
+    {
+      get { return (Union)_s.ReadUInt16(0); }
+      set { _s.WriteUInt16(0, (ushort)value); }
+    }
+
+    public bool @bool
+    {
+      get { return _s.ReadBool(16); }
+      set { _s.WriteBool(16, value); }
+    }
+
+    public sbyte int8
+    {
+      get { return _s.ReadInt8(2); }
+      set { _s.WriteInt8(2, value); }
+    }
+
+    public short int16
+    {
+      get { return _s.ReadInt16(1); }
+      set { _s.WriteInt16(1, value); }
+    }
+
+    public int int32
+    {
+      get { return _s.ReadInt32(1); }
+      set { _s.WriteInt32(1, value); }
+    }
+
+    public long int64
+    {
+      get { return _s.ReadInt64(1); }
+      set { _s.WriteInt64(1, value); }
+    }
+
+    public byte uint8
+    {
+      get { return _s.ReadUInt8(2); }
+      set { _s.WriteUInt8(2, value); }
+    }
+
+    public ushort uint16
+    {
+      get { return _s.ReadUInt16(1); }
+      set { _s.WriteUInt16(1, value); }
+    }
+
+    public uint uint32
+    {
+      get { return _s.ReadUInt32(1); }
+      set { _s.WriteUInt32(1, value); }
+    }
+
+    public ulong uint64
+    {
+      get { return _s.ReadUInt64(1); }
+      set { _s.WriteUInt64(1, value); }
+    }
+
+    public float float32
+    {
+      get { return _s.ReadFloat32(1); }
+      set { _s.WriteFloat32(1, value); }
+    }
+
+    public double float64
+    {
+      get { return _s.ReadFloat64(1); }
+      set { _s.WriteFloat64(1, value); }
+    }
+
+    public Text text
+    {
+      get { return _s.DereferenceText(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public PrimitiveList<byte> data
+    {
+      get { return _s.DereferenceList<byte>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public AbsPointer list
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public ushort @enum
+    {
+      get { return _s.ReadUInt16(1); }
+      set { _s.WriteUInt16(1, value); }
+    }
+
+    public AbsPointer @struct
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public AbsPointer anyPointer
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  public struct Annotation : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public Annotation(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Annotation(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Annotation(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Annotation(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+      set { _s = value; }
+    }
+
+    public ulong id
+    {
+      get { return _s.ReadUInt64(0); }
+      set { _s.WriteUInt64(0, value); }
+    }
+
+    public Brand brand
+    {
+      get { return _s.DereferenceStruct<Brand>(1); }
+      set { _s.WritePointer(1, value); }
+    }
+
+    public Value value
+    {
+      get { return _s.DereferenceStruct<Value>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  public enum ElementSize : ushort
+  {
+    empty = 0,
+    bit = 1,
+    @byte = 2,
+    twoBytes = 3,
+    fourBytes = 4,
+    eightBytes = 5,
+    pointer = 6,
+    inlineComposite = 7
+  }
+
+  public struct CapnpVersion : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 0;
+    private global::CapnpNet.Struct _s;
+    public CapnpVersion(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public CapnpVersion(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public CapnpVersion(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public CapnpVersion(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+      set { _s = value; }
+    }
+
+    public ushort major
+    {
+      get { return _s.ReadUInt16(0); }
+      set { _s.WriteUInt16(0, value); }
+    }
+
+    public byte minor
+    {
+      get { return _s.ReadUInt8(2); }
+      set { _s.WriteUInt8(2, value); }
+    }
+
+    public byte micro
+    {
+      get { return _s.ReadUInt8(3); }
+      set { _s.WriteUInt8(3, value); }
+    }
+  }
+
+  public struct CodeGeneratorRequest : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 0;
+    public const int KNOWN_POINTER_WORDS = 3;
+    private global::CapnpNet.Struct _s;
+    public CodeGeneratorRequest(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public CodeGeneratorRequest(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public CodeGeneratorRequest(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public CodeGeneratorRequest(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+      set { _s = value; }
+    }
+
+    public CapnpVersion capnpVersion
+    {
+      get { return _s.DereferenceStruct<CapnpVersion>(2); }
+      set { _s.WritePointer(2, value); }
+    }
+
+    public CompositeList<Node> nodes
+    {
+      get { return _s.DereferenceCompositeList<Node>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public CompositeList<RequestedFile> requestedFiles
+    {
+      get { return _s.DereferenceCompositeList<RequestedFile>(1); }
+      set { _s.WritePointer(1, value); }
+    }
+
+    public struct RequestedFile : global::CapnpNet.IStruct
+    {
+      public const int KNOWN_DATA_WORDS = 1;
+      public const int KNOWN_POINTER_WORDS = 2;
+      private global::CapnpNet.Struct _s;
+      public RequestedFile(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+      {
+      }
+
+      public RequestedFile(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+      {
+      }
+
+      public RequestedFile(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+      {
+      }
+
+      public RequestedFile(global::CapnpNet.Struct s) { _s = s; }
+      global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+      {
+        get { return _s; }
+        set { _s = value; }
+      }
+
+      public ulong id
+      {
+        get { return _s.ReadUInt64(0); }
+        set { _s.WriteUInt64(0, value); }
+      }
+
+      public Text filename
+      {
+        get { return _s.DereferenceText(0); }
+        set { _s.WritePointer(0, value); }
+      }
+
+      public CompositeList<Import> imports
+      {
+        get { return _s.DereferenceCompositeList<Import>(1); }
+        set { _s.WritePointer(1, value); }
+      }
+
+      public struct Import : global::CapnpNet.IStruct
+      {
+        public const int KNOWN_DATA_WORDS = 1;
+        public const int KNOWN_POINTER_WORDS = 1;
+        private global::CapnpNet.Struct _s;
+        public Import(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+        {
+        }
+
+        public Import(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+        {
+        }
+
+        public Import(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+        {
+        }
+
+        public Import(global::CapnpNet.Struct s) { _s = s; }
+        global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+        {
+          get { return _s; }
+          set { _s = value; }
+        }
+
+        public ulong id
+        {
+          get { return _s.ReadUInt64(0); }
+          set { _s.WriteUInt64(0, value); }
+        }
+
+        public Text name
+        {
+          get { return _s.DereferenceText(0); }
+          set { _s.WritePointer(0, value); }
+        }
       }
     }
   }

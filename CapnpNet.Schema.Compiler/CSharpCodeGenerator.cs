@@ -1,12 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Editing;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Options;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CapnpNet.Schema.Compiler
 {
@@ -24,7 +22,37 @@ namespace CapnpNet.Schema.Compiler
     private readonly CodeGeneratorRequest _request;
     private readonly SyntaxGenerator _generator;
 
-    private Stack<string> _nodePath = new Stack<string>();
+    private Dictionary<ulong, TypeName> _typeNames = new Dictionary<ulong, TypeName>();
+
+    private sealed class TypeName
+    {
+      public TypeName(string name, string identifier, TypeName parent)
+      {
+        this.Name = name;
+        this.Identifier = identifier;
+        this.Parent = parent;
+      }
+
+      public string Name { get; }
+      public string Identifier { get; }
+      public TypeName Parent { get; }
+
+      public TypeName GetCommonParent(TypeName targetName)
+      {
+        if (targetName == null) return null;
+        
+        while (targetName != null)
+        {
+          if (targetName == this) return this;
+
+          targetName = targetName.Parent;
+        }
+
+        return this.Parent?.GetCommonParent(targetName);
+      }
+
+      public override string ToString() => $"{this.Parent?.ToString()}.{this.Name}";
+    }
 
     public CSharpCodeGenerator(CodeGeneratorRequest request)
       : this(request, "Schema")
@@ -36,13 +64,12 @@ namespace CapnpNet.Schema.Compiler
       _request = request;
       this.DefaultNamespace = defaultNamespace;
       _generator = SyntaxGenerator.GetGenerator(new AdhocWorkspace(), LanguageNames.CSharp);
-      
     }
-
-    public IEnumerable<string> NodePath => _nodePath;
-
+    
     public string DefaultNamespace { get; set; }
     public OptionKey CSharpFormattingOption { get; private set; }
+
+    private Node this[ulong id] => _request.nodes.First(n => n.id == id);
 
     public IReadOnlyDictionary<string, string> GenerateSources()
     {
@@ -50,24 +77,45 @@ namespace CapnpNet.Schema.Compiler
         .Select(f => new
         {
           name = Path.GetFileNameWithoutExtension(f.filename.ToString()),
-          content = this.GenerateContent(f),
+          content = this.GenerateFile(f),
         })
         .ToDictionary(
           x => x.name,
           x => x.content);
     }
 
-    private string GenerateContent(CodeGeneratorRequest.RequestedFile file)
+    private void BuildNames(TypeName parent, Node node, string name)
     {
-      var node = _request.nodes.First(n => n.id == file.id);
+      var typeName = new TypeName(name, _generator.IdentifierName(name).ToString(), parent);
+      _typeNames.Add(node.id, typeName);
 
-      if (node.which != Node.Union.file) throw new InvalidOperationException("Expected file node");
+      if (node.Is(out Node.structGroup @struct))
+      {
+        foreach (var groupField in @struct.fields.Where(f => f.which == Field.Union.group))
+        {
+          this.BuildNames(typeName, this[groupField.group.typeId], $"{groupField.name.ToString()}Group");
+        }
+      }
 
+      foreach (var nn in node.nestedNodes)
+      {
+        this.BuildNames(typeName, this[nn.id], nn.name.ToString());
+      }
+    }
+
+    private string GenerateFile(CodeGeneratorRequest.RequestedFile file)
+    {
+      var node = this[file.id];
+
+      var @namespace = this.GetNamespace(node);
+
+      this.BuildNames(null, node, "global::" + @namespace);
+      
       var src = $@"using CapnpNet;
 
-namespace {GetNamespace(node)}
+namespace {@namespace}
 {{
-  {string.Join("\n", GenerateTypesUnder(node))}
+  {string.Join("\n", node.nestedNodes.SelectMany(this.GenerateNode))}
 }}
 ";
       var tree = SyntaxFactory.ParseSyntaxTree(src);
@@ -76,141 +124,111 @@ namespace {GetNamespace(node)}
       return new WhitespaceRewriter().Visit(root).ToString();
     }
 
-    private class WhitespaceRewriter : CSharpSyntaxRewriter
+    private IEnumerable<string> GenerateNode(Node.NestedNode nestedNode)
     {
-      public override SyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
-      {
-        node = node.ReplaceNode(node.ParameterList, node.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));
-        return base.VisitConstructorDeclaration(node);
-      }
-
-      public override SyntaxNode VisitBlock(BlockSyntax node)
-      {
-        if (node.Statements.Count == 1
-          /*&& (node.Parent is ConstructorDeclarationSyntax
-            || node.Parent is AccessorDeclarationSyntax
-            || node.Parent is MethodDeclarationSyntax)*/)
-        {
-          node = node.ReplaceToken(node.OpenBraceToken, node.OpenBraceToken.WithoutTrivia());
-          node = node.ReplaceToken(node.CloseBraceToken, node.CloseBraceToken
-            .WithLeadingTrivia()
-            .WithTrailingTrivia(node.CloseBraceToken.TrailingTrivia.Last()));
-          node = node.ReplaceNode(node.Statements[0], node.Statements[0]
-            .WithLeadingTrivia(SyntaxFactory.Space)
-            .WithTrailingTrivia(SyntaxFactory.Space));
-        }
-
-        return node;
-      }
-
-      public override SyntaxNode VisitAccessorDeclaration(AccessorDeclarationSyntax node)
-      {
-        node = node.ReplaceToken(node.Keyword, node.Keyword
-          .WithLeadingTrivia(node.Keyword.LeadingTrivia.First())
-          .WithTrailingTrivia(SyntaxFactory.Space));
-        return base.VisitAccessorDeclaration(node);
-      }
+      return this.GenerateNode(this[nestedNode.id]);
     }
 
-    private IEnumerable<string> GenerateTypesUnder(Node parent)
+    private IEnumerable<string> GenerateNode(Node node)
     {
-      foreach (var node in _request.nodes.Where(n => n.scopeId == parent.id
-          && (n.which != Node.Union.@struct || n.@struct.isGroup == false)))
-      {
-        _nodePath.Push(node.displayName.ToString());
-        yield return GenerateType(node);
-        _nodePath.Pop();
-      }
+      var typeName = _typeNames[node.id];
+      return node.which == Node.Union.@struct ? this.GenerateStruct(typeName, node)
+        : node.which == Node.Union.@enum ? this.GenerateEnum(typeName, node)
+        : node.which == Node.Union.@interface ? this.GenerateInterface(typeName, node)
+        : node.which == Node.Union.@const ? this.GenerateConst(typeName, node)
+        : node.which == Node.Union.annotation ? this.GenerateAnnotation(typeName, node)
+        : null;
     }
 
-    private string GenerateType(Node node)
+    private IEnumerable<string> GenerateStruct(TypeName name, Node node)
     {
-      var name = _generator.IdentifierName(node.displayName.ToString().Substring((int)node.displayNamePrefixLength)).ToString();
+      var s = node.@struct;
 
-      if (node.Is(out Node.structGroup s))
-      {
-        return $@"
-          {GetDocComment(node)}
-          public struct {name} : {CnNamespace}.IStruct
-          {{
-            public const int KNOWN_DATA_WORDS = {s.dataWordCount.ToString()};
-            public const int KNOWN_POINTER_WORDS = {s.pointerCount.ToString()};
-            private {StructType} _s;
-            public {name}(ref {CnNamespace}.AllocationContext allocContext) : this(allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)) {{ }}
-            public {name}({MessageType} m) : this(m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS) {{ }}
-            public {name}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWords, pointers)) {{ }}
-            public {name}({StructType} s) {{ _s = s; }}
+      yield return $@"
+        {GetDocComment(node)}
+        public struct {name.Identifier} : {CnNamespace}.IStruct
+        {{
+          public const int KNOWN_DATA_WORDS = {s.dataWordCount.ToString()};
+          public const int KNOWN_POINTER_WORDS = {s.pointerCount.ToString()};
+          private {StructType} _s;
+          public {name.Identifier}(ref {CnNamespace}.AllocationContext allocContext) : this(allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)) {{ }}
+          public {name.Identifier}({MessageType} m) : this(m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS) {{ }}
+          public {name.Identifier}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWords, pointers)) {{ }}
+          public {name.Identifier}({StructType} s) {{ _s = s; }}
 
-            {StructType} {CnNamespace}.IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}
+          {StructType} {CnNamespace}.IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}";
 
-            {string.Join("\n", GenerateMembers(s))}
+      foreach (var code in this.GenerateMembers(name, s))
+      {
+        yield return code;
+      }
 
-            {string.Join("\n", GenerateTypesUnder(node))}
-          }}";
-      }
-      else if (node.Is(out Node.enumGroup @enum))
+      foreach (var code in node.nestedNodes.SelectMany(this.GenerateNode))
       {
-        return $@"
-          {GetDocComment(node)}
-          public enum {name} : ushort
-          {{
-            {string.Join(",\n", @enum.enumerants
-              .Select((e, i) => new { e.codeOrder, ordinal = i, enumerant = e })
-              .OrderBy(e => e.codeOrder)
-              .Select(e => $@"
-                {GetDocComment(e.enumerant.annotations)}
-                {ToName(e.enumerant.name)} = {e.ordinal}"))}
-          }}";
+        yield return code;
       }
-      else if (node.Is(out Node.interfaceGroup i))
-      {
-        return $@"
-          {this.GetDocComment(node)}
-          public interface {name} {this.GetSupertypes(i.superclasses)}
-          {{
-            {string.Join("\n", GenerateMethods(i.methods))}
-          }}";
-      }
-      else if (node.Is(out Node.constGroup c))
-      {
-        this.GetTypeInfo(c.type, out var type, out var accessor);
-        return $@"
-          {this.GetDocComment(node)}
-          public const {type} {name} = {this.GetDefaultLiteral(c.value, false)};";
-      }
-      else
-      {
-        throw new InvalidOperationException($"Unexpected node: {node.which}");
-      }
+
+      yield return "}";
     }
 
-    private IEnumerable<string> GenerateMethods(CompositeList<Method> methods)
+    private IEnumerable<string> GenerateEnum(TypeName name, Node node)
     {
+      var @enum = node.@enum;
+      yield return $@"
+        {GetDocComment(node)}
+        public enum {name.Identifier} : ushort
+        {{
+          {string.Join(",\n", @enum.enumerants
+            .Select((e, i) => new { e.codeOrder, ordinal = i, enumerant = e })
+            .OrderBy(e => e.codeOrder)
+            .Select(e => $@"
+              {GetDocComment(e.enumerant.annotations)}
+              {ToName(e.enumerant.name)} = {e.ordinal}"))}
+        }}";
+    }
+
+    private IEnumerable<string> GenerateInterface(TypeName name, Node node)
+    {
+      var i = node.@interface;
+      yield return $@"
+        {this.GetDocComment(node)}
+        public interface {name.Identifier} {GetSupertypes(i.superclasses)}
+        {{";
+      
       var ordinal = 0;
-      foreach (var method in methods.OrderBy(m => m.codeOrder))
+      foreach (var method in i.methods.OrderBy(m => m.codeOrder))
       {
-        _nodePath.Push(method.name.ToString());
         yield return $@"
           {GetDocComment(method.annotations)}
           [Ordinal({ordinal})]
-          {this.GetTypeName(method.resultStructType)} {_generator.IdentifierName(method.name.ToString())}";
+          {this.GetTypeName(name, method.resultStructType)} {_generator.IdentifierName(method.name.ToString())}";
         ordinal++;
-        _nodePath.Pop();
+      }
+
+      yield return "}}";
+
+      string GetSupertypes(CompositeList<Superclass> extends)
+      {
+        var names = string.Join(", ", extends.Select(e => this.GetTypeName(name.Parent, e)));
+        return string.IsNullOrEmpty(names) ? string.Empty : " : " + names;
       }
     }
 
-    private string GetSupertypes(CompositeList<Superclass> extends)
+    private IEnumerable<string> GenerateConst(TypeName name, Node node)
     {
-      var names = string.Join(", ", extends.Select(this.GetTypeName));
-      return string.IsNullOrEmpty(names) ? string.Empty : " : " + names;
+      var c = node.@const;
+      this.GetTypeInfo(name.Parent, c.type, out var type, out var accessor);
+      yield return $@"
+        {this.GetDocComment(node)}
+        public const {type} {name.Identifier} = {this.GetDefaultLiteral(c.value, false)};";
     }
 
-    private IEnumerable<string> GenerateMembers(ulong typeId)
+    private IEnumerable<string> GenerateAnnotation(TypeName name, Node node)
     {
-      return this.GenerateMembers(_request.nodes.First(n => n.id == typeId && n.which == Node.Union.@struct).@struct);
+      yield break;
     }
-
-    private void GetTypeInfo(Type t, out string type, out string accessor)
+    
+    private void GetTypeInfo(TypeName container, Type t, out string type, out string accessor)
     {
       switch (t.which)
       {
@@ -240,20 +258,20 @@ namespace {GetNamespace(node)}
            && elemType.which <= Type.Union.float64)
           {
             string elemTypeName, elemAccessor;
-            this.GetTypeInfo(elemType, out elemTypeName, out elemAccessor);
+            this.GetTypeInfo(container, elemType, out elemTypeName, out elemAccessor);
             type = $"PrimitiveList<{elemTypeName}>";
             accessor = $"List<{elemTypeName}>";
           }
           else if (elemType.which == Type.Union.@enum)
           {
-            type = this.GetTypeName(elemType.@enum.typeId);
+            type = this.GetTypeName(container, elemType.@enum.typeId);
             accessor = "UInt16";
           }
           else if (elemType.which >= Type.Union.text
                 && elemType.which <= Type.Union.@interface)
           {
             string elemTypeName, elemAccessor;
-            this.GetTypeInfo(elemType, out elemTypeName, out elemAccessor);
+            this.GetTypeInfo(container, elemType, out elemTypeName, out elemAccessor);
             type = $"CompositeList<{elemTypeName}>";
             accessor = $"CompositeList<{elemTypeName}>";
           }
@@ -262,28 +280,28 @@ namespace {GetNamespace(node)}
             type = "Pointer";
             accessor = "RawPointer";
           }
-          else throw new InvalidOperationException($"Unexpected element type {elemType.which}");
+          else throw new System.InvalidOperationException($"Unexpected element type {elemType.which}");
           break;
         case Type.Union.@enum:
-          type = this.GetTypeName(t.@enum.typeId);
+          type = this.GetTypeName(container, t.@enum.typeId);
           accessor = "UInt16";
           break;
         case Type.Union.@struct:
-          type = this.GetTypeName(t.@struct.typeId);
+          type = this.GetTypeName(container, t.@struct.typeId);
           accessor = $"Struct<{type}>";
           break;
         case Type.Union.@interface:
-          type = this.GetTypeName(t.@interface.typeId);
+          type = this.GetTypeName(container, t.@interface.typeId);
           accessor = $"Interface<{type}>";
           break;
         default:
-          throw new InvalidOperationException($"Unexpected type {t.which}");
+          throw new System.InvalidOperationException($"Unexpected type {t.which}");
       }
     }
 
     private string ToName(Text name) => _generator.IdentifierName(name.ToString()).ToString();
 
-    private IEnumerable<string> GenerateMembers(Node.structGroup s)
+    private IEnumerable<string> GenerateMembers(TypeName container, Node.structGroup s)
     {
       if (s.discriminantCount > 0)
       {
@@ -294,26 +312,12 @@ namespace {GetNamespace(node)}
         yield return $@"
           public enum Union : ushort
           {{
-            {string.Join("\n", unionFieldList.Select(f => $"{ToName(f.name)} = {f.discriminantValue},"))}
+            {string.Join("\n", unionFieldList.Select(f => $"{this.ToName(f.name)} = {f.discriminantValue},"))}
           }}";
-        var complexUnionMembers = unionFieldList
-          .Where(f => f.which == Field.Union.group)
-          .Select(f =>
-          (
-            discriminantName: ToName(f.name),
-            type: ToGroupName(this.GetTypeName(f.group.typeId))
-          ))
-          .Union(unionFieldList
-            .Where(f => f.Is(out Field.slotGroup slot) && slot.type.which == Type.Union.@struct)
-            .Select(f =>
-            (
-              discriminantName: ToName(f.name),
-              type: this.GetTypeName(f.slot.type.@struct.typeId)
-            )));
         foreach (var field in unionFieldList.Where(f => f.which == Field.Union.group))
         {
           var discriminantName = this.ToName(field.name);
-          var type = ToGroupName(this.GetTypeName(field.group.typeId));
+          var type = this.GetTypeName(container, field.group.typeId);
           var returnValueName = discriminantName == "ret" ? "ret1" : "ret";
           yield return $@"
             public bool Is(out {type} {discriminantName})
@@ -327,7 +331,7 @@ namespace {GetNamespace(node)}
             .Where(f => f.Is(out Field.slotGroup slot) && slot.type.which == Type.Union.@struct))
         {
           var discriminantName = this.ToName(field.name);
-          var type = this.GetTypeName(field.slot.type.@struct.typeId);
+          var type = this.GetTypeName(container, field.slot.type.@struct.typeId);
           var returnValueName = discriminantName == "ret" ? "ret1" : "ret";
           yield return $@"
             public bool Is(out {type} {discriminantName})
@@ -348,18 +352,16 @@ namespace {GetNamespace(node)}
       foreach (var field in s.fields.OrderBy(f => f.codeOrder))
       {
         var name = ToName(field.name);
-        _nodePath.Push(name);
         if (field.which == Field.Union.slot)
         {
           var slot = field.slot;
           if (slot.type.which == Type.Union.@void)
           {
-            _nodePath.Pop();
             continue;
           }
 
           string type, accessor;
-          this.GetTypeInfo(slot.type, out type, out accessor);
+          this.GetTypeInfo(container, slot.type, out type, out accessor);
           if (slot.type.which == Type.Union.@enum)
           {
             yield return $@"
@@ -398,7 +400,7 @@ namespace {GetNamespace(node)}
         }
         else if (field.which == Field.Union.group)
         {
-          string groupName = ToGroupName(name);
+          string groupName = _typeNames[field.group.typeId].Identifier;
 
           yield return $@"
             {GetDocComment(field.annotations)}
@@ -408,7 +410,9 @@ namespace {GetNamespace(node)}
               private readonly {StructType} _s;
               public {groupName}({StructType} s) {{ _s = s; }}
             ";
-          foreach (var member in this.GenerateMembers(field.group.typeId))
+          foreach (var member in this.GenerateMembers(
+            container,
+            _request.nodes.First(n => n.id == field.group.typeId && n.which == Node.Union.@struct).@struct))
           {
             yield return member;
           }
@@ -417,39 +421,36 @@ namespace {GetNamespace(node)}
         }
         else
         {
-          throw new InvalidOperationException($"Unexpected field type {field.which}");
+          throw new System.InvalidOperationException($"Unexpected field type {field.which}");
         }
-
-        _nodePath.Pop();
       }
     }
+    
+    private string GetTypeName(TypeName container, Superclass super) => this.GetTypeName(container, super.id);
 
-    private static string ToGroupName(string name)
+    private string GetTypeName(TypeName container, Node node) => this.GetTypeName(container, node.id);
+
+    private string GetTypeName(TypeName container, ulong typeId)
     {
-      var groupName = name.TrimStart('@');
-      //if (groupName[0] >= 'a' && groupName[0] <= 'z')
-      //{
-      //  groupName = char.ToUpperInvariant(groupName[0]) + groupName.Substring(1);
-      //}
-      //else
+      var targetName = _typeNames[typeId];
+      var name = targetName.Identifier;
+
+      var importedNames = new List<TypeName>();
+      var parent = container;
+      while (parent != null)
       {
-        groupName += "Group";
+        importedNames.Add(parent);
+        parent = parent.Parent;
       }
 
-      return groupName;
-    }
+      parent = targetName.Parent;
+      while (importedNames.Contains(parent) == false)
+      {
+        name = $"{parent.Identifier}.{name}";
+        parent = parent.Parent;
+      }
 
-    private string GetTypeName(Superclass super) => this.GetTypeName(_request.nodes.First(n => n.id == super.id));
-
-    private string GetTypeName(ulong typeId) => this.GetTypeName(_request.nodes.First(n => n.id == typeId));
-
-    private string GetTypeName(Node node)
-    {
-      var nodeFullName = node.displayName.ToString();
-      var prefix = node.scopeId != 0
-        ? _request.nodes.First(n => n.id == node.scopeId).displayNamePrefixLength
-        : node.displayNamePrefixLength;
-      return _generator.IdentifierName(nodeFullName.Substring((int)prefix)).ToString();
+      return name;
     }
 
     private string GetDefaultLiteral(Value val, bool leadingComma = true)
@@ -467,7 +468,7 @@ namespace {GetNamespace(node)}
       else if (val.which == Value.Union.float32) ret = val.float32 != 0 ? SyntaxFactory.Literal(val.float32).ToString() : null;
       else if (val.which == Value.Union.float64) ret = val.float64 != 0 ? SyntaxFactory.Literal(val.float64).ToString() : null;
       else if (val.which == Value.Union.@enum)   ret = val.@enum != 0 ? SyntaxFactory.Literal(val.@enum).ToString() : null;
-      else throw new ArgumentException($"Value not a primitive type: {val.which}");
+      else throw new System.ArgumentException($"Value not a primitive type: {val.which}");
       
       return ret == null ? string.Empty
         : leadingComma ? ", " + ret

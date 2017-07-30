@@ -149,8 +149,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CSharpCodeGenerator.cs" />
+    <Compile Include="CSharpCodeGenerator2.cs" />
+    <Compile Include="FormattableStringUtilties.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WhitespaceRewriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
