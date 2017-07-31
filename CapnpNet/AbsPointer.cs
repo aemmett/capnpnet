@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -35,6 +36,15 @@ namespace CapnpNet
       }
     }
 
+    internal ref ulong Data
+    {
+      get
+      {
+        Debug.Assert(this.IsIndirect == false);
+        return ref _segment[this.DataOffset | Word.unit];
+      }
+    }
+
     public static implicit operator AbsPointer(OtherPointer op) => new AbsPointer(null, 0, op);
 
     public bool Is<T>(out T @struct) where T : struct, IStruct
@@ -43,7 +53,7 @@ namespace CapnpNet
       {
         @struct = new T
         {
-          Struct = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords, 0)
+          Struct = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords)
         };
         return true;
       }
@@ -56,7 +66,7 @@ namespace CapnpNet
     {
       if (this.Tag.Type == PointerType.Struct)
       {
-        @struct = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords, 0);
+        @struct = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords);
         return true;
       }
 
@@ -132,7 +142,7 @@ namespace CapnpNet
 
       if (this.Tag.Is(out StructPointer sptr))
       {
-        var srcStruct = new Struct(this.Segment, dataOffset, sptr.DataWords, sptr.PointerWords, 0);
+        var srcStruct = new Struct(this.Segment, dataOffset, sptr.DataWords, sptr.PointerWords);
         var dstStruct = srcStruct.CopyTo(dest);
         return dstStruct.ToAbsPointer();
       }

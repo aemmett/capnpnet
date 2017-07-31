@@ -41,7 +41,7 @@ namespace CapnpNet
 
       if (savedWords == 0) return false;
 
-      var newStruct = new Struct(s.Segment, s.StructWordOffset, dw, pw, 0);
+      var newStruct = new Struct(s.Segment, s.StructWordOffset, dw, pw);
 
       var pointerShift = s.DataWords - dw;
       if (pointerShift > 0)
@@ -80,7 +80,7 @@ namespace CapnpNet
     private readonly Segment _segment;
     private readonly int _structWordOffset; // in the encoding spec, technically this is a uint, but currently I bottom out at an API that uses int :(
     private readonly ushort _dataWords, _pointerWords;
-    private readonly byte _upgradedListElementByteOffset; // FIXME seems like this will have trouble detecting first element in a word
+    private readonly sbyte _upgradedListElementByteOffset;
 
     public static bool operator ==(Struct a, Struct b)
     {
@@ -105,12 +105,11 @@ namespace CapnpNet
           segment,
           pointerOffset + pointer.WordOffset,
           pointer.DataWords,
-          pointer.PointerWords,
-          0)
+          pointer.PointerWords)
     {
     }
 
-    public Struct(Segment segment, int structWordOffset, ushort dataWords, ushort pointerWords, byte upgradedListElementSize)
+    public Struct(Segment segment, int structWordOffset, ushort dataWords, ushort pointerWords, sbyte upgradedListElementSize = -1)
     {
       _segment = segment;
       _structWordOffset = structWordOffset;
@@ -240,7 +239,7 @@ namespace CapnpNet
       Check.Positive(pointerIndex);
 
       // TODO: how to handle default?
-      if (_upgradedListElementByteOffset > 0 || pointerIndex >= this.PointerWords) return new Pointer();
+      if (pointerIndex >= this.PointerWords) return new Pointer();
 
       return this.Pointer(pointerIndex);
     }
@@ -351,7 +350,7 @@ namespace CapnpNet
 
     public T ReadInterface<T>(int pointerIndex) where T : ICapability
     {
-      if (_upgradedListElementByteOffset > 0 || pointerIndex >= this.PointerWords)
+      if (pointerIndex >= this.PointerWords)
       {
         return default(T);
       }
@@ -366,7 +365,7 @@ namespace CapnpNet
     {
       Check.Positive(pointerIndex);
 
-      if (_upgradedListElementByteOffset > 0 || pointerIndex >= this.PointerWords)
+      if (pointerIndex >= this.PointerWords)
       {
         pointer = default(Pointer);
         baseOffset = 0;
@@ -398,7 +397,7 @@ namespace CapnpNet
     {
       Check.Positive(index);
 
-      if (_upgradedListElementByteOffset > 0)
+      if (_upgradedListElementByteOffset >= 0)
       {
         // this is a list element upgraded to a struct; only the first field is present
         if (index > 0) return default(T);
@@ -431,7 +430,7 @@ namespace CapnpNet
     public bool ReadBool(int index, bool defaultValue = false)
     {
       // bool list elements can't be upgraded to struct
-      if (_upgradedListElementByteOffset > 0) return defaultValue;
+      if (_upgradedListElementByteOffset >= 0) return defaultValue;
 
       var wordIndex = index >> 6;
       if (wordIndex >= this.DataWords) return defaultValue;
@@ -648,9 +647,11 @@ namespace CapnpNet
     private void Write<T>(int index, T value)
       where T : struct
     {
-      if (_upgradedListElementByteOffset > 0 && index > 0)
+      if (_upgradedListElementByteOffset >= 0)
       {
-        throw new InvalidOperationException("Cannot write to struct from a non-composite list");
+        if (index > 0) throw new InvalidOperationException("Cannot write to struct from a non-composite list");
+
+        Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + _upgradedListElementByteOffset | Byte.unit]) = value;
       }
       
       Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + index * Unsafe.SizeOf<T>() | Byte.unit]) = value;
@@ -670,7 +671,7 @@ namespace CapnpNet
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteBool(int index, bool value, bool defaultValue = false)
     {
-      if (_upgradedListElementByteOffset > 0 && index > 0)
+      if (_upgradedListElementByteOffset >= 0 && index > 0)
       {
         throw new InvalidOperationException("Cannot write to struct from a non-composite list");
       }

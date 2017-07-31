@@ -153,7 +153,7 @@ namespace CapnpNet
     public Struct Allocate(ushort dataWords, ushort pointerWords)
     {
       this.Allocate(dataWords + pointerWords, out int offset, out Segment segment);
-      return new Struct(segment, offset, dataWords, pointerWords, 0);
+      return new Struct(segment, offset, dataWords, pointerWords);
     }
 
     public void Allocate(int words, out int offset, out Segment segment)

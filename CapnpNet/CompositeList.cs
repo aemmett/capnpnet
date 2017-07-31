@@ -35,7 +35,7 @@ namespace CapnpNet
 
       var offset = _nextOffset;
       _nextOffset += dataWords + pointerWords;
-      return new Struct(this.Segment, offset, dataWords, pointerWords, 0);
+      return new Struct(this.Segment, offset, dataWords, pointerWords);
     }
   }
 
@@ -50,7 +50,7 @@ namespace CapnpNet
       KnownPointerWords = (ushort)(int)typeof(T).GetField("KNOWN_POINTER_WORDS").GetValue(null);
     }
   }
-  
+
   public struct CompositeList<T> : IEnumerable<T>
     where T : struct, IStruct
   {
@@ -109,7 +109,7 @@ namespace CapnpNet
         var elementSize = _dataWords + _pointerWords;
         return new T
         {
-          Struct = new Struct(_segment, _tagOffset + 1 + elementSize * index, _dataWords, _pointerWords, 0)
+          Struct = new Struct(_segment, _tagOffset + 1 + elementSize * index, _dataWords, _pointerWords)
         };
       }
     }

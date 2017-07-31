@@ -111,9 +111,7 @@ namespace CapnpNet.Schema.Compiler
 
       this.BuildNames(null, node, "global::" + @namespace);
       
-      var src = $@"using CapnpNet;
-
-namespace {@namespace}
+      var src = $@"namespace {@namespace}
 {{
   {string.Join("\n", node.nestedNodes.SelectMany(this.GenerateNode))}
 }}

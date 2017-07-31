@@ -1,5 +1,3 @@
-using CapnpNet;
-
 namespace CapnpNet.Schema
 {
   public struct Node : global::CapnpNet.IStruct
