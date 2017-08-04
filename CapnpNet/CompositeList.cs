@@ -1,56 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace CapnpNet
 {
-  public struct AnyStruct : IStruct
-  {
-    public Struct Struct { get; set; }
-  }
-
-  public struct AllocationContext
-  {
-    private int _nextOffset;
-
-    public AllocationContext(Segment segment, int startOffset, int count)
-    {
-      this.Segment = segment;
-      _nextOffset = startOffset;
-      this.EndOffset = startOffset + count;
-    }
-
-    public Segment Segment { get; }
-    public int NextOffset => _nextOffset;
-    public int EndOffset { get; }
-    
-    public Struct Allocate(ushort dataWords, ushort pointerWords)
-    {
-      if (_nextOffset + dataWords + pointerWords > this.EndOffset)
-      {
-        throw new InvalidOperationException("");
-      }
-
-      var offset = _nextOffset;
-      _nextOffset += dataWords + pointerWords;
-      return new Struct(this.Segment, offset, dataWords, pointerWords);
-    }
-  }
-
-  internal static class WordsReflectionCache<T>
-  {
-    public static readonly ushort KnownDataWords;
-    public static readonly ushort KnownPointerWords;
-
-    static WordsReflectionCache()
-    {
-      KnownDataWords = (ushort)(int)typeof(T).GetField("KNOWN_DATA_WORDS").GetValue(null);
-      KnownPointerWords = (ushort)(int)typeof(T).GetField("KNOWN_POINTER_WORDS").GetValue(null);
-    }
-  }
-
   public struct CompositeList<T> : IEnumerable<T>
     where T : struct, IStruct
   {
@@ -64,8 +18,8 @@ namespace CapnpNet
       {
         Type = PointerType.Struct,
         WordOffset = 0,
-        DataWords = WordsReflectionCache<T>.KnownDataWords,
-        PointerWords = WordsReflectionCache<T>.KnownPointerWords,
+        DataWords = ReflectionCache<T>.KnownDataWords,
+        PointerWords = ReflectionCache<T>.KnownPointerWords,
       };
       _elementCount = 0;
       _dataWords = tag.DataWords;

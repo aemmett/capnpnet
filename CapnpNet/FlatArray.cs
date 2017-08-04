@@ -5,6 +5,10 @@ using System.Runtime.CompilerServices;
 
 namespace CapnpNet
 {
+  public struct Void
+  {
+  }
+
   public struct FlatArray<T> : IEnumerable<T>
     where T : struct
   {
@@ -14,6 +18,7 @@ namespace CapnpNet
     {
       _pointer = pointer;
       _pointer.Dereference();
+      // TODO: assert pointer type
       // TODO: verify correct size
     }
 
@@ -37,10 +42,14 @@ namespace CapnpNet
       get
       {
         Check.Range(index, this.Count);
+        if (typeof(T) == typeof(Void))
+        {
+          return default(T);
+        }
+
         ref ulong listStart = ref _pointer.Data;
         if (_pointer.Tag.ElementSize == ElementSize.Composite)
         {
-          // TODO: check if jit will inline, otherwise might need to make this branch a method
           var tag = Unsafe.As<ulong, StructPointer>(ref listStart);
           var wordOffset = 1 + index * (tag.DataWords + tag.PointerWords);
           ref ulong dataRef = ref Unsafe.Add(ref listStart, wordOffset);
@@ -56,10 +65,15 @@ namespace CapnpNet
               _pointer.DataOffset + wordOffset,
               Unsafe.As<ulong, Pointer>(ref dataRef));
           }
-          else
+          else if (ReflectionCache<T>.ImplementsIStruct)
           {
             var s = new Struct(_pointer.Segment, _pointer.DataOffset + wordOffset, tag.DataWords, tag.PointerWords);
             return Unsafe.As<Struct, T>(ref s);
+          }
+          else
+          {
+            // TOOD: FlatArray, BoolList, Text, Data (once implemented)
+            throw new NotImplementedException();
           }
         }
         else
@@ -75,7 +89,7 @@ namespace CapnpNet
               _pointer.DataOffset + index,
               Unsafe.As<ulong, Pointer>(ref Unsafe.Add(ref listStart, index)));
           }
-          else
+          else if (ReflectionCache<T>.ImplementsIStruct)
           {
             var wordOffset = _pointer.DataOffset + index * Unsafe.SizeOf<T>() / 8;
             sbyte byteRem = (sbyte)(index & 7);
@@ -84,6 +98,10 @@ namespace CapnpNet
               : (ushort)1;
             var s = new Struct(_pointer.Segment, wordOffset, dataWords, (ushort)(1 - dataWords), byteRem);
             return Unsafe.As<Struct, T>(ref s);
+          }
+          else
+          {
+            throw new NotImplementedException();
           }
         }
       }

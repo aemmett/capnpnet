@@ -79,10 +79,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbsPointer.cs" />
+    <Compile Include="AllocationContext.cs" />
+    <Compile Include="AnyStruct.cs" />
     <Compile Include="BoolList.cs" />
     <Compile Include="CompositeList.cs" />
     <Compile Include="Check.cs" />
+    <Compile Include="FlatArray.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="ReflectionCache.cs" />
     <Compile Include="Rpc\ExportTable.cs" />
     <Compile Include="Rpc\ICapability.cs" />
     <Compile Include="Index.cs" />
@@ -97,7 +101,6 @@
     <Compile Include="OrdinalAttribute.cs" />
     <Compile Include="Pointer.cs" />
     <Compile Include="PrimitiveList.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Segment.cs" />
     <Compile Include="SegmentList.cs" />

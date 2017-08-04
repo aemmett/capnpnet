@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace CapnpNet
 {
+  /// <summary>
+  /// Implementors must be a struct whose only field is <see cref="Struct"/>.
+  /// </summary>
   public interface IStruct
   {
     Struct Struct { get; set; }

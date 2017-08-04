@@ -36,6 +36,7 @@ namespace CapnpNet.Schema.Compiler
       public string Name { get; }
       public string Identifier { get; }
       public TypeName Parent { get; }
+      public TypeName SideContainer { get; set; }
 
       public TypeName GetCommonParent(TypeName targetName)
       {
@@ -86,15 +87,53 @@ namespace CapnpNet.Schema.Compiler
 
     private void BuildNames(TypeName parent, Node node, string name)
     {
-      var typeName = new TypeName(name, _generator.IdentifierName(name).ToString(), parent);
-      _typeNames.Add(node.id, typeName);
+      TypeName typeName;
 
       if (node.Is(out Node.structGroup @struct))
       {
+        typeName = new TypeName(name, _generator.IdentifierName(name).ToString(), parent);
+        _typeNames.Add(node.id, typeName);
         foreach (var groupField in @struct.fields.Where(f => f.which == Field.Union.group))
         {
           this.BuildNames(typeName, this[groupField.group.typeId], $"{groupField.name.ToString()}Group");
         }
+      }
+      else if (node.Is(out Node.interfaceGroup @interface))
+      {
+        typeName = new TypeName("I" + name, _generator.IdentifierName("I" + name).ToString(), parent);
+        _typeNames.Add(node.id, typeName);
+        TypeName container = null;
+        foreach (var method in @interface.methods)
+        {
+          var n = this[method.paramStructType];
+          if (n.scopeId == 0 && (n.Is(out Node.structGroup s) == false || s.dataWordCount + s.pointerCount > 0))
+          {
+            if (container == null)
+            {
+              container = new TypeName(name, _generator.IdentifierName(name).ToString(), parent);
+            }
+
+            this.BuildNames(container, n, method.name + "Params");
+          }
+
+          n = this[method.resultStructType];
+          if (n.scopeId == 0 && (n.Is(out s) == false || s.dataWordCount + s.pointerCount > 0))
+          {
+            if (container == null)
+            {
+              container = new TypeName(name, _generator.IdentifierName(name).ToString(), parent);
+            }
+
+            this.BuildNames(container, n, method.name + "Results");
+          }
+        }
+
+        typeName.SideContainer = container;
+      }
+      else
+      {
+        typeName = new TypeName(name, _generator.IdentifierName(name).ToString(), parent);
+        _typeNames.Add(node.id, typeName);
       }
 
       foreach (var nn in node.nestedNodes)
@@ -143,8 +182,8 @@ namespace CapnpNet.Schema.Compiler
       var s = node.@struct;
 
       yield return $@"
-        {GetDocComment(node)}
-        public struct {name.Identifier} : {CnNamespace}.IStruct
+        {this.GetDocComment(node)}
+        public struct {name.Identifier}{this.GetGenericArgs(node)} : {CnNamespace}.IStruct
         {{
           public const int KNOWN_DATA_WORDS = {s.dataWordCount.ToString()};
           public const int KNOWN_POINTER_WORDS = {s.pointerCount.ToString()};
@@ -169,6 +208,13 @@ namespace CapnpNet.Schema.Compiler
       yield return "}";
     }
 
+    private string GetGenericArgs(Node node)
+    {
+      return node.isGeneric && node.parameters.Count > 0
+        ? $"<{string.Join(", ", node.parameters.Select(p => this.ToName(p.name)))}>"
+        : string.Empty;
+    }
+
     private IEnumerable<string> GenerateEnum(TypeName name, Node node)
     {
       var @enum = node.@enum;
@@ -190,20 +236,48 @@ namespace CapnpNet.Schema.Compiler
       var i = node.@interface;
       yield return $@"
         {this.GetDocComment(node)}
-        public interface {name.Identifier} {GetSupertypes(i.superclasses)}
+        public interface {name.Identifier}{this.GetGenericArgs(node)} {GetSupertypes(i.superclasses)}
         {{";
       
-      var ordinal = 0;
-      foreach (var method in i.methods.OrderBy(m => m.codeOrder))
+      foreach (var tuple in i.methods.Select((method, ordinal) => ((method, ordinal))).OrderBy(m => m.Item1.codeOrder))
       {
+        var (method, ordinal) = tuple;
+        var returnType = _typeNames.ContainsKey(method.resultStructType)
+          ? $"{this.GetTypeName(name, this[method.resultStructType])}"
+          : "void";
+        
+        var genericArgs = method.implicitParameters.Count > 0
+          ? $"<{string.Join(", ", method.implicitParameters.Select(p => this.ToName(p.name)))}>"
+          : string.Empty;
+
+        var parameter = _typeNames.ContainsKey(method.paramStructType)
+          ? $"{this.GetTypeName(name, this[method.paramStructType])} parameters"
+          : string.Empty;
+        
         yield return $@"
           {GetDocComment(method.annotations)}
-          [Ordinal({ordinal})]
-          {this.GetTypeName(name, method.resultStructType)} {_generator.IdentifierName(method.name.ToString())}";
+          [{CnNamespace}.Ordinal({ordinal})]
+          {returnType} {this.ToName(method.name)}{genericArgs}({parameter});";
         ordinal++;
       }
 
-      yield return "}}";
+      yield return "}";
+
+      if (name.SideContainer != null)
+      {
+        yield return $@"
+          public static class {name.SideContainer.Identifier}
+          {{";
+
+        foreach (var code in _typeNames
+          .Where(kvp => kvp.Value.Parent == name.SideContainer)
+          .SelectMany(kvp => this.GenerateNode(this[kvp.Key])))
+        {
+          yield return code;
+        }
+        
+        yield return "}";
+      }
 
       string GetSupertypes(CompositeList<Superclass> extends)
       {
@@ -230,7 +304,7 @@ namespace CapnpNet.Schema.Compiler
     {
       switch (t.which)
       {
-        //case Type.Union.@void: type = null; accessor = null; return false;
+        case Type.Union.@void: type = $"{CnNamespace}.Void"; accessor = null; break;
         case Type.Union.@bool: type = "bool"; accessor = "Bool"; break;
         case Type.Union.int8: type = "sbyte"; accessor = "Int8"; break;
         case Type.Union.int16: type = "short"; accessor = "Int16"; break;
@@ -242,9 +316,9 @@ namespace CapnpNet.Schema.Compiler
         case Type.Union.uint64: type = "ulong"; accessor = "UInt64"; break;
         case Type.Union.float32: type = "float"; accessor = "Float32"; break;
         case Type.Union.float64: type = "double"; accessor = "Float64"; break;
-        case Type.Union.text: type = "Text"; accessor = "Text"; break;
-        case Type.Union.data: type = "PrimitiveList<byte>"; accessor = "List<byte>"; break;
-        case Type.Union.anyPointer: type = "AbsPointer"; accessor = "AbsPointer "; break;
+        case Type.Union.text: type = $"{CnNamespace}.Text"; accessor = "Text"; break;
+        case Type.Union.data: type = $"{CnNamespace}.PrimitiveList<byte>"; accessor = "List<byte>"; break;
+        case Type.Union.anyPointer: type = $"{CnNamespace}.AbsPointer"; accessor = "AbsPointer "; break;
         case Type.Union.list:
           var elemType = t.list.elementType;
           if (elemType.which == Type.Union.@bool)
@@ -270,13 +344,18 @@ namespace CapnpNet.Schema.Compiler
           {
             string elemTypeName, elemAccessor;
             this.GetTypeInfo(container, elemType, out elemTypeName, out elemAccessor);
-            type = $"CompositeList<{elemTypeName}>";
+            type = $"{CnNamespace}.CompositeList<{elemTypeName}>";
             accessor = $"CompositeList<{elemTypeName}>";
           }
           else if (elemType.which == Type.Union.anyPointer)
           {
-            type = "Pointer";
+            type = $"{CnNamespace}.Pointer";
             accessor = "RawPointer";
+          }
+          else if (elemType.which == Type.Union.@void)
+          {
+            type = $"{CnNamespace}.FlatArray<{CnNamespace}.Void>";
+            accessor = "FlatArray";
           }
           else throw new System.InvalidOperationException($"Unexpected element type {elemType.which}");
           break;
@@ -466,7 +545,10 @@ namespace CapnpNet.Schema.Compiler
       else if (val.which == Value.Union.float32) ret = val.float32 != 0 ? SyntaxFactory.Literal(val.float32).ToString() : null;
       else if (val.which == Value.Union.float64) ret = val.float64 != 0 ? SyntaxFactory.Literal(val.float64).ToString() : null;
       else if (val.which == Value.Union.@enum)   ret = val.@enum != 0 ? SyntaxFactory.Literal(val.@enum).ToString() : null;
-      else throw new System.ArgumentException($"Value not a primitive type: {val.which}");
+      else if (val.which == Value.Union.@void)   ret = $"default({CnNamespace}.Void)";
+      else if (val.which == Value.Union.text)    ret = SyntaxFactory.Literal(val.text.ToString()).ToString();
+      else ret = $"default /*not yet supported*/";
+      //else throw new System.ArgumentException($"Value not a primitive type: {val.which}");
       
       return ret == null ? string.Empty
         : leadingComma ? ", " + ret
