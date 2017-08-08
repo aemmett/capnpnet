@@ -61,10 +61,8 @@ namespace CapnpNet
         if (index < 0 || index >= _elementCount) throw new ArgumentOutOfRangeException();
 
         var elementSize = _dataWords + _pointerWords;
-        return new T
-        {
-          Struct = new Struct(_segment, _tagOffset + 1 + elementSize * index, _dataWords, _pointerWords)
-        };
+        var s = new Struct(_segment, _tagOffset + 1 + elementSize * index, _dataWords, _pointerWords);
+        return Unsafe.As<Struct, T>(ref s);
       }
     }
 

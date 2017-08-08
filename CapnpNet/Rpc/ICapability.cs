@@ -7,9 +7,9 @@ namespace CapnpNet.Rpc
 {
   public interface ICapability
   {
-    Task DispatchCall(ulong interfaceId, ushort methodId, CallContext callContext, CancellationToken ct);
+    //Task DispatchCall(ulong interfaceId, ushort methodId, CallContext callContext, CancellationToken ct);
   }
-
+  /*
   public abstract class RpcBase : ICapability
   {
     public Task DispatchCall(ulong interfaceId, ushort methodId, CallContext callContext, CancellationToken ct)
@@ -40,5 +40,5 @@ namespace CapnpNet.Rpc
         throw new NotImplementedException();
       }
     }
-  }
+  }*/
 }

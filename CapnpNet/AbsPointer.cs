@@ -5,17 +5,17 @@ using System.Runtime.InteropServices;
 
 namespace CapnpNet
 {
-  [StructLayout(LayoutKind.Auto)]
-  public struct AbsPointer
+  [StructLayout(LayoutKind.Sequential)]
+  public struct AbsPointer : IPureAbsPointer
   {
-    private Segment _segment;
-    private int _baseOffset;
     private Pointer _tag;
+    private Segment _segment;
+    private int _baseOffset; // TODO: bake into _tag.WordOffset and remove?
 
-    public AbsPointer(Segment segment, int baseOffset, Pointer tag)
+    public AbsPointer(Segment segment, int offsetAfterPointer, Pointer tag)
     {
       _segment = segment;
-      _baseOffset = baseOffset;
+      _baseOffset = offsetAfterPointer;
       _tag = tag;
     }
 
@@ -45,16 +45,16 @@ namespace CapnpNet
       }
     }
 
+    AbsPointer IAbsPointer.Pointer => this;
+
     public static implicit operator AbsPointer(OtherPointer op) => new AbsPointer(null, 0, op);
 
     public bool Is<T>(out T @struct) where T : struct, IStruct
     {
       if (this.Tag.Type == PointerType.Struct)
       {
-        @struct = new T
-        {
-          Struct = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords)
-        };
+        @struct = default(T); // annoying :/
+        Unsafe.As<T, Struct>(ref @struct) = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords);
         return true;
       }
 

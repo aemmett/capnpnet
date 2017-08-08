@@ -193,7 +193,7 @@ namespace CapnpNet.Schema.Compiler
           public {name.Identifier}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWords, pointers)) {{ }}
           public {name.Identifier}({StructType} s) {{ _s = s; }}
 
-          {StructType} {CnNamespace}.IStruct.Struct {{ get {{ return _s; }} set {{ _s = value; }} }}";
+          {StructType} {CnNamespace}.IStruct.Struct {{ get {{ return _s; }} }}";
 
       foreach (var code in this.GenerateMembers(name, s))
       {
@@ -292,7 +292,7 @@ namespace CapnpNet.Schema.Compiler
       this.GetTypeInfo(name.Parent, c.type, out var type, out var accessor);
       yield return $@"
         {this.GetDocComment(node)}
-        public const {type} {name.Identifier} = {this.GetDefaultLiteral(c.value, false)};";
+        public const {type} {name.Identifier} = {this.GetDefaultLiteral(c.value, type)};";
     }
 
     private IEnumerable<string> GenerateAnnotation(TypeName name, Node node)
@@ -317,47 +317,13 @@ namespace CapnpNet.Schema.Compiler
         case Type.Union.float32: type = "float"; accessor = "Float32"; break;
         case Type.Union.float64: type = "double"; accessor = "Float64"; break;
         case Type.Union.text: type = $"{CnNamespace}.Text"; accessor = "Text"; break;
-        case Type.Union.data: type = $"{CnNamespace}.PrimitiveList<byte>"; accessor = "List<byte>"; break;
+        case Type.Union.data: type = $"{CnNamespace}.FlatArray<byte>"; accessor = "List<byte>"; break;
         case Type.Union.anyPointer: type = $"{CnNamespace}.AbsPointer"; accessor = "AbsPointer "; break;
         case Type.Union.list:
           var elemType = t.list.elementType;
-          if (elemType.which == Type.Union.@bool)
-          {
-            type = "BoolList";
-            accessor = "BoolList";
-          }
-          else if (elemType.which >= Type.Union.int8
-           && elemType.which <= Type.Union.float64)
-          {
-            string elemTypeName, elemAccessor;
-            this.GetTypeInfo(container, elemType, out elemTypeName, out elemAccessor);
-            type = $"PrimitiveList<{elemTypeName}>";
-            accessor = $"List<{elemTypeName}>";
-          }
-          else if (elemType.which == Type.Union.@enum)
-          {
-            type = this.GetTypeName(container, elemType.@enum.typeId);
-            accessor = "UInt16";
-          }
-          else if (elemType.which >= Type.Union.text
-                && elemType.which <= Type.Union.@interface)
-          {
-            string elemTypeName, elemAccessor;
-            this.GetTypeInfo(container, elemType, out elemTypeName, out elemAccessor);
-            type = $"{CnNamespace}.CompositeList<{elemTypeName}>";
-            accessor = $"CompositeList<{elemTypeName}>";
-          }
-          else if (elemType.which == Type.Union.anyPointer)
-          {
-            type = $"{CnNamespace}.Pointer";
-            accessor = "RawPointer";
-          }
-          else if (elemType.which == Type.Union.@void)
-          {
-            type = $"{CnNamespace}.FlatArray<{CnNamespace}.Void>";
-            accessor = "FlatArray";
-          }
-          else throw new System.InvalidOperationException($"Unexpected element type {elemType.which}");
+          this.GetTypeInfo(container, elemType, out type, out _);
+          type = $"{CnNamespace}.FlatArray<{type}>";
+          accessor = null;
           break;
         case Type.Union.@enum:
           type = this.GetTypeName(container, t.@enum.typeId);
@@ -451,9 +417,7 @@ namespace CapnpNet.Schema.Compiler
           }
           else if (slot.type.which == Type.Union.@struct
                 || slot.type.which == Type.Union.@interface
-                || slot.type.which == Type.Union.list
                 || slot.type.which == Type.Union.text
-                || slot.type.which == Type.Union.data
                 || slot.type.which == Type.Union.anyPointer)
           {
             yield return $@"
@@ -462,6 +426,17 @@ namespace CapnpNet.Schema.Compiler
               {{
                 get {{ return _s.Dereference{accessor}({slot.offset}); }}
                 set {{ _s.WritePointer({slot.offset}, value); }}
+              }}";
+          }
+          else if (slot.type.which == Type.Union.list
+                || slot.type.which == Type.Union.data)
+          {
+            yield return $@"
+              {GetDocComment(field.annotations)}
+              public {type} {name}
+              {{
+                get {{ return new {type}(_s.DereferenceAbsPointer({slot.offset})); }}
+                set {{ _s.WritePointer({slot.offset}, value.Pointer); }}
               }}";
           }
           else
@@ -530,7 +505,25 @@ namespace CapnpNet.Schema.Compiler
       return name;
     }
 
-    private string GetDefaultLiteral(Value val, bool leadingComma = true)
+    private string GetDefaultLiteral(Value val, string type)
+    {
+      if (val.which == Value.Union.@bool) return val.@bool ? "true" : "false";
+      else if (val.which == Value.Union.int8) return SyntaxFactory.Literal(val.int8).ToString();
+      else if (val.which == Value.Union.int16) return SyntaxFactory.Literal(val.int16).ToString();
+      else if (val.which == Value.Union.int32) return SyntaxFactory.Literal(val.int32).ToString();
+      else if (val.which == Value.Union.int64) return SyntaxFactory.Literal(val.int64).ToString();
+      else if (val.which == Value.Union.uint8) return SyntaxFactory.Literal(val.uint8).ToString();
+      else if (val.which == Value.Union.uint16) return SyntaxFactory.Literal(val.uint16).ToString();
+      else if (val.which == Value.Union.uint32) return SyntaxFactory.Literal(val.uint32).ToString();
+      else if (val.which == Value.Union.uint64) return SyntaxFactory.Literal(val.uint64).ToString();
+      else if (val.which == Value.Union.float32) return SyntaxFactory.Literal(val.float32).ToString();
+      else if (val.which == Value.Union.float64) return SyntaxFactory.Literal(val.float64).ToString();
+      else if (val.which == Value.Union.@enum) return SyntaxFactory.Literal(val.@enum).ToString();
+      //else if (val.which == Value.Union.text) return SyntaxFactory.Literal(val.text.ToString()).ToString();
+      else return $"default({type})/*not yet supported*/";
+    }
+
+    private string GetDefaultLiteral(Value val)
     {
       string ret;
       if (val.which == Value.Union.@bool)        ret = val.@bool ? "true" : null;
@@ -550,9 +543,7 @@ namespace CapnpNet.Schema.Compiler
       else ret = $"default /*not yet supported*/";
       //else throw new System.ArgumentException($"Value not a primitive type: {val.which}");
       
-      return ret == null ? string.Empty
-        : leadingComma ? ", " + ret
-        : ret;
+      return ret == null ? string.Empty : ", " + ret;
     }
 
     private string GetDocComment(Node node)

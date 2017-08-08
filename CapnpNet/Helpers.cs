@@ -33,6 +33,23 @@ namespace CapnpNet
       }
     }
 
+    public static int SizeOf(this ElementSize size)
+    {
+      switch (size)
+      {
+        case ElementSize.Zero: return 0;
+        case ElementSize.OneBit: throw new ArgumentException("size is OneBit", nameof(size));
+        case ElementSize.OneByte: return 1;
+        case ElementSize.TwoBytes: return 2;
+        case ElementSize.FourBytes: return 4;
+        case ElementSize.EightBytesNonPointer:
+        case ElementSize.EightBytesPointer:
+          return 8;
+        case ElementSize.Composite: throw new ArgumentException("size is Composite", nameof(size));
+        default: throw new ArgumentException($"Invalid ElementSize: {size}");
+      }
+    }
+
     public static void AssertSize<T>(ElementSize elementSize)
     {
       if (TypeHelpers.ToElementSize<T>() != elementSize)

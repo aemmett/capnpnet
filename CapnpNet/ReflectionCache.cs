@@ -7,10 +7,12 @@ namespace CapnpNet
     public static readonly bool ImplementsIStruct;
     public static readonly ushort KnownDataWords;
     public static readonly ushort KnownPointerWords;
+    public static readonly bool ImplementsIPureAbsPointer;
 
     static ReflectionCache()
     {
       ImplementsIStruct = typeof(T).GetInterfaces().Contains(typeof(IStruct));
+      ImplementsIPureAbsPointer = typeof(T).GetInterfaces().Contains(typeof(IPureAbsPointer));
       KnownDataWords = (ushort)(int)(typeof(T).GetField("KNOWN_DATA_WORDS")?.GetValue(null) ?? 0);
       KnownPointerWords = (ushort)(int)(typeof(T).GetField("KNOWN_POINTER_WORDS")?.GetValue(null) ?? 0);
     }

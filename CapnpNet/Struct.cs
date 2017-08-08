@@ -7,21 +7,25 @@ namespace CapnpNet
   /// <summary>
   /// Implementors must be a struct whose only field is <see cref="Struct"/>.
   /// </summary>
-  public interface IStruct
+  public interface IStruct // TODO: rename to IPureStruct
   {
-    Struct Struct { get; set; }
+    Struct Struct { get; }
   }
 
   public static class StructExtensions
   {
-    public static T As<T>(this Struct s) where T : struct, IStruct => new T { Struct = s };
+    public static T As<T>(this Struct s) where T : struct, IStruct => Unsafe.As<Struct, T>(ref s);
 
     public static Struct GetStruct<T>(this T structObj) where T : struct, IStruct => structObj.Struct;
 
     public static bool Compact<T>(this T structObj, bool dataOnly = true) where T : struct, IStruct
     {
-      // FIXME: check for upgraded list struct
       var s = structObj.Struct;
+      if (s.IsPartialStruct)
+      {
+        return false;
+      }
+
       var originalEnd = s.StructWordOffset + s.DataWords + s.PointerWords;
       int savedWords = 0;
 
@@ -64,8 +68,8 @@ namespace CapnpNet
       {
         seg[originalEnd - i - 1 | Word.unit] = 0;
       }
-      
-      structObj.Struct = newStruct;
+
+      Unsafe.As<T, Struct>(ref structObj) = newStruct;
 
       seg.TryReclaim(originalEnd, savedWords);
 
@@ -74,7 +78,8 @@ namespace CapnpNet
 
     public static T CopyTo<T>(this T structObj, Message dest) where T : struct, IStruct
     {
-      return new T() { Struct = structObj.Struct.CopyTo(dest) };
+      var s = structObj.Struct.CopyTo(dest);
+      return Unsafe.As<Struct, T>(ref s);
     }
   }
   
@@ -147,8 +152,9 @@ namespace CapnpNet
     public Segment Segment => _segment;
     public ushort DataWords => _dataWords;
     public ushort PointerWords => _pointerWords;
-
+    
     public bool IsEmpty => _dataWords == 0 && _pointerWords == 0;
+    public bool IsPartialStruct => _upgradedListElementByteOffset != -1;
 
     public override string ToString() => $"Struct(S={_segment.SegmentIndex}, O={_structWordOffset}, DW={_dataWords}, PW={_pointerWords})";
     
@@ -247,6 +253,35 @@ namespace CapnpNet
       return this.Pointer(pointerIndex);
     }
 
+    public T DereferencePointer<T>(int pointerIndex)
+      where T : struct, IAbsPointer
+    {
+      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
+      {
+        var p = new AbsPointer(targetSegment, baseOffset, pointer);
+        if (ReflectionCache<T>.ImplementsIPureAbsPointer)
+        {
+          // TODO: grab expected pointer type(s) from reflection cache
+          // - or, to put a Verify method on IAbsPointer; FlatArray's verifications is complicated.
+          return Unsafe.As<AbsPointer, T>(ref p);
+        }
+        else if (ReflectionCache<T>.ImplementsIStruct) // pure struct
+        {
+          if (p.IsStruct(out var s) == false)
+          {
+            throw new InvalidOperationException($"Pointer type {p.Tag.Type} is not Struct");
+          }
+
+          return Unsafe.As<Struct, T>(ref s);
+        }
+
+        throw new InvalidOperationException($"{typeof(T).Name} expected to implement either IPureStruct or IPureAbsPointer");
+      }
+
+      // TODO: how to handle default?
+      throw new NotImplementedException();
+    }
+
     public AbsPointer DereferenceAbsPointer(int pointerIndex)
     {
       if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
@@ -273,10 +308,8 @@ namespace CapnpNet
     {
       if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
       {
-        return new T
-        {
-          Struct = new Struct(targetSegment, baseOffset, (StructPointer)pointer)
-        };
+        var s = new Struct(targetSegment, baseOffset, (StructPointer)pointer);
+        return Unsafe.As<Struct, T>(ref s);
       }
 
       // TODO: how to handle default?

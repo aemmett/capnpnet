@@ -21,7 +21,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public enum Union : ushort
@@ -324,7 +323,6 @@ namespace CapnpNet.Schema
       global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
       {
         get { return _s; }
-        set { _s = value; }
       }
 
       public Text name
@@ -355,7 +353,6 @@ namespace CapnpNet.Schema
       global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
       {
         get { return _s; }
-        set { _s = value; }
       }
 
       public Text name
@@ -393,7 +390,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public enum Union : ushort
@@ -536,7 +532,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public Text name
@@ -579,7 +574,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public ulong id
@@ -616,7 +610,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public Text name
@@ -689,7 +682,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public enum Union : ushort
@@ -934,7 +926,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public CompositeList<Scope> scopes
@@ -964,7 +955,6 @@ namespace CapnpNet.Schema
       global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
       {
         get { return _s; }
-        set { _s = value; }
       }
 
       public enum Union : ushort
@@ -1013,7 +1003,6 @@ namespace CapnpNet.Schema
       global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
       {
         get { return _s; }
-        set { _s = value; }
       }
 
       public enum Union : ushort
@@ -1064,7 +1053,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public enum Union : ushort
@@ -1220,7 +1208,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public ulong id
@@ -1275,7 +1262,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public ushort major
@@ -1318,7 +1304,6 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
 
     public CapnpVersion capnpVersion
@@ -1360,7 +1345,6 @@ namespace CapnpNet.Schema
       global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
       {
         get { return _s; }
-        set { _s = value; }
       }
 
       public ulong id
@@ -1402,7 +1386,6 @@ namespace CapnpNet.Schema
         global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
         {
           get { return _s; }
-          set { _s = value; }
         }
 
         public ulong id
