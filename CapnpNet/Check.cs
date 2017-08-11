@@ -1,5 +1,4 @@
 ﻿using System;
-using CapnpNet.Rpc;
 
 namespace CapnpNet
 {
@@ -18,6 +17,11 @@ namespace CapnpNet
     public static void NotNull(object obj, string name)
     {
       if (obj == null) throw new ArgumentNullException(name);
+    }
+
+    public static void IsTrue(bool condition)
+    {
+      if (condition == false) throw new InvalidOperationException();
     }
   }
 }

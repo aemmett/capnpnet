@@ -13,7 +13,13 @@ namespace CapnpNet.Schema.Compiler
         msg = Message.DecodeAsync(stdin).Result;
       }
 
-      var codeGenerator = new CSharpCodeGenerator(msg.GetRoot<CodeGeneratorRequest>());
+      var defaultNamespace = "Schema";
+      if (args.Length > 0)
+      {
+        defaultNamespace = args[0];
+      }
+
+      var codeGenerator = new CSharpCodeGenerator(msg.GetRoot<CodeGeneratorRequest>(), defaultNamespace);
       var outputs = codeGenerator.GenerateSources();
       foreach (var kvp in outputs)
       {

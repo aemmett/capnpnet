@@ -4,38 +4,37 @@ using System.Text;
 
 namespace CapnpNet
 {
-  public struct Text
+  public struct Text : IPureAbsPointer
   {
-    private readonly Segment _segment;
-    private readonly int _listWordOffset, _elementCount;
+    private readonly FlatArray<byte> _bytes;
     
-    public Text(Message msg, int bytesWithNulTerminator)
+    public Text(Message msg, int bytesWithNulTerminator, out AllocationContext allocContext)
     {
-      _elementCount = bytesWithNulTerminator;
-      var words = (_elementCount + 7) / 8;
-      msg.Allocate(words, out _listWordOffset, out _segment);
+      _bytes = new FlatArray<byte>(msg, bytesWithNulTerminator, out allocContext);
     }
     
     public Text(Message msg, string str)
     {
-      _elementCount = Encoding.UTF8.GetByteCount(str) + 1;
-      var words = (_elementCount + 7) / 8;
-      msg.Allocate(words, out _listWordOffset, out _segment);
-      if (_segment.Is(out ArraySegment<byte> arrSeg))
+      var byteCount = Encoding.UTF8.GetByteCount(str) + 1;
+      _bytes = new FlatArray<byte>(msg, byteCount, out AllocationContext allocContext);
+
+      var absPointer = _bytes.Pointer;
+      var segment = absPointer.Segment;
+      if (segment.Is(out ArraySegment<byte> arrSeg))
       {
-        var writeOffset = arrSeg.Offset + _listWordOffset * sizeof(ulong);
+        var writeOffset = arrSeg.Offset + absPointer.DataOffset * sizeof(ulong);
         Encoding.UTF8.GetBytes(str, 0, str.Length, arrSeg.Array, writeOffset);
-        arrSeg.Array[writeOffset + _elementCount - 1] = 0; // null terminator
+        arrSeg.Array[writeOffset + byteCount - 1] = 0; // null terminator
       }
-      else if (_segment.IsFixedMemory)
+      else if (segment.IsFixedMemory)
       {
         unsafe
         {
           fixed (char* chars = str)
           {
-            var ptr = (byte*)Unsafe.AsPointer(ref _segment[_listWordOffset | Word.unit]);
-            Encoding.UTF8.GetBytes(chars, str.Length, ptr, _elementCount - 1);
-            ptr[_elementCount - 1] = 0;
+            var ptr = (byte*)Unsafe.AsPointer(ref absPointer.Data);
+            Encoding.UTF8.GetBytes(chars, str.Length, ptr, byteCount - 1);
+            ptr[byteCount - 1] = 0;
           }
         }
       }
@@ -49,9 +48,7 @@ namespace CapnpNet
     public Text(Segment segment, int baseWordOffset, ListPointer listPointer)
     {
       TypeHelpers.AssertSize<byte>(listPointer.ElementSize);
-      _segment = segment;
-      _listWordOffset = baseWordOffset + listPointer.WordOffset;
-      _elementCount = (int)listPointer.ElementCount;
+      _bytes = new FlatArray<byte>(new AbsPointer(segment, baseWordOffset, listPointer));
     }
     
 #if SPAN
@@ -60,9 +57,14 @@ namespace CapnpNet
       : _segment.Span.Slice(_listWordOffset).Cast<ulong, byte>().Slice(0, _elementCount);
 #endif
 
-    public Segment Segment => _segment;
-    public int ListWordOffset => _listWordOffset;
-    public int Count => _elementCount;
+    public Segment Segment => _bytes.Pointer.Segment;
+    public int ListWordOffset => _bytes.Pointer.DataOffset;
+    /// <summary>
+    /// Number of encoded bytes, including null terminator.
+    /// </summary>
+    public int ByteLength => (int)_bytes.Pointer.Tag.ElementCount;
+
+    public AbsPointer Pointer => _bytes.Pointer;
 
     public byte this[int index]
     {
@@ -71,18 +73,26 @@ namespace CapnpNet
 #else
       get
       {
-        Check.Range(index, _elementCount);
+        Check.Range(index, this.ByteLength);
 
-        return _segment[_listWordOffset * sizeof(ulong) + index | Byte.unit];
+        return this.Segment[this.ListWordOffset * sizeof(ulong) + index | Byte.unit];
       }
 #endif
     }
 
+    /// <summary>
+    /// Retrieves the segment of bytes encoding this Text, excluding the null terminator.
+    /// </summary>
+    /// <param name="seg">The <see cref="ArraySegment{T}"/>.</param>
+    /// <returns><c>true</c> if Text is held in a <see cref="byte[]"/> array.</returns>
     public bool Is(out ArraySegment<byte> seg)
     {
-      if (_segment.Is(out ArraySegment<byte> arrSeg))
+      if (this.Segment.Is(out ArraySegment<byte> arrSeg))
       {
-        seg = new ArraySegment<byte>(arrSeg.Array, arrSeg.Offset + _listWordOffset * sizeof(ulong), _elementCount - 1);
+        seg = new ArraySegment<byte>(
+          arrSeg.Array, 
+          arrSeg.Offset + this.ListWordOffset * sizeof(ulong),
+          this.ByteLength - 1);
         return true;
       }
 

@@ -86,6 +86,7 @@
     <Compile Include="CompositeList.cs" />
     <Compile Include="FlatArray.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="PreferredListEncodingAttribute.cs" />
     <Compile Include="ReflectionCache.cs" />
     <Compile Include="Rpc\ExportTable.cs" />
     <Compile Include="Index.cs" />

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CapnpNet.Rpc
 {
-  public interface ICapability
+  public interface ICapability : IAbsPointer
   {
     //Task DispatchCall(ulong interfaceId, ushort methodId, CallContext callContext, CancellationToken ct);
   }

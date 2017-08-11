@@ -7,7 +7,7 @@ namespace CapnpNet
   /// <summary>
   /// Implementors must be a struct whose only field is <see cref="Struct"/>.
   /// </summary>
-  public interface IStruct // TODO: rename to IPureStruct
+  public interface IStruct : IAbsPointer // TODO: rename to IPureStruct
   {
     Struct Struct { get; }
   }
@@ -83,7 +83,7 @@ namespace CapnpNet
     }
   }
   
-  public struct Struct
+  public struct Struct : IAbsPointer
   {
     private readonly Segment _segment;
     private readonly int _structWordOffset; // in the encoding spec, technically this is a uint, but currently I bottom out at an API that uses int :(
@@ -125,6 +125,14 @@ namespace CapnpNet
       _pointerWords = pointerWords;
       _upgradedListElementByteOffset = upgradedListElementSize;
     }
+
+    public AbsPointer Pointer => new AbsPointer(_segment, 0, new StructPointer()
+    {
+      Type = PointerType.Struct,
+      WordOffset = _structWordOffset,
+      DataWords = _dataWords,
+      PointerWords = _pointerWords
+    });
 
     public Pointer[] PointersDebug
     {
@@ -227,7 +235,7 @@ namespace CapnpNet
       for (int i = 0; i < this.PointerWords; i++)
       {
         Unsafe.Add(ref dst, _dataWords + i) =
-          new AbsPointer(_segment, srcPointerBase + i, this.Pointer(i))
+          new AbsPointer(_segment, srcPointerBase + i, this.GetPointer(i))
             .CopyTo(dest)
             .ToPointer(destSeg, dstPointerBase + i)
             .RawValue;
@@ -236,7 +244,7 @@ namespace CapnpNet
       return newS;
     }
     
-    private ref Pointer Pointer(int index)
+    private ref Pointer GetPointer(int index)
     {
       Check.Range(index, _pointerWords);
       return ref Unsafe.As<ulong, Pointer>(ref _segment[_structWordOffset + _dataWords + index | Word.unit]);
@@ -250,14 +258,28 @@ namespace CapnpNet
       // TODO: how to handle default?
       if (pointerIndex >= this.PointerWords) return new Pointer();
 
-      return this.Pointer(pointerIndex);
+      return this.GetPointer(pointerIndex);
     }
 
     public T DereferencePointer<T>(int pointerIndex)
-      where T : struct, IAbsPointer
+      where T : IAbsPointer
     {
       if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
       {
+        if (ReflectionCache<T>.ImplementsICapability)
+        {
+          Check.IsTrue(pointer.Type == PointerType.Other && pointer.OtherPointerType == OtherPointerType.Capability);
+
+          ref var capEntry = ref this.Segment.Message.LocalCaps.TryGet(pointer.CapabilityId, out var found);
+          if (found == false)
+          {
+            // TODO: how to handle missing cap?
+            throw new NotImplementedException();
+          }
+
+          return (T)capEntry.Capability;
+        }
+
         var p = new AbsPointer(targetSegment, baseOffset, pointer);
         if (ReflectionCache<T>.ImplementsIPureAbsPointer)
         {
@@ -290,7 +312,7 @@ namespace CapnpNet
       }
 
       // TODO: how to handle default?
-      throw new NotImplementedException();
+      return default(AbsPointer);
     }
 
     public Struct DereferenceRawStruct(int pointerIndex)
@@ -391,7 +413,14 @@ namespace CapnpNet
         return default(T);
       }
 
-      ref Pointer otherPointer = ref this.Pointer(pointerIndex);
+      ref Pointer otherPointer = ref this.GetPointer(pointerIndex);
+      if (otherPointer == default(Pointer)) throw new NotSupportedException(); // TODO: default?
+
+      if (otherPointer.Type != PointerType.Other
+        || otherPointer.OtherPointerType != OtherPointerType.Capability)
+      {
+        throw new InvalidOperationException("Pointer is not a capability pointer");
+      }
 
       return (T)this.Segment.Message.LocalCaps[otherPointer.CapabilityId].Capability;
     }
@@ -409,7 +438,7 @@ namespace CapnpNet
         return false;
       }
       
-      pointer = this.Pointer(pointerIndex);
+      pointer = this.GetPointer(pointerIndex);
       
       if (pointer == default(Pointer))
       {
@@ -487,7 +516,7 @@ namespace CapnpNet
         throw new ArgumentOutOfRangeException("pointerIndex", "Pointer index out of range");
       }
 
-      this.Pointer(pointerIndex) = pointer;
+      this.GetPointer(pointerIndex) = pointer;
     }
 
     public void WritePointer<T>(int pointerIndex, PrimitiveList<T> dest)
@@ -515,7 +544,7 @@ namespace CapnpNet
         {
           Type = PointerType.List,
           ElementSize = ElementSize.OneByte,
-          ElementCount = (uint)dest.Count,
+          ElementCount = (uint)dest.ByteLength,
         });
     }
 
@@ -561,19 +590,15 @@ namespace CapnpNet
         });
     }
     
-    public void WritePointer<T>(int pointerIndex, T dest) where T : struct, IStruct
+    public void WritePointer<T>(int pointerIndex, T dest)
+      where T : IAbsPointer
     {
-      var s = dest.Struct;
+      var p = dest.Pointer;
       this.WritePointerCore(
         pointerIndex,
-        s.Segment,
-        s.StructWordOffset,
-        new StructPointer
-        {
-          Type = PointerType.Struct,
-          DataWords = s.DataWords,
-          PointerWords = s.PointerWords,
-        });
+        p.Segment,
+        p.DataOffset,
+        p.Tag);
     }
 
     public void WritePointer(int pointerIndex, ICapability cap)

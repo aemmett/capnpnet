@@ -40,6 +40,18 @@ namespace CapnpNet
       return ref _slots[index];
     }
 
+    public ref T TryGet(uint index, out bool found)
+    {
+      if (index > this.Count)
+      {
+        found = false;
+        return ref _empty;
+      }
+
+      found = true;
+      return ref _slots[index];
+    }
+
     public Enumerator GetEnumerator() => new Enumerator(this);
 
     IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();

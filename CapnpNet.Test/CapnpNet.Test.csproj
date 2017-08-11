@@ -50,9 +50,11 @@
   <ItemGroup>
     <Compile Include="SegmentTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="test.g.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="test.capnp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\capnpnet\CapnpNet.csproj">

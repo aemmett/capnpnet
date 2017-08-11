@@ -2,7 +2,7 @@
 
 namespace CapnpNet
 {
-  // TODO: make generic, should always allocate the same size/shape object. Allow for 
+  // TODO: make generic, should always allocate the same size/shape object. Account for tightly encoded struct lists
   public struct AllocationContext
   {
     private int _nextOffset;

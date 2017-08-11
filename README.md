@@ -40,17 +40,14 @@ TODO
 
 ### Bugs / unimplemented cases
 - Missing edge cases
-  - Upgraded list structs
   - Pointer field defaults
   - Copying messages with lists containing pointers
-  - Primitive list -> struct list upgradability (merge PrimitiveList and CopositeList?)
 - Codegen improvements
   - annotations to control codegen (namespace, etc.)
   - missing metadata
 - Equals, GetHashCode boilerplate
 - Better AnyPointer support
 - APIs to support easier writing
-  - struct copying, size measurements
   - Implement more standard interfaces?
   - Automatic discriminant setting/validation?
 - Runtime and compiler version safety checks
@@ -60,11 +57,12 @@ TODO
   - Check for integer overflows. I'm pretty sure there's a lot of them when
     dealing with >2GB (possibly smaller) messages, may potentially compromise
     memory safety / process stability
+- Special type for ":Data"
 - Packing/unpacking
 - dynamic API
 
 ### Nice to haves
-- VS integration 
+- VS integration
 - .Net Core compatibility
   - what does this entail? Do I need to make unsafe code optional?
 - Portability improvements (data alignment, big endian support)
@@ -73,6 +71,5 @@ TODO
 - Performance analysis
 - Re-incorporate `Span<T>`-based APIs
 - Support for incremental reads?
-- Find some tool to inline/prune all the compiler dependencies?
 
 [Cap'n Proto]: https://capnproto.org

@@ -9,6 +9,7 @@ namespace CapnpNet
   {
   }
 
+  // TODO: a different root "pointer" type e.g. for capability interfaces?
   public interface IAbsPointer
   {
     AbsPointer Pointer { get; }
@@ -19,10 +20,9 @@ namespace CapnpNet
   }
 
   public struct FlatArray<T> : IEnumerable<T>, IPureAbsPointer
-    where T : struct
   {
     private readonly AbsPointer _pointer;
-    
+
     public FlatArray(AbsPointer pointer)
       : this()
     {
@@ -31,7 +31,83 @@ namespace CapnpNet
       // TODO: assert pointer type
       // TODO: verify correct size
     }
-    
+
+    public FlatArray(Message msg, int count, out AllocationContext allocContext) : this()
+    {
+      var elementSize = this.GetElementSize();
+
+      // TODO: handle composite
+      if (elementSize == ElementSize.Composite)
+      {
+        int words = 1 + count * (ReflectionCache<T>.KnownDataWords + ReflectionCache<T>.KnownPointerWords);
+        
+        msg.Allocate(
+          words,
+          out var offset,
+          out var segment);
+
+        segment[offset | Word.unit] = new StructPointer
+        {
+          Type = PointerType.Struct,
+          WordOffset = count,
+          DataWords = ReflectionCache<T>.KnownDataWords,
+          PointerWords = ReflectionCache<T>.KnownPointerWords,
+        }.RawValue;
+
+        allocContext = new AllocationContext(segment, offset + 1, words - 1);
+      
+        _pointer = new AbsPointer(
+          segment,
+          0,
+          new ListPointer
+          {
+            Type = PointerType.List,
+            WordOffset = offset,
+            ElementSize = elementSize,
+            ElementCount = (uint)words - 1
+          });
+      }
+      else
+      {
+        int words = TypeHelpers.SizeOf(elementSize) * count / 8;
+        msg.Allocate(
+          words,
+          out var offset,
+          out var segment);
+
+        allocContext = new AllocationContext(segment, offset, words);
+      
+        _pointer = new AbsPointer(
+          segment,
+          0,
+          new ListPointer
+          {
+            Type = PointerType.List,
+            WordOffset = offset,
+            ElementSize = elementSize,
+            ElementCount = (uint)count
+          });
+      }
+    }
+
+    private ElementSize GetElementSize()
+    {
+      if (ReflectionCache<T>.ImplementsIStruct)
+      {
+        return ReflectionCache<T>.PreferredElementSize;
+      }
+      else if (ReflectionCache<T>.ImplementsIAbsPointer)
+      {
+        return ElementSize.EightBytesPointer;
+      }
+      else if (typeof(T) == typeof(Void))
+      {
+        return ElementSize.Zero;
+      }
+
+      return TypeHelpers.ToElementSize<T>();
+    }
+
     public AbsPointer Pointer => _pointer;
 
     public int Count
@@ -87,6 +163,13 @@ namespace CapnpNet
               Unsafe.As<ulong, Pointer>(ref dataRef));
             return Unsafe.As<AbsPointer, T>(ref p);
           }
+          else if (ReflectionCache<T>.ImplementsICapability)
+          {
+            var ptr = Unsafe.As<ulong, Pointer>(ref dataRef);
+            Check.IsTrue(ptr.Type == PointerType.Other && ptr.OtherPointerType == OtherPointerType.Capability);
+            var cap = _pointer.Segment.Message.LocalCaps[ptr.CapabilityId].Capability;
+            return (T)cap;
+          }
           else
           {
             // TOOD: Text, Data (once implemented)
@@ -105,13 +188,20 @@ namespace CapnpNet
         }
         else if (_pointer.Tag.ElementSize == ElementSize.EightBytesPointer)
         {
+          Pointer elem = Unsafe.As<ulong, Pointer>(ref Unsafe.Add(ref listStart, index));
           if (ReflectionCache<T>.ImplementsIPureAbsPointer)
           {
             var absPointer = new AbsPointer(
               _pointer.Segment,
               _pointer.DataOffset + index + 1,
-              Unsafe.As<ulong, Pointer>(ref Unsafe.Add(ref listStart, index)));
+              elem);
             return Unsafe.As<AbsPointer, T>(ref absPointer);
+          }
+          else if (ReflectionCache<T>.ImplementsICapability)
+          {
+            Check.IsTrue(elem.Type == PointerType.Other && elem.OtherPointerType == OtherPointerType.Capability);
+            var cap = _pointer.Segment.Message.LocalCaps[elem.CapabilityId].Capability;
+            return (T)cap;
           }
           else
           {

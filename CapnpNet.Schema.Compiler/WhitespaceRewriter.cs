@@ -1,12 +1,13 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-//using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CapnpNet.Schema.Compiler
 {
   public sealed class WhitespaceRewriter : CSharpSyntaxRewriter
   {
+    // TODO: where clauses on their own lines
+
     public override SyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
     {
       node = node.ReplaceNode(node.ParameterList, node.ParameterList.WithTrailingTrivia(SyntaxFactory.Space));

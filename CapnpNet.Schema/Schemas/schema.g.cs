@@ -23,6 +23,11 @@ namespace CapnpNet.Schema
       get { return _s; }
     }
 
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
     public enum Union : ushort
     {
       file = 0,
@@ -80,7 +85,7 @@ namespace CapnpNet.Schema
       set { _s.WriteUInt64(0, value); }
     }
 
-    public Text displayName
+    public global::CapnpNet.Text displayName
     {
       get { return _s.DereferenceText(0); }
       set { _s.WritePointer(0, value); }
@@ -98,10 +103,10 @@ namespace CapnpNet.Schema
       set { _s.WriteUInt64(2, value); }
     }
 
-    public CompositeList<Parameter> parameters
+    public global::CapnpNet.FlatArray<Parameter> parameters
     {
-      get { return _s.DereferenceCompositeList<Parameter>(5); }
-      set { _s.WritePointer(5, value); }
+      get { return new global::CapnpNet.FlatArray<Parameter>(_s.DereferenceAbsPointer(5)); }
+      set { _s.WritePointer(5, value.Pointer); }
     }
 
     public bool isGeneric
@@ -110,16 +115,16 @@ namespace CapnpNet.Schema
       set { _s.WriteBool(288, value); }
     }
 
-    public CompositeList<NestedNode> nestedNodes
+    public global::CapnpNet.FlatArray<NestedNode> nestedNodes
     {
-      get { return _s.DereferenceCompositeList<NestedNode>(1); }
-      set { _s.WritePointer(1, value); }
+      get { return new global::CapnpNet.FlatArray<NestedNode>(_s.DereferenceAbsPointer(1)); }
+      set { _s.WritePointer(1, value.Pointer); }
     }
 
-    public CompositeList<Annotation> annotations
+    public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return _s.DereferenceCompositeList<Annotation>(2); }
-      set { _s.WritePointer(2, value); }
+      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(2)); }
+      set { _s.WritePointer(2, value.Pointer); }
     }
 
     public structGroup @struct => new structGroup(_s);
@@ -163,10 +168,10 @@ namespace CapnpNet.Schema
         set { _s.WriteUInt32(8, value); }
       }
 
-      public CompositeList<Field> fields
+      public global::CapnpNet.FlatArray<Field> fields
       {
-        get { return _s.DereferenceCompositeList<Field>(3); }
-        set { _s.WritePointer(3, value); }
+        get { return new global::CapnpNet.FlatArray<Field>(_s.DereferenceAbsPointer(3)); }
+        set { _s.WritePointer(3, value.Pointer); }
       }
     }
 
@@ -175,10 +180,10 @@ namespace CapnpNet.Schema
     {
       private readonly global::CapnpNet.Struct _s;
       public enumGroup(global::CapnpNet.Struct s) { _s = s; }
-      public CompositeList<Enumerant> enumerants
+      public global::CapnpNet.FlatArray<Enumerant> enumerants
       {
-        get { return _s.DereferenceCompositeList<Enumerant>(3); }
-        set { _s.WritePointer(3, value); }
+        get { return new global::CapnpNet.FlatArray<Enumerant>(_s.DereferenceAbsPointer(3)); }
+        set { _s.WritePointer(3, value.Pointer); }
       }
     }
 
@@ -187,16 +192,16 @@ namespace CapnpNet.Schema
     {
       private readonly global::CapnpNet.Struct _s;
       public interfaceGroup(global::CapnpNet.Struct s) { _s = s; }
-      public CompositeList<Method> methods
+      public global::CapnpNet.FlatArray<Method> methods
       {
-        get { return _s.DereferenceCompositeList<Method>(3); }
-        set { _s.WritePointer(3, value); }
+        get { return new global::CapnpNet.FlatArray<Method>(_s.DereferenceAbsPointer(3)); }
+        set { _s.WritePointer(3, value.Pointer); }
       }
 
-      public CompositeList<Superclass> superclasses
+      public global::CapnpNet.FlatArray<Superclass> superclasses
       {
-        get { return _s.DereferenceCompositeList<Superclass>(4); }
-        set { _s.WritePointer(4, value); }
+        get { return new global::CapnpNet.FlatArray<Superclass>(_s.DereferenceAbsPointer(4)); }
+        set { _s.WritePointer(4, value.Pointer); }
       }
     }
 
@@ -325,7 +330,12 @@ namespace CapnpNet.Schema
         get { return _s; }
       }
 
-      public Text name
+      global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+      {
+        get { return _s.Pointer; }
+      }
+
+      public global::CapnpNet.Text name
       {
         get { return _s.DereferenceText(0); }
         set { _s.WritePointer(0, value); }
@@ -355,7 +365,12 @@ namespace CapnpNet.Schema
         get { return _s; }
       }
 
-      public Text name
+      global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+      {
+        get { return _s.Pointer; }
+      }
+
+      public global::CapnpNet.Text name
       {
         get { return _s.DereferenceText(0); }
         set { _s.WritePointer(0, value); }
@@ -392,6 +407,11 @@ namespace CapnpNet.Schema
       get { return _s; }
     }
 
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
     public enum Union : ushort
     {
       slot = 0,
@@ -418,7 +438,7 @@ namespace CapnpNet.Schema
       set { _s.WriteUInt16(4, (ushort)value); }
     }
 
-    public Text name
+    public global::CapnpNet.Text name
     {
       get { return _s.DereferenceText(0); }
       set { _s.WritePointer(0, value); }
@@ -430,10 +450,10 @@ namespace CapnpNet.Schema
       set { _s.WriteUInt16(0, value); }
     }
 
-    public CompositeList<Annotation> annotations
+    public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return _s.DereferenceCompositeList<Annotation>(1); }
-      set { _s.WritePointer(1, value); }
+      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(1)); }
+      set { _s.WritePointer(1, value.Pointer); }
     }
 
     public ushort discriminantValue
@@ -534,7 +554,12 @@ namespace CapnpNet.Schema
       get { return _s; }
     }
 
-    public Text name
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public global::CapnpNet.Text name
     {
       get { return _s.DereferenceText(0); }
       set { _s.WritePointer(0, value); }
@@ -546,10 +571,10 @@ namespace CapnpNet.Schema
       set { _s.WriteUInt16(0, value); }
     }
 
-    public CompositeList<Annotation> annotations
+    public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return _s.DereferenceCompositeList<Annotation>(1); }
-      set { _s.WritePointer(1, value); }
+      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(1)); }
+      set { _s.WritePointer(1, value.Pointer); }
     }
   }
 
@@ -574,6 +599,11 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
     }
 
     public ulong id
@@ -612,7 +642,12 @@ namespace CapnpNet.Schema
       get { return _s; }
     }
 
-    public Text name
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public global::CapnpNet.Text name
     {
       get { return _s.DereferenceText(0); }
       set { _s.WritePointer(0, value); }
@@ -624,10 +659,10 @@ namespace CapnpNet.Schema
       set { _s.WriteUInt16(0, value); }
     }
 
-    public CompositeList<Node.Parameter> implicitParameters
+    public global::CapnpNet.FlatArray<Node.Parameter> implicitParameters
     {
-      get { return _s.DereferenceCompositeList<Node.Parameter>(4); }
-      set { _s.WritePointer(4, value); }
+      get { return new global::CapnpNet.FlatArray<Node.Parameter>(_s.DereferenceAbsPointer(4)); }
+      set { _s.WritePointer(4, value.Pointer); }
     }
 
     public ulong paramStructType
@@ -654,10 +689,10 @@ namespace CapnpNet.Schema
       set { _s.WritePointer(3, value); }
     }
 
-    public CompositeList<Annotation> annotations
+    public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return _s.DereferenceCompositeList<Annotation>(1); }
-      set { _s.WritePointer(1, value); }
+      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(1)); }
+      set { _s.WritePointer(1, value.Pointer); }
     }
   }
 
@@ -682,6 +717,11 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
     }
 
     public enum Union : ushort
@@ -928,10 +968,15 @@ namespace CapnpNet.Schema
       get { return _s; }
     }
 
-    public CompositeList<Scope> scopes
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
     {
-      get { return _s.DereferenceCompositeList<Scope>(0); }
-      set { _s.WritePointer(0, value); }
+      get { return _s.Pointer; }
+    }
+
+    public global::CapnpNet.FlatArray<Scope> scopes
+    {
+      get { return new global::CapnpNet.FlatArray<Scope>(_s.DereferenceAbsPointer(0)); }
+      set { _s.WritePointer(0, value.Pointer); }
     }
 
     public struct Scope : global::CapnpNet.IStruct
@@ -957,6 +1002,11 @@ namespace CapnpNet.Schema
         get { return _s; }
       }
 
+      global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+      {
+        get { return _s.Pointer; }
+      }
+
       public enum Union : ushort
       {
         bind = 0,
@@ -975,10 +1025,10 @@ namespace CapnpNet.Schema
         set { _s.WriteUInt64(0, value); }
       }
 
-      public CompositeList<Binding> bind
+      public global::CapnpNet.FlatArray<Binding> bind
       {
-        get { return _s.DereferenceCompositeList<Binding>(0); }
-        set { _s.WritePointer(0, value); }
+        get { return new global::CapnpNet.FlatArray<Binding>(_s.DereferenceAbsPointer(0)); }
+        set { _s.WritePointer(0, value.Pointer); }
       }
     }
 
@@ -1003,6 +1053,11 @@ namespace CapnpNet.Schema
       global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
       {
         get { return _s; }
+      }
+
+      global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+      {
+        get { return _s.Pointer; }
       }
 
       public enum Union : ushort
@@ -1053,6 +1108,11 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
     }
 
     public enum Union : ushort
@@ -1150,19 +1210,19 @@ namespace CapnpNet.Schema
       set { _s.WriteFloat64(1, value); }
     }
 
-    public Text text
+    public global::CapnpNet.Text text
     {
       get { return _s.DereferenceText(0); }
       set { _s.WritePointer(0, value); }
     }
 
-    public PrimitiveList<byte> data
+    public global::CapnpNet.FlatArray<byte> data
     {
-      get { return _s.DereferenceList<byte>(0); }
-      set { _s.WritePointer(0, value); }
+      get { return new global::CapnpNet.FlatArray<byte>(_s.DereferenceAbsPointer(0)); }
+      set { _s.WritePointer(0, value.Pointer); }
     }
 
-    public AbsPointer list
+    public global::CapnpNet.AbsPointer list
     {
       get { return _s.DereferenceAbsPointer(0); }
       set { _s.WritePointer(0, value); }
@@ -1174,13 +1234,13 @@ namespace CapnpNet.Schema
       set { _s.WriteUInt16(1, value); }
     }
 
-    public AbsPointer @struct
+    public global::CapnpNet.AbsPointer @struct
     {
       get { return _s.DereferenceAbsPointer(0); }
       set { _s.WritePointer(0, value); }
     }
 
-    public AbsPointer anyPointer
+    public global::CapnpNet.AbsPointer anyPointer
     {
       get { return _s.DereferenceAbsPointer(0); }
       set { _s.WritePointer(0, value); }
@@ -1208,6 +1268,11 @@ namespace CapnpNet.Schema
     global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
     }
 
     public ulong id
@@ -1264,6 +1329,11 @@ namespace CapnpNet.Schema
       get { return _s; }
     }
 
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
     public ushort major
     {
       get { return _s.ReadUInt16(0); }
@@ -1306,22 +1376,27 @@ namespace CapnpNet.Schema
       get { return _s; }
     }
 
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
     public CapnpVersion capnpVersion
     {
       get { return _s.DereferenceStruct<CapnpVersion>(2); }
       set { _s.WritePointer(2, value); }
     }
 
-    public CompositeList<Node> nodes
+    public global::CapnpNet.FlatArray<Node> nodes
     {
-      get { return _s.DereferenceCompositeList<Node>(0); }
-      set { _s.WritePointer(0, value); }
+      get { return new global::CapnpNet.FlatArray<Node>(_s.DereferenceAbsPointer(0)); }
+      set { _s.WritePointer(0, value.Pointer); }
     }
 
-    public CompositeList<RequestedFile> requestedFiles
+    public global::CapnpNet.FlatArray<RequestedFile> requestedFiles
     {
-      get { return _s.DereferenceCompositeList<RequestedFile>(1); }
-      set { _s.WritePointer(1, value); }
+      get { return new global::CapnpNet.FlatArray<RequestedFile>(_s.DereferenceAbsPointer(1)); }
+      set { _s.WritePointer(1, value.Pointer); }
     }
 
     public struct RequestedFile : global::CapnpNet.IStruct
@@ -1347,22 +1422,27 @@ namespace CapnpNet.Schema
         get { return _s; }
       }
 
+      global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+      {
+        get { return _s.Pointer; }
+      }
+
       public ulong id
       {
         get { return _s.ReadUInt64(0); }
         set { _s.WriteUInt64(0, value); }
       }
 
-      public Text filename
+      public global::CapnpNet.Text filename
       {
         get { return _s.DereferenceText(0); }
         set { _s.WritePointer(0, value); }
       }
 
-      public CompositeList<Import> imports
+      public global::CapnpNet.FlatArray<Import> imports
       {
-        get { return _s.DereferenceCompositeList<Import>(1); }
-        set { _s.WritePointer(1, value); }
+        get { return new global::CapnpNet.FlatArray<Import>(_s.DereferenceAbsPointer(1)); }
+        set { _s.WritePointer(1, value.Pointer); }
       }
 
       public struct Import : global::CapnpNet.IStruct
@@ -1388,13 +1468,18 @@ namespace CapnpNet.Schema
           get { return _s; }
         }
 
+        global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+        {
+          get { return _s.Pointer; }
+        }
+
         public ulong id
         {
           get { return _s.ReadUInt64(0); }
           set { _s.WriteUInt64(0, value); }
         }
 
-        public Text name
+        public global::CapnpNet.Text name
         {
           get { return _s.DereferenceText(0); }
           set { _s.WritePointer(0, value); }
