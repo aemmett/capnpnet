@@ -1,795 +1,15 @@
-using CapnpNet;
-
 namespace CapnpNet.Rpc
 {
-  public struct ThirdPartyCapDescriptor : IStruct
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Message : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 1;
     public const int KNOWN_POINTER_WORDS = 1;
     private global::CapnpNet.Struct _s;
-    public ThirdPartyCapDescriptor(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    public Message(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
     {
     }
 
-    public ThirdPartyCapDescriptor(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public ThirdPartyCapDescriptor(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public Pointer id
-    {
-      get { return _s.ReadRawPointer(0); }
-      set { _s.WriteRawPointer(0, value); }
-    }
-
-    public uint vineId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-  }
-
-  public struct Return : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 2;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Return(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Return(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Return(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public enum Union : ushort
-    {
-      results = 0,
-      exception = 1,
-      canceled = 2,
-      resultsSentElsewhere = 3,
-      takeFromOtherQuestion = 4,
-      acceptFromThirdParty = 5,
-    }
-
-    public bool Is(out Payload results)
-    {
-      var ret = this.which == Union.results;
-      results = ret ? this.results : default (Payload);
-      return ret;
-    }
-
-    public bool Is(out Exception exception)
-    {
-      var ret = this.which == Union.exception;
-      exception = ret ? this.exception : default (Exception);
-      return ret;
-    }
-
-    public Union which
-    {
-      get { return (Union)_s.ReadUInt16(3); }
-      set { _s.WriteUInt16(3, (ushort)value); }
-    }
-
-    public uint answerId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public bool releaseParamCaps
-    {
-      get { return _s.ReadBool(32, true); }
-      set { _s.WriteBool(32, value, true); }
-    }
-
-    public Payload results
-    {
-      get { return _s.DereferenceStruct<Payload>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public Exception exception
-    {
-      get { return _s.DereferenceStruct<Exception>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public uint takeFromOtherQuestion
-    {
-      get { return _s.ReadUInt32(2); }
-      set { _s.WriteUInt32(2, value); }
-    }
-
-    public Pointer acceptFromThirdParty
-    {
-      get { return _s.ReadRawPointer(0); }
-      set { _s.WriteRawPointer(0, value); }
-    }
-  }
-
-  public struct Provide : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 2;
-    private global::CapnpNet.Struct _s;
-    public Provide(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Provide(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Provide(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public uint questionId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public MessageTarget target
-    {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public Pointer recipient
-    {
-      get { return _s.ReadRawPointer(1); }
-      set { _s.WriteRawPointer(1, value); }
-    }
-  }
-
-  public struct Call : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 3;
-    public const int KNOWN_POINTER_WORDS = 3;
-    private global::CapnpNet.Struct _s;
-    public Call(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Call(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Call(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public uint questionId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public MessageTarget target
-    {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public ulong interfaceId
-    {
-      get { return _s.ReadUInt64(1); }
-      set { _s.WriteUInt64(1, value); }
-    }
-
-    public ushort methodId
-    {
-      get { return _s.ReadUInt16(2); }
-      set { _s.WriteUInt16(2, value); }
-    }
-
-    public bool allowThirdPartyTailCall
-    {
-      get { return _s.ReadBool(128); }
-      set { _s.WriteBool(128, value); }
-    }
-
-    public Payload @params
-    {
-      get { return _s.DereferenceStruct<Payload>(1); }
-      set { _s.WritePointer(1, value); }
-    }
-
-    public sendResultsToGroup sendResultsTo => new sendResultsToGroup(_s);
-    public struct sendResultsToGroup
-    {
-      private readonly global::CapnpNet.Struct _s;
-      public sendResultsToGroup(global::CapnpNet.Struct s) { _s = s; }
-      public enum Union : ushort
-      {
-        caller = 0,
-        yourself = 1,
-        thirdParty = 2,
-      }
-
-      public Union which
-      {
-        get { return (Union)_s.ReadUInt16(3); }
-        set { _s.WriteUInt16(3, (ushort)value); }
-      }
-
-      public Pointer thirdParty
-      {
-        get { return _s.ReadRawPointer(2); }
-        set { _s.WriteRawPointer(2, value); }
-      }
-    }
-  }
-
-  public struct Join : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 2;
-    private global::CapnpNet.Struct _s;
-    public Join(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Join(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Join(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public uint questionId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public MessageTarget target
-    {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public Pointer keyPart
-    {
-      get { return _s.ReadRawPointer(1); }
-      set { _s.WriteRawPointer(1, value); }
-    }
-  }
-
-  public struct Finish : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 0;
-    private global::CapnpNet.Struct _s;
-    public Finish(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Finish(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Finish(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public uint questionId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public bool releaseResultCaps
-    {
-      get { return _s.ReadBool(32, true); }
-      set { _s.WriteBool(32, value, true); }
-    }
-  }
-
-  public struct Resolve : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Resolve(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Resolve(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Resolve(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public enum Union : ushort
-    {
-      cap = 0,
-      exception = 1,
-    }
-
-    public bool Is(out CapDescriptor cap)
-    {
-      var ret = this.which == Union.cap;
-      cap = ret ? this.cap : default (CapDescriptor);
-      return ret;
-    }
-
-    public bool Is(out Exception exception)
-    {
-      var ret = this.which == Union.exception;
-      exception = ret ? this.exception : default (Exception);
-      return ret;
-    }
-
-    public Union which
-    {
-      get { return (Union)_s.ReadUInt16(2); }
-      set { _s.WriteUInt16(2, (ushort)value); }
-    }
-
-    public uint promiseId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public CapDescriptor cap
-    {
-      get { return _s.DereferenceStruct<CapDescriptor>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public Exception exception
-    {
-      get { return _s.DereferenceStruct<Exception>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-  }
-
-  public struct Release : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 0;
-    private global::CapnpNet.Struct _s;
-    public Release(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Release(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Release(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public uint id
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public uint referenceCount
-    {
-      get { return _s.ReadUInt32(1); }
-      set { _s.WriteUInt32(1, value); }
-    }
-  }
-
-  public struct Exception : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Exception(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Exception(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Exception(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public Text reason
-    {
-      get { return _s.DereferenceText(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public Type type
-    {
-      get { return (Type)_s.ReadUInt16(2); }
-      set { _s.WriteUInt16(2, (ushort)value); }
-    }
-
-    public bool obsoleteIsCallersFault
-    {
-      get { return _s.ReadBool(0); }
-      set { _s.WriteBool(0, value); }
-    }
-
-    public ushort obsoleteDurability
-    {
-      get { return _s.ReadUInt16(1); }
-      set { _s.WriteUInt16(1, value); }
-    }
-
-    public enum Type : ushort
-    {
-      failed = 0,
-      overloaded = 1,
-      disconnected = 2,
-      unimplemented = 3
-    }
-  }
-
-  public struct Bootstrap : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Bootstrap(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Bootstrap(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Bootstrap(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public uint questionId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public Pointer deprecatedObjectId
-    {
-      get { return _s.ReadRawPointer(0); }
-      set { _s.WriteRawPointer(0, value); }
-    }
-  }
-
-  public struct Disembargo : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Disembargo(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Disembargo(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Disembargo(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public MessageTarget target
-    {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public contextGroup context => new contextGroup(_s);
-    public struct contextGroup
-    {
-      private readonly global::CapnpNet.Struct _s;
-      public contextGroup(global::CapnpNet.Struct s) { _s = s; }
-      public enum Union : ushort
-      {
-        senderLoopback = 0,
-        receiverLoopback = 1,
-        accept = 2,
-        provide = 3,
-      }
-
-      public Union which
-      {
-        get { return (Union)_s.ReadUInt16(2); }
-        set { _s.WriteUInt16(2, (ushort)value); }
-      }
-
-      public uint senderLoopback
-      {
-        get { return _s.ReadUInt32(0); }
-        set { _s.WriteUInt32(0, value); }
-      }
-
-      public uint receiverLoopback
-      {
-        get { return _s.ReadUInt32(0); }
-        set { _s.WriteUInt32(0, value); }
-      }
-
-      public uint provide
-      {
-        get { return _s.ReadUInt32(0); }
-        set { _s.WriteUInt32(0, value); }
-      }
-    }
-  }
-
-  public struct MessageTarget : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public MessageTarget(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public MessageTarget(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public MessageTarget(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public enum Union : ushort
-    {
-      importedCap = 0,
-      promisedAnswer = 1,
-    }
-
-    public bool Is(out PromisedAnswer promisedAnswer)
-    {
-      var ret = this.which == Union.promisedAnswer;
-      promisedAnswer = ret ? this.promisedAnswer : default (PromisedAnswer);
-      return ret;
-    }
-
-    public Union which
-    {
-      get { return (Union)_s.ReadUInt16(2); }
-      set { _s.WriteUInt16(2, (ushort)value); }
-    }
-
-    public uint importedCap
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public PromisedAnswer promisedAnswer
-    {
-      get { return _s.DereferenceStruct<PromisedAnswer>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-  }
-
-  public struct Payload : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 0;
-    public const int KNOWN_POINTER_WORDS = 2;
-    private global::CapnpNet.Struct _s;
-    public Payload(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Payload(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Payload(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public AbsPointer content
-    {
-      get { return _s.DereferenceAbsPointer(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public CompositeList<CapDescriptor> capTable
-    {
-      get { return _s.DereferenceCompositeList<CapDescriptor>(1); }
-      set { _s.WritePointer(1, value); }
-    }
-  }
-
-  public struct Accept : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-    public Accept(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public Accept(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public Accept(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public uint questionId
-    {
-      get { return _s.ReadUInt32(0); }
-      set { _s.WriteUInt32(0, value); }
-    }
-
-    public Pointer provision
-    {
-      get { return _s.ReadRawPointer(0); }
-      set { _s.WriteRawPointer(0, value); }
-    }
-
-    public bool embargo
-    {
-      get { return _s.ReadBool(32); }
-      set { _s.WriteBool(32, value); }
-    }
-  }
-
-  public struct CapDescriptor : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
-
-    public CapDescriptor(ref AllocationContext allocContext) : this(allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
-    {
-    }
-
-    public CapDescriptor(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
-    {
-    }
-
-    public CapDescriptor(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
-    {
-    }
-
-    public CapDescriptor(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
-    {
-      get { return _s; }
-      set { _s = value; }
-    }
-
-    public static CompositeList<CapDescriptor> List(global::CapnpNet.Message msg, int count)
-    {
-      return new CompositeList<CapDescriptor>(msg, new StructPointer
-      {
-        Type = PointerType.Struct,
-        WordOffset = count,
-        DataWords = KNOWN_DATA_WORDS,
-        PointerWords = KNOWN_POINTER_WORDS
-      });
-    }
-
-    public enum Union : ushort
-    {
-      none = 0,
-      senderHosted = 1,
-      senderPromise = 2,
-      receiverHosted = 3,
-      receiverAnswer = 4,
-      thirdPartyHosted = 5,
-    }
-
-    public bool Is(out PromisedAnswer receiverAnswer)
-    {
-      var ret = this.which == Union.receiverAnswer;
-      receiverAnswer = ret ? this.receiverAnswer : default (PromisedAnswer);
-      return ret;
-    }
-
-    public bool Is(out ThirdPartyCapDescriptor thirdPartyHosted)
-    {
-      var ret = this.which == Union.thirdPartyHosted;
-      thirdPartyHosted = ret ? this.thirdPartyHosted : default (ThirdPartyCapDescriptor);
-      return ret;
-    }
-
-    public Union which
-    {
-      get { return (Union)_s.ReadUInt16(0); }
-      set { _s.WriteUInt16(0, (ushort)value); }
-    }
-
-    public uint senderHosted
-    {
-      get { return _s.ReadUInt32(1); }
-      set { _s.WriteUInt32(1, value); }
-    }
-
-    public uint senderPromise
-    {
-      get { return _s.ReadUInt32(1); }
-      set { _s.WriteUInt32(1, value); }
-    }
-
-    public uint receiverHosted
-    {
-      get { return _s.ReadUInt32(1); }
-      set { _s.WriteUInt32(1, value); }
-    }
-
-    public PromisedAnswer receiverAnswer
-    {
-      get { return _s.DereferenceStruct<PromisedAnswer>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-
-    public ThirdPartyCapDescriptor thirdPartyHosted
-    {
-      get { return _s.DereferenceStruct<ThirdPartyCapDescriptor>(0); }
-      set { _s.WritePointer(0, value); }
-    }
-  }
-
-  public struct Message : IStruct
-  {
-    public const int KNOWN_DATA_WORDS = 1;
-    public const int KNOWN_POINTER_WORDS = 1;
-    private global::CapnpNet.Struct _s;
     public Message(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
     {
     }
@@ -799,10 +19,14 @@ namespace CapnpNet.Rpc
     }
 
     public Message(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
     }
 
     public enum Union : ushort
@@ -967,16 +191,16 @@ namespace CapnpNet.Rpc
       set { _s.WritePointer(0, value); }
     }
 
-    public Pointer obsoleteSave
+    public global::CapnpNet.AbsPointer obsoleteSave
     {
-      get { return _s.ReadRawPointer(0); }
-      set { _s.WriteRawPointer(0, value); }
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
     }
 
-    public Pointer obsoleteDelete
+    public global::CapnpNet.AbsPointer obsoleteDelete
     {
-      get { return _s.ReadRawPointer(0); }
-      set { _s.WriteRawPointer(0, value); }
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
     }
 
     public Provide provide
@@ -998,11 +222,814 @@ namespace CapnpNet.Rpc
     }
   }
 
-  public struct PromisedAnswer : IStruct
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Bootstrap : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 1;
     public const int KNOWN_POINTER_WORDS = 1;
     private global::CapnpNet.Struct _s;
+    public Bootstrap(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Bootstrap(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Bootstrap(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Bootstrap(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public uint questionId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public global::CapnpNet.AbsPointer deprecatedObjectId
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Call : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 3;
+    public const int KNOWN_POINTER_WORDS = 3;
+    private global::CapnpNet.Struct _s;
+    public Call(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Call(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Call(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Call(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public uint questionId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public MessageTarget target
+    {
+      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public ulong interfaceId
+    {
+      get { return _s.ReadUInt64(1); }
+      set { _s.WriteUInt64(1, value); }
+    }
+
+    public ushort methodId
+    {
+      get { return _s.ReadUInt16(2); }
+      set { _s.WriteUInt16(2, value); }
+    }
+
+    public bool allowThirdPartyTailCall
+    {
+      get { return _s.ReadBool(128); }
+      set { _s.WriteBool(128, value); }
+    }
+
+    public Payload @params
+    {
+      get { return _s.DereferenceStruct<Payload>(1); }
+      set { _s.WritePointer(1, value); }
+    }
+
+    public sendResultsToGroup sendResultsTo => new sendResultsToGroup(_s);
+    public struct sendResultsToGroup
+    {
+      private readonly global::CapnpNet.Struct _s;
+      public sendResultsToGroup(global::CapnpNet.Struct s) { _s = s; }
+      public enum Union : ushort
+      {
+        caller = 0,
+        yourself = 1,
+        thirdParty = 2,
+      }
+
+      public Union which
+      {
+        get { return (Union)_s.ReadUInt16(3); }
+        set { _s.WriteUInt16(3, (ushort)value); }
+      }
+
+      public global::CapnpNet.AbsPointer thirdParty
+      {
+        get { return _s.DereferenceAbsPointer(2); }
+        set { _s.WritePointer(2, value); }
+      }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Return : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 2;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Return(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Return(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Return(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Return(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public enum Union : ushort
+    {
+      results = 0,
+      exception = 1,
+      canceled = 2,
+      resultsSentElsewhere = 3,
+      takeFromOtherQuestion = 4,
+      acceptFromThirdParty = 5,
+    }
+
+    public bool Is(out Payload results)
+    {
+      var ret = this.which == Union.results;
+      results = ret ? this.results : default (Payload);
+      return ret;
+    }
+
+    public bool Is(out Exception exception)
+    {
+      var ret = this.which == Union.exception;
+      exception = ret ? this.exception : default (Exception);
+      return ret;
+    }
+
+    public Union which
+    {
+      get { return (Union)_s.ReadUInt16(3); }
+      set { _s.WriteUInt16(3, (ushort)value); }
+    }
+
+    public uint answerId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public bool releaseParamCaps
+    {
+      get { return _s.ReadBool(32, true); }
+      set { _s.WriteBool(32, value, true); }
+    }
+
+    public Payload results
+    {
+      get { return _s.DereferenceStruct<Payload>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public Exception exception
+    {
+      get { return _s.DereferenceStruct<Exception>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public uint takeFromOtherQuestion
+    {
+      get { return _s.ReadUInt32(2); }
+      set { _s.WriteUInt32(2, value); }
+    }
+
+    public global::CapnpNet.AbsPointer acceptFromThirdParty
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Finish : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 0;
+    private global::CapnpNet.Struct _s;
+    public Finish(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Finish(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Finish(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Finish(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public uint questionId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public bool releaseResultCaps
+    {
+      get { return _s.ReadBool(32, true); }
+      set { _s.WriteBool(32, value, true); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Resolve : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Resolve(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Resolve(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Resolve(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Resolve(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public enum Union : ushort
+    {
+      cap = 0,
+      exception = 1,
+    }
+
+    public bool Is(out CapDescriptor cap)
+    {
+      var ret = this.which == Union.cap;
+      cap = ret ? this.cap : default (CapDescriptor);
+      return ret;
+    }
+
+    public bool Is(out Exception exception)
+    {
+      var ret = this.which == Union.exception;
+      exception = ret ? this.exception : default (Exception);
+      return ret;
+    }
+
+    public Union which
+    {
+      get { return (Union)_s.ReadUInt16(2); }
+      set { _s.WriteUInt16(2, (ushort)value); }
+    }
+
+    public uint promiseId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public CapDescriptor cap
+    {
+      get { return _s.DereferenceStruct<CapDescriptor>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public Exception exception
+    {
+      get { return _s.DereferenceStruct<Exception>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Release : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 0;
+    private global::CapnpNet.Struct _s;
+    public Release(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Release(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Release(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Release(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public uint id
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public uint referenceCount
+    {
+      get { return _s.ReadUInt32(1); }
+      set { _s.WriteUInt32(1, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Disembargo : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Disembargo(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Disembargo(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Disembargo(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Disembargo(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public MessageTarget target
+    {
+      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public contextGroup context => new contextGroup(_s);
+    public struct contextGroup
+    {
+      private readonly global::CapnpNet.Struct _s;
+      public contextGroup(global::CapnpNet.Struct s) { _s = s; }
+      public enum Union : ushort
+      {
+        senderLoopback = 0,
+        receiverLoopback = 1,
+        accept = 2,
+        provide = 3,
+      }
+
+      public Union which
+      {
+        get { return (Union)_s.ReadUInt16(2); }
+        set { _s.WriteUInt16(2, (ushort)value); }
+      }
+
+      public uint senderLoopback
+      {
+        get { return _s.ReadUInt32(0); }
+        set { _s.WriteUInt32(0, value); }
+      }
+
+      public uint receiverLoopback
+      {
+        get { return _s.ReadUInt32(0); }
+        set { _s.WriteUInt32(0, value); }
+      }
+
+      public uint provide
+      {
+        get { return _s.ReadUInt32(0); }
+        set { _s.WriteUInt32(0, value); }
+      }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Provide : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public Provide(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Provide(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Provide(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Provide(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public uint questionId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public MessageTarget target
+    {
+      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public global::CapnpNet.AbsPointer recipient
+    {
+      get { return _s.DereferenceAbsPointer(1); }
+      set { _s.WritePointer(1, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Accept : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Accept(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Accept(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Accept(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Accept(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public uint questionId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public global::CapnpNet.AbsPointer provision
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public bool embargo
+    {
+      get { return _s.ReadBool(32); }
+      set { _s.WriteBool(32, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Join : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public Join(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Join(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Join(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Join(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public uint questionId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public MessageTarget target
+    {
+      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public global::CapnpNet.AbsPointer keyPart
+    {
+      get { return _s.DereferenceAbsPointer(1); }
+      set { _s.WritePointer(1, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct MessageTarget : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public MessageTarget(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public MessageTarget(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public MessageTarget(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public MessageTarget(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public enum Union : ushort
+    {
+      importedCap = 0,
+      promisedAnswer = 1,
+    }
+
+    public bool Is(out PromisedAnswer promisedAnswer)
+    {
+      var ret = this.which == Union.promisedAnswer;
+      promisedAnswer = ret ? this.promisedAnswer : default (PromisedAnswer);
+      return ret;
+    }
+
+    public Union which
+    {
+      get { return (Union)_s.ReadUInt16(2); }
+      set { _s.WriteUInt16(2, (ushort)value); }
+    }
+
+    public uint importedCap
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+
+    public PromisedAnswer promisedAnswer
+    {
+      get { return _s.DereferenceStruct<PromisedAnswer>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Payload : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 0;
+    public const int KNOWN_POINTER_WORDS = 2;
+    private global::CapnpNet.Struct _s;
+    public Payload(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Payload(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Payload(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Payload(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public global::CapnpNet.AbsPointer content
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public global::CapnpNet.FlatArray<CapDescriptor> capTable
+    {
+      get { return new global::CapnpNet.FlatArray<CapDescriptor>(_s.DereferenceAbsPointer(1)); }
+      set { _s.WritePointer(1, value.Pointer); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct CapDescriptor : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public CapDescriptor(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public CapDescriptor(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public CapDescriptor(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public CapDescriptor(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public enum Union : ushort
+    {
+      none = 0,
+      senderHosted = 1,
+      senderPromise = 2,
+      receiverHosted = 3,
+      receiverAnswer = 4,
+      thirdPartyHosted = 5,
+    }
+
+    public bool Is(out PromisedAnswer receiverAnswer)
+    {
+      var ret = this.which == Union.receiverAnswer;
+      receiverAnswer = ret ? this.receiverAnswer : default (PromisedAnswer);
+      return ret;
+    }
+
+    public bool Is(out ThirdPartyCapDescriptor thirdPartyHosted)
+    {
+      var ret = this.which == Union.thirdPartyHosted;
+      thirdPartyHosted = ret ? this.thirdPartyHosted : default (ThirdPartyCapDescriptor);
+      return ret;
+    }
+
+    public Union which
+    {
+      get { return (Union)_s.ReadUInt16(0); }
+      set { _s.WriteUInt16(0, (ushort)value); }
+    }
+
+    public uint senderHosted
+    {
+      get { return _s.ReadUInt32(1); }
+      set { _s.WriteUInt32(1, value); }
+    }
+
+    public uint senderPromise
+    {
+      get { return _s.ReadUInt32(1); }
+      set { _s.WriteUInt32(1, value); }
+    }
+
+    public uint receiverHosted
+    {
+      get { return _s.ReadUInt32(1); }
+      set { _s.WriteUInt32(1, value); }
+    }
+
+    public PromisedAnswer receiverAnswer
+    {
+      get { return _s.DereferenceStruct<PromisedAnswer>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public ThirdPartyCapDescriptor thirdPartyHosted
+    {
+      get { return _s.DereferenceStruct<ThirdPartyCapDescriptor>(0); }
+      set { _s.WritePointer(0, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct PromisedAnswer : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public PromisedAnswer(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
     public PromisedAnswer(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
     {
     }
@@ -1012,10 +1039,14 @@ namespace CapnpNet.Rpc
     }
 
     public PromisedAnswer(global::CapnpNet.Struct s) { _s = s; }
-    global::CapnpNet.Struct IStruct.Struct
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
     }
 
     public uint questionId
@@ -1024,17 +1055,22 @@ namespace CapnpNet.Rpc
       set { _s.WriteUInt32(0, value); }
     }
 
-    public CompositeList<Op> transform
+    public global::CapnpNet.FlatArray<Op> transform
     {
-      get { return _s.DereferenceCompositeList<Op>(0); }
-      set { _s.WritePointer(0, value); }
+      get { return new global::CapnpNet.FlatArray<Op>(_s.DereferenceAbsPointer(0)); }
+      set { _s.WritePointer(0, value.Pointer); }
     }
 
-    public struct Op : IStruct
+    [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+    public struct Op : global::CapnpNet.IStruct
     {
       public const int KNOWN_DATA_WORDS = 1;
       public const int KNOWN_POINTER_WORDS = 0;
       private global::CapnpNet.Struct _s;
+      public Op(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+      {
+      }
+
       public Op(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
       {
       }
@@ -1044,10 +1080,14 @@ namespace CapnpNet.Rpc
       }
 
       public Op(global::CapnpNet.Struct s) { _s = s; }
-      global::CapnpNet.Struct IStruct.Struct
+      global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
       {
         get { return _s; }
-        set { _s = value; }
+      }
+
+      global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+      {
+        get { return _s.Pointer; }
       }
 
       public enum Union : ushort
@@ -1067,6 +1107,110 @@ namespace CapnpNet.Rpc
         get { return _s.ReadUInt16(1); }
         set { _s.WriteUInt16(1, value); }
       }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct ThirdPartyCapDescriptor : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public ThirdPartyCapDescriptor(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public ThirdPartyCapDescriptor(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public ThirdPartyCapDescriptor(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public ThirdPartyCapDescriptor(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public global::CapnpNet.AbsPointer id
+    {
+      get { return _s.DereferenceAbsPointer(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public uint vineId
+    {
+      get { return _s.ReadUInt32(0); }
+      set { _s.WriteUInt32(0, value); }
+    }
+  }
+
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
+  public struct Exception : global::CapnpNet.IStruct
+  {
+    public const int KNOWN_DATA_WORDS = 1;
+    public const int KNOWN_POINTER_WORDS = 1;
+    private global::CapnpNet.Struct _s;
+    public Exception(ref global::CapnpNet.AllocationContext allocContext) : this (allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS))
+    {
+    }
+
+    public Exception(global::CapnpNet.Message m) : this (m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)
+    {
+    }
+
+    public Exception(global::CapnpNet.Message m, ushort dataWords, ushort pointers) : this (m.Allocate(dataWords, pointers))
+    {
+    }
+
+    public Exception(global::CapnpNet.Struct s) { _s = s; }
+    global::CapnpNet.Struct global::CapnpNet.IStruct.Struct
+    {
+      get { return _s; }
+    }
+
+    global::CapnpNet.AbsPointer global::CapnpNet.IAbsPointer.Pointer
+    {
+      get { return _s.Pointer; }
+    }
+
+    public global::CapnpNet.Text reason
+    {
+      get { return _s.DereferenceText(0); }
+      set { _s.WritePointer(0, value); }
+    }
+
+    public Type type
+    {
+      get { return (Type)_s.ReadUInt16(2); }
+      set { _s.WriteUInt16(2, (ushort)value); }
+    }
+
+    public bool obsoleteIsCallersFault
+    {
+      get { return _s.ReadBool(0); }
+      set { _s.WriteBool(0, value); }
+    }
+
+    public ushort obsoleteDurability
+    {
+      get { return _s.ReadUInt16(1); }
+      set { _s.WriteUInt16(1, value); }
+    }
+
+    public enum Type : ushort
+    {
+      failed = 0,
+      overloaded = 1,
+      disconnected = 2,
+      unimplemented = 3
     }
   }
 }

@@ -222,6 +222,11 @@ namespace CapnpNet
       }
     }
 
+    public void Add(T element)
+    {
+      // TODO: check if element is within list?
+    }
+
     public Enumerator GetEnumerator() => new Enumerator(this);
 
     IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();

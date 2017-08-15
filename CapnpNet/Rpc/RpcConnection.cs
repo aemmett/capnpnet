@@ -146,7 +146,7 @@ namespace CapnpNet.Rpc
                 OtherPointerType = OtherPointerType.Capability,
                 CapabilityId = 0
               },
-              capTable = new CompositeList<CapDescriptor>(reply, 1, out AllocationContext allocContext)
+              capTable = new FlatArray<CapDescriptor>(reply, 1, out AllocationContext allocContext)
               {
                 new CapDescriptor(ref allocContext)
                 {
@@ -262,7 +262,7 @@ namespace CapnpNet.Rpc
       }
     }
 
-    internal CompositeList<CapDescriptor> CreateCapDescList(CapnpNet.Message msg)
+    internal FlatArray<CapDescriptor> CreateCapDescList(CapnpNet.Message msg)
     {
       var caps = msg.LocalCaps;
       var count = 0;
@@ -271,7 +271,7 @@ namespace CapnpNet.Rpc
         count += caps[i].RefCount > 0 ? 1 : 0;
       }
 
-      var list = new CompositeList<CapDescriptor>(msg, count, out var allocContext);
+      var list = new FlatArray<CapDescriptor>(msg, count, out var allocContext);
       
       for (uint i = 0; i < caps.Count; i++)
       {

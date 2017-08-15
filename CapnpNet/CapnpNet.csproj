@@ -93,6 +93,8 @@
     <Compile Include="Rpc\ICapability.cs" />
     <Compile Include="Rpc\ImportTable.cs" />
     <Compile Include="Rpc\MessageStream.cs" />
+    <Compile Include="Rpc\RpcConnection.cs" />
+    <Compile Include="Rpc\Schemas\rpc.g.cs" />
     <Compile Include="SafeBufferReleaser.cs" />
     <Compile Include="SegmentFactory.cs" />
     <Compile Include="Message.cs" />
@@ -111,9 +113,7 @@
     <Compile Include="Message.Framing.cs" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Rpc\Schemas\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
