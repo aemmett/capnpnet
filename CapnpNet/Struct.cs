@@ -183,7 +183,7 @@ namespace CapnpNet
         
         if (ptr.Type == PointerType.Struct)
         {
-          size += this.DereferenceRawStruct(i).CalculateSize();
+          size += this.DereferencePointer<Struct>(i).CalculateSize();
         }
         else if (ptr.Is(out ListPointer list))
         {
@@ -298,130 +298,9 @@ namespace CapnpNet
       }
 
       // TODO: how to handle default?
-      throw new NotImplementedException();
-    }
-
-    public AbsPointer DereferenceAbsPointer(int pointerIndex)
-    {
-      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
-      {
-        return new AbsPointer(targetSegment, baseOffset, pointer);
-      }
-
-      // TODO: how to handle default?
       return default;
     }
-
-    public Struct DereferenceRawStruct(int pointerIndex)
-    {
-      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
-      {
-        return new Struct(targetSegment, baseOffset, (StructPointer)pointer);
-      }
-
-      // TODO: how to handle default?
-      return new Struct();
-    }
-
-    public T DereferenceStruct<T>(int pointerIndex) where T : struct, IStruct
-    {
-      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
-      {
-        var s = new Struct(targetSegment, baseOffset, (StructPointer)pointer);
-        return Unsafe.As<Struct, T>(ref s);
-      }
-
-      // TODO: how to handle default?
-      return default;
-    }
-
-    public Text DereferenceText(int pointerIndex)
-    {
-      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
-      {
-        var listPointer = (ListPointer)pointer;
-        TypeHelpers.AssertSize<byte>(listPointer.ElementSize);
-
-        return new Text(targetSegment, baseOffset, listPointer);
-      }
-
-      // TODO: how to handle default?
-      return new Text();
-    }
-
-    public PrimitiveList<T> DereferenceList<T>(int pointerIndex)
-      where T : struct
-    {
-      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
-      {
-        var listPointer = (ListPointer)pointer;
-
-        if (listPointer.ElementSize == ElementSize.Zero) return new PrimitiveList<T>(); // ummm...
-
-        TypeHelpers.AssertSize<T>(listPointer.ElementSize);
-
-        return new PrimitiveList<T>(targetSegment, baseOffset, listPointer);
-      }
-
-      // TODO: how to handle default?
-      return new PrimitiveList<T>();
-    }
-
-    public BoolList DereferenceBoolList(int pointerIndex)
-    {
-      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
-      {
-        var listPointer = (ListPointer)pointer;
-
-        if (listPointer.ElementSize != ElementSize.OneBit) throw new ArgumentException($"Expected list with element size of one bit, but found {pointer.ElementSize}");
-      
-        return new BoolList(
-          targetSegment,
-          baseOffset,
-          listPointer);
-      }
-
-      // TODO: how to handle default?
-      return new BoolList();
-    }
-
-    public CompositeList<T> DereferenceCompositeList<T>(int pointerIndex) where T : struct, IStruct
-    {
-      if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
-      {
-        var listPointer = (ListPointer)pointer;
-
-        if (listPointer.ElementSize != ElementSize.Composite) throw new ArgumentException($"Expected composite list, but found {listPointer.ElementSize} list");
-      
-        return new CompositeList<T>(
-          targetSegment,
-          baseOffset,
-          listPointer);
-      }
-
-      // TODO: how to handle default?
-      return new CompositeList<T>();
-    }
-
-    public T ReadInterface<T>(int pointerIndex) where T : ICapability
-    {
-      if (pointerIndex >= this.PointerWords)
-      {
-        return default;
-      }
-
-      ref Pointer otherPointer = ref this.GetPointer(pointerIndex);
-      if (otherPointer == default) throw new NotSupportedException(); // TODO: default?
-
-      if (otherPointer.Type != PointerType.Other
-        || otherPointer.OtherPointerType != OtherPointerType.Capability)
-      {
-        throw new InvalidOperationException("Pointer is not a capability pointer");
-      }
-
-      return (T)this.Segment.Message.LocalCaps[otherPointer.CapabilityId].Capability;
-    }
-
+    
     // TODO: replace with AbsPointer
     private bool DereferenceCore(int pointerIndex, out Pointer pointer, out int baseOffset, out Segment targetSegment)
     {
@@ -515,77 +394,6 @@ namespace CapnpNet
 
       this.GetPointer(pointerIndex) = pointer;
     }
-
-    public void WritePointer<T>(int pointerIndex, PrimitiveList<T> dest)
-      where T : struct
-    {
-      this.WritePointerCore(
-        pointerIndex,
-        dest.Segment,
-        dest.ListWordOffset,
-        new ListPointer
-        {
-          Type = PointerType.List,
-          ElementSize = TypeHelpers.ToElementSize<T>(),
-          ElementCount = (uint)dest.Count,
-        });
-    }
-
-    public void WritePointer(int pointerIndex, Text dest)
-    {
-      this.WritePointerCore(
-        pointerIndex,
-        dest.Segment,
-        dest.ListWordOffset,
-        new ListPointer
-        {
-          Type = PointerType.List,
-          ElementSize = ElementSize.OneByte,
-          ElementCount = (uint)dest.ByteLength,
-        });
-    }
-
-    public void WritePointer(int pointerIndex, BoolList dest)
-    {
-      this.WritePointerCore(
-        pointerIndex,
-        dest.Segment,
-        dest.ListWordOffset,
-        new ListPointer
-        {
-          Type = PointerType.List,
-          ElementSize = ElementSize.OneBit,
-          ElementCount = (uint)dest.Count,
-        });
-    }
-
-    public void WritePointer<T>(int pointerIndex, CompositeList<T> dest) where T : struct, IStruct
-    {
-      this.WritePointerCore(
-        pointerIndex,
-        dest.Segment,
-        dest.TagWordOffset,
-        new ListPointer
-        {
-          Type = PointerType.List,
-          ElementSize = ElementSize.Composite,
-          ElementCount = (uint)dest.Count,
-        });
-    }
-    
-    public void WritePointer(int pointerIndex, Struct s)
-    {
-      this.WritePointerCore(
-        pointerIndex,
-        s.Segment,
-        s.StructWordOffset,
-        new StructPointer
-        {
-          Type = PointerType.Struct,
-          DataWords = s.DataWords,
-          PointerWords = s.PointerWords,
-        });
-    }
     
     public void WritePointer<T>(int pointerIndex, T dest)
       where T : IAbsPointer
@@ -632,16 +440,7 @@ namespace CapnpNet
 
       _segment[_structWordOffset + this.DataWords + pointerIndex | Word.unit] = p.RawValue;
     }
-
-    public void WritePointer(int pointerIndex, AbsPointer p)
-    {
-      this.WritePointerCore(
-        pointerIndex,
-        p.Segment,
-        p.DataOffset,
-        p.Tag);
-    }
-
+    
     private void WritePointerCore(int pointerIndex, Segment destSegment, int absOffset, Pointer tag)
     {
       if (pointerIndex < 0 || pointerIndex >= this.PointerWords)

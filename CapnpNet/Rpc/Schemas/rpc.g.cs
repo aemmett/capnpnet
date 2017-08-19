@@ -139,85 +139,85 @@ namespace CapnpNet.Rpc
 
     public Message unimplemented
     {
-      get { return _s.DereferenceStruct<Message>(0); }
+      get { return _s.DereferencePointer<Message>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Exception abort
     {
-      get { return _s.DereferenceStruct<Exception>(0); }
+      get { return _s.DereferencePointer<Exception>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Bootstrap bootstrap
     {
-      get { return _s.DereferenceStruct<Bootstrap>(0); }
+      get { return _s.DereferencePointer<Bootstrap>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Call call
     {
-      get { return _s.DereferenceStruct<Call>(0); }
+      get { return _s.DereferencePointer<Call>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Return @return
     {
-      get { return _s.DereferenceStruct<Return>(0); }
+      get { return _s.DereferencePointer<Return>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Finish finish
     {
-      get { return _s.DereferenceStruct<Finish>(0); }
+      get { return _s.DereferencePointer<Finish>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Resolve resolve
     {
-      get { return _s.DereferenceStruct<Resolve>(0); }
+      get { return _s.DereferencePointer<Resolve>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Release release
     {
-      get { return _s.DereferenceStruct<Release>(0); }
+      get { return _s.DereferencePointer<Release>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Disembargo disembargo
     {
-      get { return _s.DereferenceStruct<Disembargo>(0); }
+      get { return _s.DereferencePointer<Disembargo>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer obsoleteSave
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer obsoleteDelete
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Provide provide
     {
-      get { return _s.DereferenceStruct<Provide>(0); }
+      get { return _s.DereferencePointer<Provide>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Accept accept
     {
-      get { return _s.DereferenceStruct<Accept>(0); }
+      get { return _s.DereferencePointer<Accept>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Join join
     {
-      get { return _s.DereferenceStruct<Join>(0); }
+      get { return _s.DereferencePointer<Join>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -259,7 +259,7 @@ namespace CapnpNet.Rpc
 
     public global::CapnpNet.AbsPointer deprecatedObjectId
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -301,7 +301,7 @@ namespace CapnpNet.Rpc
 
     public MessageTarget target
     {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      get { return _s.DereferencePointer<MessageTarget>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -325,7 +325,7 @@ namespace CapnpNet.Rpc
 
     public Payload @params
     {
-      get { return _s.DereferenceStruct<Payload>(1); }
+      get { return _s.DereferencePointer<Payload>(1); }
       set { _s.WritePointer(1, value); }
     }
 
@@ -349,7 +349,7 @@ namespace CapnpNet.Rpc
 
       public global::CapnpNet.AbsPointer thirdParty
       {
-        get { return _s.DereferenceAbsPointer(2); }
+        get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(2); }
         set { _s.WritePointer(2, value); }
       }
     }
@@ -428,13 +428,13 @@ namespace CapnpNet.Rpc
 
     public Payload results
     {
-      get { return _s.DereferenceStruct<Payload>(0); }
+      get { return _s.DereferencePointer<Payload>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Exception exception
     {
-      get { return _s.DereferenceStruct<Exception>(0); }
+      get { return _s.DereferencePointer<Exception>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -446,7 +446,7 @@ namespace CapnpNet.Rpc
 
     public global::CapnpNet.AbsPointer acceptFromThirdParty
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -556,13 +556,13 @@ namespace CapnpNet.Rpc
 
     public CapDescriptor cap
     {
-      get { return _s.DereferenceStruct<CapDescriptor>(0); }
+      get { return _s.DereferencePointer<CapDescriptor>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public Exception exception
     {
-      get { return _s.DereferenceStruct<Exception>(0); }
+      get { return _s.DereferencePointer<Exception>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -640,7 +640,7 @@ namespace CapnpNet.Rpc
 
     public MessageTarget target
     {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      get { return _s.DereferencePointer<MessageTarget>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -720,13 +720,13 @@ namespace CapnpNet.Rpc
 
     public MessageTarget target
     {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      get { return _s.DereferencePointer<MessageTarget>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer recipient
     {
-      get { return _s.DereferenceAbsPointer(1); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(1); }
       set { _s.WritePointer(1, value); }
     }
   }
@@ -768,7 +768,7 @@ namespace CapnpNet.Rpc
 
     public global::CapnpNet.AbsPointer provision
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -816,13 +816,13 @@ namespace CapnpNet.Rpc
 
     public MessageTarget target
     {
-      get { return _s.DereferenceStruct<MessageTarget>(0); }
+      get { return _s.DereferencePointer<MessageTarget>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer keyPart
     {
-      get { return _s.DereferenceAbsPointer(1); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(1); }
       set { _s.WritePointer(1, value); }
     }
   }
@@ -883,7 +883,7 @@ namespace CapnpNet.Rpc
 
     public PromisedAnswer promisedAnswer
     {
-      get { return _s.DereferenceStruct<PromisedAnswer>(0); }
+      get { return _s.DereferencePointer<PromisedAnswer>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -919,14 +919,14 @@ namespace CapnpNet.Rpc
 
     public global::CapnpNet.AbsPointer content
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.FlatArray<CapDescriptor> capTable
     {
-      get { return new global::CapnpNet.FlatArray<CapDescriptor>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<CapDescriptor>>(1); }
+      set { _s.WritePointer(1, value); }
     }
   }
 
@@ -1009,13 +1009,13 @@ namespace CapnpNet.Rpc
 
     public PromisedAnswer receiverAnswer
     {
-      get { return _s.DereferenceStruct<PromisedAnswer>(0); }
+      get { return _s.DereferencePointer<PromisedAnswer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public ThirdPartyCapDescriptor thirdPartyHosted
     {
-      get { return _s.DereferenceStruct<ThirdPartyCapDescriptor>(0); }
+      get { return _s.DereferencePointer<ThirdPartyCapDescriptor>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -1057,8 +1057,8 @@ namespace CapnpNet.Rpc
 
     public global::CapnpNet.FlatArray<Op> transform
     {
-      get { return new global::CapnpNet.FlatArray<Op>(_s.DereferenceAbsPointer(0)); }
-      set { _s.WritePointer(0, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Op>>(0); }
+      set { _s.WritePointer(0, value); }
     }
 
     [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
@@ -1141,7 +1141,7 @@ namespace CapnpNet.Rpc
 
     public global::CapnpNet.AbsPointer id
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -1183,7 +1183,7 @@ namespace CapnpNet.Rpc
 
     public global::CapnpNet.Text reason
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 

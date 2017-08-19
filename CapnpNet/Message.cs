@@ -188,6 +188,12 @@ namespace CapnpNet
         throw new InvalidOperationException("Newly created segment was not big enough");
       }
     }
+
+    public AllocationContext Allocate(int words)
+    {
+      this.Allocate(words, out int offset, out var segment);
+      return new AllocationContext(segment, offset, words);
+    }
     
     public Pointer GetCapPointer(ICapability cap)
     {

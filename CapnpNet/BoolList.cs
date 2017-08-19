@@ -2,53 +2,57 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CapnpNet
 {
-  public struct BoolList : IEnumerable<bool>
+  [StructLayout(LayoutKind.Sequential)]
+  public struct BoolList : IPureAbsPointer, IEnumerable<bool>
   {
-    private readonly Segment _segment;
-    private readonly int _listWordOffset, _count;
+    private readonly AbsPointer _pointer;
     
     public BoolList(Message msg, int count)
     {
-      _count = count;
-      msg.Allocate((count + 63) / 64, out _listWordOffset, out _segment);
+      int words = (count + 63) / 64;
+      msg.Allocate(words, out var offset, out var segment);
+      _pointer = new AbsPointer(
+        segment,
+        0,
+        new ListPointer
+        {
+          Type = PointerType.List,
+          WordOffset = offset,
+          ElementSize = ElementSize.OneBit,
+          ElementCount = (uint)count
+        });
     }
 
-    public BoolList(Segment segment, int baseWordOffset, ListPointer listPointer)
-    {
-      if (listPointer.ElementSize != ElementSize.OneBit) throw new ArgumentException("Expected list pointer with ElementSize of OneBit");
-
-      _segment = segment;
-      _listWordOffset = baseWordOffset + listPointer.WordOffset;
-      _count = (int)listPointer.ElementCount;
-    }
+    public AbsPointer Pointer => _pointer;
 
 #if SPAN
-    public Span<ulong> Span => _segment.Span.Slice(_listWordOffset, (_count + 63) / 64); 
+    public Span<ulong> Span => _segment.Span.Slice(_listWordOffset, (this.Count + 63) / 64); 
 #endif
 
-    public Segment Segment => _segment;
-    public int ListWordOffset => _listWordOffset;
-    public int Count => _count;
+    public Segment Segment => _pointer.Segment;
+    public int ListWordOffset => _pointer.DataOffset;
+    public int Count => (int)_pointer.Tag.ElementCount;
 
     public bool this[int index]
     {
       get
       {
-        if (index < 0 || index >= _count) throw new ArgumentOutOfRangeException("index");
+        if (index < 0 || index >= this.Count) throw new ArgumentOutOfRangeException("index");
 
         var mask = 1UL << (index & 63);
 #if SPAN
         return (this.Span[index >> 6] & mask) > 0; 
 #else
-        return (_segment[index >> 6 | Word.unit] & mask) > 0;
+        return (this.Segment[index >> 6 | Word.unit] & mask) > 0;
 #endif
       }
       set
       {
-        if (index < 0 || index >= _count) throw new ArgumentOutOfRangeException("index");
+        if (index < 0 || index >= this.Count) throw new ArgumentOutOfRangeException("index");
 
         var mask = 1UL << (index & 63);
 #if SPAN
@@ -62,7 +66,7 @@ namespace CapnpNet
           span &= ~mask;
         }
 #else
-        ref var word = ref _segment[index >> 6 | Word.unit];
+        ref var word = ref this.Segment[index >> 6 | Word.unit];
         if (value)
         {
           word |= mask;
@@ -79,9 +83,9 @@ namespace CapnpNet
     {
       var ret = new BoolList(dest, this.Count);
       
-      ref ulong src = ref _segment[_listWordOffset | Word.unit];
-      ref ulong dst = ref ret._segment[ret._listWordOffset | Word.unit];
-      for (int i = 0; i < (_count + 63) / 64; i++)
+      ref ulong src = ref this.Segment[this.ListWordOffset | Word.unit];
+      ref ulong dst = ref ret.Segment[ret.ListWordOffset | Word.unit];
+      for (int i = 0; i < (this.Count + 63) / 64; i++)
       {
         Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
       }
@@ -93,7 +97,7 @@ namespace CapnpNet
 
     public IEnumerator<bool> GetEnumerator()
     {
-      for (int i = 0; i < _count; i++)
+      for (int i = 0; i < this.Count; i++)
       {
         yield return this[i];
       }
