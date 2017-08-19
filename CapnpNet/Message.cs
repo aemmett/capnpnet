@@ -229,7 +229,7 @@ namespace CapnpNet
 
     public async Task CreateAndAddSegmentAsync(
       int? sizeHint,
-      CancellationToken cancellationToken = default(CancellationToken))
+      CancellationToken cancellationToken = default)
     {
       await _segmentFactory.CreateAsync(this, sizeHint, cancellationToken);
     }
@@ -325,7 +325,7 @@ namespace CapnpNet
       if (pointer.Type != PointerType.Far)
       {
         this.CheckTraversalLimit(pointer);
-        baseOffset = default(int);
+        baseOffset = default;
         return false;
       }
 

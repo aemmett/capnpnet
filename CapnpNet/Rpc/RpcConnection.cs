@@ -361,7 +361,7 @@ namespace CapnpNet.Rpc
     public void DisposeParameters()
     {
       _call.GetStruct().Segment.Message.Dispose();
-      _call = default(Call);
+      _call = default;
     }
     
     public CapnpNet.Message CreateReply(int? sizeHint = null)

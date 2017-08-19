@@ -40,7 +40,7 @@ namespace CapnpNet.Rpc
       }
 
       T copy = val;
-      val = default(T);
+      val = default;
       if (_freeList == null) _freeList = new SortedList<uint, uint>();
 
       _freeList.Add(key, key);

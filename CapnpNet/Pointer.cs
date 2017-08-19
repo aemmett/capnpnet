@@ -103,7 +103,7 @@ namespace CapnpNet
       }
       else
       {
-        structPtr = default(StructPointer);
+        structPtr = default;
         return false;
       }
     }
@@ -117,7 +117,7 @@ namespace CapnpNet
       }
       else
       {
-        listPtr = default(ListPointer);
+        listPtr = default;
         return false;
       }
     }
@@ -131,7 +131,7 @@ namespace CapnpNet
       }
       else
       {
-        farPtr = default(FarPointer);
+        farPtr = default;
         return false;
       }
     }
@@ -145,7 +145,7 @@ namespace CapnpNet
       }
       else
       {
-        otherPtr = default(OtherPointer);
+        otherPtr = default;
         return false;
       }
     }

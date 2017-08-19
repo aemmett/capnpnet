@@ -1,5 +1,6 @@
 namespace CapnpNet.Schema
 {
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Node : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 5;
@@ -87,7 +88,7 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.Text displayName
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -105,8 +106,8 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.FlatArray<Parameter> parameters
     {
-      get { return new global::CapnpNet.FlatArray<Parameter>(_s.DereferenceAbsPointer(5)); }
-      set { _s.WritePointer(5, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Parameter>>(5); }
+      set { _s.WritePointer(5, value); }
     }
 
     public bool isGeneric
@@ -117,14 +118,14 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.FlatArray<NestedNode> nestedNodes
     {
-      get { return new global::CapnpNet.FlatArray<NestedNode>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<NestedNode>>(1); }
+      set { _s.WritePointer(1, value); }
     }
 
     public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(2)); }
-      set { _s.WritePointer(2, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Annotation>>(2); }
+      set { _s.WritePointer(2, value); }
     }
 
     public structGroup @struct => new structGroup(_s);
@@ -170,8 +171,8 @@ namespace CapnpNet.Schema
 
       public global::CapnpNet.FlatArray<Field> fields
       {
-        get { return new global::CapnpNet.FlatArray<Field>(_s.DereferenceAbsPointer(3)); }
-        set { _s.WritePointer(3, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Field>>(3); }
+        set { _s.WritePointer(3, value); }
       }
     }
 
@@ -182,8 +183,8 @@ namespace CapnpNet.Schema
       public enumGroup(global::CapnpNet.Struct s) { _s = s; }
       public global::CapnpNet.FlatArray<Enumerant> enumerants
       {
-        get { return new global::CapnpNet.FlatArray<Enumerant>(_s.DereferenceAbsPointer(3)); }
-        set { _s.WritePointer(3, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Enumerant>>(3); }
+        set { _s.WritePointer(3, value); }
       }
     }
 
@@ -194,14 +195,14 @@ namespace CapnpNet.Schema
       public interfaceGroup(global::CapnpNet.Struct s) { _s = s; }
       public global::CapnpNet.FlatArray<Method> methods
       {
-        get { return new global::CapnpNet.FlatArray<Method>(_s.DereferenceAbsPointer(3)); }
-        set { _s.WritePointer(3, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Method>>(3); }
+        set { _s.WritePointer(3, value); }
       }
 
       public global::CapnpNet.FlatArray<Superclass> superclasses
       {
-        get { return new global::CapnpNet.FlatArray<Superclass>(_s.DereferenceAbsPointer(4)); }
-        set { _s.WritePointer(4, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Superclass>>(4); }
+        set { _s.WritePointer(4, value); }
       }
     }
 
@@ -212,13 +213,13 @@ namespace CapnpNet.Schema
       public constGroup(global::CapnpNet.Struct s) { _s = s; }
       public Type type
       {
-        get { return _s.DereferenceStruct<Type>(3); }
+        get { return _s.DereferencePointer<Type>(3); }
         set { _s.WritePointer(3, value); }
       }
 
       public Value value
       {
-        get { return _s.DereferenceStruct<Value>(4); }
+        get { return _s.DereferencePointer<Value>(4); }
         set { _s.WritePointer(4, value); }
       }
     }
@@ -230,7 +231,7 @@ namespace CapnpNet.Schema
       public annotationGroup(global::CapnpNet.Struct s) { _s = s; }
       public Type type
       {
-        get { return _s.DereferenceStruct<Type>(3); }
+        get { return _s.DereferencePointer<Type>(3); }
         set { _s.WritePointer(3, value); }
       }
 
@@ -307,6 +308,7 @@ namespace CapnpNet.Schema
       }
     }
 
+    [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
     public struct Parameter : global::CapnpNet.IStruct
     {
       public const int KNOWN_DATA_WORDS = 0;
@@ -337,11 +339,12 @@ namespace CapnpNet.Schema
 
       public global::CapnpNet.Text name
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
 
+    [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
     public struct NestedNode : global::CapnpNet.IStruct
     {
       public const int KNOWN_DATA_WORDS = 1;
@@ -372,7 +375,7 @@ namespace CapnpNet.Schema
 
       public global::CapnpNet.Text name
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
@@ -384,6 +387,7 @@ namespace CapnpNet.Schema
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Field : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 3;
@@ -440,7 +444,7 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.Text name
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -452,8 +456,8 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Annotation>>(1); }
+      set { _s.WritePointer(1, value); }
     }
 
     public ushort discriminantValue
@@ -475,13 +479,13 @@ namespace CapnpNet.Schema
 
       public Type type
       {
-        get { return _s.DereferenceStruct<Type>(2); }
+        get { return _s.DereferencePointer<Type>(2); }
         set { _s.WritePointer(2, value); }
       }
 
       public Value defaultValue
       {
-        get { return _s.DereferenceStruct<Value>(3); }
+        get { return _s.DereferencePointer<Value>(3); }
         set { _s.WritePointer(3, value); }
       }
 
@@ -531,6 +535,7 @@ namespace CapnpNet.Schema
     public const ushort noDiscriminant = 65535;
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Enumerant : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 1;
@@ -561,7 +566,7 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.Text name
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -573,11 +578,12 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Annotation>>(1); }
+      set { _s.WritePointer(1, value); }
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Superclass : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 1;
@@ -614,11 +620,12 @@ namespace CapnpNet.Schema
 
     public Brand brand
     {
-      get { return _s.DereferenceStruct<Brand>(0); }
+      get { return _s.DereferencePointer<Brand>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Method : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 3;
@@ -649,7 +656,7 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.Text name
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -661,8 +668,8 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.FlatArray<Node.Parameter> implicitParameters
     {
-      get { return new global::CapnpNet.FlatArray<Node.Parameter>(_s.DereferenceAbsPointer(4)); }
-      set { _s.WritePointer(4, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Node.Parameter>>(4); }
+      set { _s.WritePointer(4, value); }
     }
 
     public ulong paramStructType
@@ -673,7 +680,7 @@ namespace CapnpNet.Schema
 
     public Brand paramBrand
     {
-      get { return _s.DereferenceStruct<Brand>(2); }
+      get { return _s.DereferencePointer<Brand>(2); }
       set { _s.WritePointer(2, value); }
     }
 
@@ -685,17 +692,18 @@ namespace CapnpNet.Schema
 
     public Brand resultBrand
     {
-      get { return _s.DereferenceStruct<Brand>(3); }
+      get { return _s.DereferencePointer<Brand>(3); }
       set { _s.WritePointer(3, value); }
     }
 
     public global::CapnpNet.FlatArray<Annotation> annotations
     {
-      get { return new global::CapnpNet.FlatArray<Annotation>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Annotation>>(1); }
+      set { _s.WritePointer(1, value); }
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Type : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 3;
@@ -795,7 +803,7 @@ namespace CapnpNet.Schema
       public listGroup(global::CapnpNet.Struct s) { _s = s; }
       public Type elementType
       {
-        get { return _s.DereferenceStruct<Type>(0); }
+        get { return _s.DereferencePointer<Type>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -813,7 +821,7 @@ namespace CapnpNet.Schema
 
       public Brand brand
       {
-        get { return _s.DereferenceStruct<Brand>(0); }
+        get { return _s.DereferencePointer<Brand>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -831,7 +839,7 @@ namespace CapnpNet.Schema
 
       public Brand brand
       {
-        get { return _s.DereferenceStruct<Brand>(0); }
+        get { return _s.DereferencePointer<Brand>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -849,7 +857,7 @@ namespace CapnpNet.Schema
 
       public Brand brand
       {
-        get { return _s.DereferenceStruct<Brand>(0); }
+        get { return _s.DereferencePointer<Brand>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -945,6 +953,7 @@ namespace CapnpNet.Schema
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Brand : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 0;
@@ -975,10 +984,11 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.FlatArray<Scope> scopes
     {
-      get { return new global::CapnpNet.FlatArray<Scope>(_s.DereferenceAbsPointer(0)); }
-      set { _s.WritePointer(0, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Scope>>(0); }
+      set { _s.WritePointer(0, value); }
     }
 
+    [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
     public struct Scope : global::CapnpNet.IStruct
     {
       public const int KNOWN_DATA_WORDS = 2;
@@ -1027,11 +1037,12 @@ namespace CapnpNet.Schema
 
       public global::CapnpNet.FlatArray<Binding> bind
       {
-        get { return new global::CapnpNet.FlatArray<Binding>(_s.DereferenceAbsPointer(0)); }
-        set { _s.WritePointer(0, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Binding>>(0); }
+        set { _s.WritePointer(0, value); }
       }
     }
 
+    [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
     public struct Binding : global::CapnpNet.IStruct
     {
       public const int KNOWN_DATA_WORDS = 1;
@@ -1081,12 +1092,13 @@ namespace CapnpNet.Schema
 
       public Type type
       {
-        get { return _s.DereferenceStruct<Type>(0); }
+        get { return _s.DereferencePointer<Type>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Value : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 2;
@@ -1212,19 +1224,19 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.Text text
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
-    public global::CapnpNet.FlatArray<byte> data
+    public global::CapnpNet.Data data
     {
-      get { return new global::CapnpNet.FlatArray<byte>(_s.DereferenceAbsPointer(0)); }
-      set { _s.WritePointer(0, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.Data>(0); }
+      set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer list
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -1236,17 +1248,18 @@ namespace CapnpNet.Schema
 
     public global::CapnpNet.AbsPointer @struct
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer anyPointer
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct Annotation : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 1;
@@ -1283,13 +1296,13 @@ namespace CapnpNet.Schema
 
     public Brand brand
     {
-      get { return _s.DereferenceStruct<Brand>(1); }
+      get { return _s.DereferencePointer<Brand>(1); }
       set { _s.WritePointer(1, value); }
     }
 
     public Value value
     {
-      get { return _s.DereferenceStruct<Value>(0); }
+      get { return _s.DereferencePointer<Value>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -1306,6 +1319,7 @@ namespace CapnpNet.Schema
     inlineComposite = 7
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct CapnpVersion : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 1;
@@ -1353,6 +1367,7 @@ namespace CapnpNet.Schema
     }
   }
 
+  [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
   public struct CodeGeneratorRequest : global::CapnpNet.IStruct
   {
     public const int KNOWN_DATA_WORDS = 0;
@@ -1383,22 +1398,23 @@ namespace CapnpNet.Schema
 
     public CapnpVersion capnpVersion
     {
-      get { return _s.DereferenceStruct<CapnpVersion>(2); }
+      get { return _s.DereferencePointer<CapnpVersion>(2); }
       set { _s.WritePointer(2, value); }
     }
 
     public global::CapnpNet.FlatArray<Node> nodes
     {
-      get { return new global::CapnpNet.FlatArray<Node>(_s.DereferenceAbsPointer(0)); }
-      set { _s.WritePointer(0, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Node>>(0); }
+      set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.FlatArray<RequestedFile> requestedFiles
     {
-      get { return new global::CapnpNet.FlatArray<RequestedFile>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<RequestedFile>>(1); }
+      set { _s.WritePointer(1, value); }
     }
 
+    [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
     public struct RequestedFile : global::CapnpNet.IStruct
     {
       public const int KNOWN_DATA_WORDS = 1;
@@ -1435,16 +1451,17 @@ namespace CapnpNet.Schema
 
       public global::CapnpNet.Text filename
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
       public global::CapnpNet.FlatArray<Import> imports
       {
-        get { return new global::CapnpNet.FlatArray<Import>(_s.DereferenceAbsPointer(1)); }
-        set { _s.WritePointer(1, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Import>>(1); }
+        set { _s.WritePointer(1, value); }
       }
 
+      [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
       public struct Import : global::CapnpNet.IStruct
       {
         public const int KNOWN_DATA_WORDS = 1;
@@ -1481,7 +1498,7 @@ namespace CapnpNet.Schema
 
         public global::CapnpNet.Text name
         {
-          get { return _s.DereferenceText(0); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
           set { _s.WritePointer(0, value); }
         }
       }

@@ -270,7 +270,9 @@ namespace CapnpNet.Schema.Compiler
           {this.GetGenericConstraints(genericParams)}
         {{";
       
-      foreach (var tuple in i.methods.Select((method, ordinal) => ((method, ordinal))).OrderBy(m => m.Item1.codeOrder))
+      foreach (var tuple in i.methods
+        .Select((method, ordinal) => ((method, ordinal)))
+        .OrderBy(m => m.method.codeOrder))
       {
         var (method, ordinal) = tuple;
 
@@ -298,7 +300,7 @@ namespace CapnpNet.Schema.Compiler
         ordinal++;
       }
 
-      _implicitParameters = default(FlatArray<Node.Parameter>);
+      _implicitParameters = default;
 
       yield return "}";
 
@@ -366,8 +368,8 @@ namespace CapnpNet.Schema.Compiler
         case Type.Union.uint64: type = "ulong"; accessor = "UInt64"; break;
         case Type.Union.float32: type = "float"; accessor = "Float32"; break;
         case Type.Union.float64: type = "double"; accessor = "Float64"; break;
-        case Type.Union.text: type = $"{CnNamespace}.Text"; accessor = "Text"; break;
-        case Type.Union.data: type = $"{CnNamespace}.FlatArray<byte>"; accessor = "List<byte>"; break;
+        case Type.Union.text: type = $"{CnNamespace}.Text"; accessor = "Pointer"; break;
+        case Type.Union.data: type = $"{CnNamespace}.Data"; accessor = "Pointer"; break;
         case Type.Union.anyPointer:
           switch (t.anyPointer.which)
           {
@@ -376,19 +378,19 @@ namespace CapnpNet.Schema.Compiler
               {
                 case Type.anyPointerGroup.unconstrainedGroup.Union.anyKind:
                   type = $"{CnNamespace}.AbsPointer";
-                  accessor = "AbsPointer";
+                  accessor = "Pointer";
                   break;
                 case Type.anyPointerGroup.unconstrainedGroup.Union.@struct:
                   type = $"{CnNamespace}.Struct";
-                  accessor = "RawStruct";
+                  accessor = "Pointer";
                   break;
                 case Type.anyPointerGroup.unconstrainedGroup.Union.list:
                   type = $"{CnNamespace}.AbsPointer";
-                  accessor = "AbsPointer";
+                  accessor = "Pointer";
                   break;
                 case Type.anyPointerGroup.unconstrainedGroup.Union.capability:
                   type = $"{CnNamespace}.Rpc.ICapability";
-                  accessor = null;
+                  accessor = "Pointer";
                   break;
                 default:
                   throw new System.InvalidOperationException("Unknown kind of unconstrained AnyPointer");
@@ -413,7 +415,7 @@ namespace CapnpNet.Schema.Compiler
           var elemType = t.list.elementType;
           this.GetTypeInfo(container, elemType, out type, out _);
           type = $"{CnNamespace}.FlatArray<{type}>";
-          accessor = null;
+          accessor = "Pointer";
           break;
         case Type.Union.@enum:
           // TODO: generic enums? I guess maybe from parent scope?
@@ -422,7 +424,7 @@ namespace CapnpNet.Schema.Compiler
           break;
         case Type.Union.@struct:
           type = this.GetTypeName(container, t.@struct.typeId, t.@struct.brand);
-          accessor = $"Struct<{type}>";
+          accessor = $"Pointer";
           break;
         case Type.Union.@interface:
           type = this.GetTypeName(container, t.@interface.typeId, t.@interface.brand);
@@ -493,9 +495,8 @@ namespace CapnpNet.Schema.Compiler
           {
             continue;
           }
-          
-          string type, accessor;
-          this.GetTypeInfo(container, slot.type, out type, out accessor);
+
+          this.GetTypeInfo(container, slot.type, out string type, out string accessor);
           if (slot.type.which == Type.Union.@enum)
           {
             yield return $@"
@@ -506,18 +507,6 @@ namespace CapnpNet.Schema.Compiler
                 set {{ _s.WriteUInt16({slot.offset}, (ushort)value {GetDefaultLiteral(slot.defaultValue)}); }}
               }}";
           }
-          else if (slot.type.Is(out Type.anyPointerGroup anyPointer)
-            && anyPointer.Is(out Type.anyPointerGroup.unconstrainedGroup unconstrained)
-            && unconstrained.which == Type.anyPointerGroup.unconstrainedGroup.Union.capability)
-          {
-            yield return $@"
-              {GetDocComment(field.annotations)}
-              public {CnNamespace}.Rpc.ICapability {name}
-              {{
-                get {{ return _s.ReadInterface<{CnNamespace}.Rpc.ICapability>({slot.offset}); }}
-                set {{ _s.WritePointer({slot.offset}, value); }}
-              }}";
-          }
           else if (accessor == "Pointer")
           {
             yield return $@"
@@ -526,29 +515,6 @@ namespace CapnpNet.Schema.Compiler
               {{
                 get {{ return _s.DereferencePointer<{type}>({slot.offset}); }}
                 set {{ _s.WritePointer({slot.offset}, value); }}
-              }}";
-          }
-          else if (slot.type.which == Type.Union.@struct
-                || slot.type.which == Type.Union.text
-                || slot.type.which == Type.Union.anyPointer)
-          {
-            yield return $@"
-              {GetDocComment(field.annotations)}
-              public {type} {name}
-              {{
-                get {{ return _s.Dereference{accessor}({slot.offset}); }}
-                set {{ _s.WritePointer({slot.offset}, value); }}
-              }}";
-          }
-          else if (slot.type.which == Type.Union.list
-                || slot.type.which == Type.Union.data)
-          {
-            yield return $@"
-              {GetDocComment(field.annotations)}
-              public {type} {name}
-              {{
-                get {{ return new {type}(_s.DereferenceAbsPointer({slot.offset})); }}
-                set {{ _s.WritePointer({slot.offset}, value.Pointer); }}
               }}";
           }
           else
@@ -592,12 +558,12 @@ namespace CapnpNet.Schema.Compiler
     
     private string GetTypeName(TypeName container, Superclass super) => this.GetTypeName(container, super.id);
 
-    private string GetTypeName(TypeName container, ulong typeId, Brand brand = default(Brand)) => this.GetTypeName(container, this[typeId], brand);
+    private string GetTypeName(TypeName container, ulong typeId, Brand brand = default) => this.GetTypeName(container, this[typeId], brand);
 
     private string GetTypeName(
       TypeName container,
       Node node,
-      Brand brand = default(Brand))
+      Brand brand = default)
     {
       var targetName = _typeNames[node.id];
 

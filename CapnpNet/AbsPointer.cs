@@ -53,12 +53,12 @@ namespace CapnpNet
     {
       if (this.Tag.Type == PointerType.Struct)
       {
-        @struct = default(T); // annoying :/
+        @struct = default; // annoying :/
         Unsafe.As<T, Struct>(ref @struct) = new Struct(this.Segment, this.DataOffset, this.Tag.DataWords, this.Tag.PointerWords);
         return true;
       }
 
-      @struct = default(T);
+      @struct = default;
       return false;
     }
     
@@ -70,7 +70,7 @@ namespace CapnpNet
         return true;
       }
 
-      @struct = default(Struct);
+      @struct = default;
       return false;
     }
 
@@ -144,7 +144,7 @@ namespace CapnpNet
       {
         var srcStruct = new Struct(this.Segment, dataOffset, sptr.DataWords, sptr.PointerWords);
         var dstStruct = srcStruct.CopyTo(dest);
-        return dstStruct.ToAbsPointer();
+        return dstStruct.Pointer;
       }
       else if (this.Tag.Is(out ListPointer list))
       {

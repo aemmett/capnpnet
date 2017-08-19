@@ -36,7 +36,7 @@ namespace CapnpNet
     /// <param name="sizeHint">Optional hint for how many words this segment should accommodate</param>
     /// <param name="cancellationToken">Optional cancellation token.</param>
     /// <returns>A ValueTask with a non-null Segment, or exception</returns>
-    ValueTask<Segment> CreateAsync(Message msg, int? sizeHint = null, CancellationToken cancellationToken = default(CancellationToken));
+    ValueTask<Segment> CreateAsync(Message msg, int? sizeHint = null, CancellationToken cancellationToken = default);
   }
 
   public sealed class ArrayPoolSegmentFactory : ISegmentFactory
@@ -53,14 +53,14 @@ namespace CapnpNet
       _pool = pool;
     }
 
-    public ValueTask<Segment> CreateAsync(Message msg, int? sizeHint = default(int?), CancellationToken cancellationToken = default(CancellationToken))
+    public ValueTask<Segment> CreateAsync(Message msg, int? sizeHint = default, CancellationToken cancellationToken = default)
     {
       // TODO: do we even bother checking for cancellation?
       cancellationToken.ThrowIfCancellationRequested();
       return new ValueTask<Segment>(this.TryCreatePrompt(msg, sizeHint));
     }
 
-    public Segment TryCreatePrompt(Message msg, int? sizeHint = default(int?))
+    public Segment TryCreatePrompt(Message msg, int? sizeHint = default)
     {
       var buf = _pool.Rent(sizeHint * sizeof(ulong) ?? 4096); // TODO: tune
 

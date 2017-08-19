@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CapnpNet
 {
@@ -19,6 +20,24 @@ namespace CapnpNet
   {
   }
 
+  public static class FlatArrayExtensions
+  {
+    public static bool Is(this FlatArray<byte> flatArray, out ArraySegment<byte> arraySegment)
+    {
+      if (flatArray.Segment.Is(out arraySegment))
+      {
+        arraySegment = new ArraySegment<byte>(
+          arraySegment.Array,
+          arraySegment.Offset + flatArray.Pointer.DataOffset * sizeof(ulong),
+          flatArray.Count);
+        return true;
+      }
+
+      return false;
+    }
+  }
+
+  [StructLayout(LayoutKind.Sequential)]
   public struct FlatArray<T> : IEnumerable<T>, IPureAbsPointer
   {
     private readonly AbsPointer _pointer;
@@ -109,6 +128,8 @@ namespace CapnpNet
     }
 
     public AbsPointer Pointer => _pointer;
+    
+    public Segment Segment => this.Pointer.Segment;
 
     public int Count
     {
@@ -132,7 +153,7 @@ namespace CapnpNet
         Check.Range(index, this.Count);
         if (typeof(T) == typeof(Void))
         {
-          return default(T);
+          return default;
         }
         else if (typeof(T) == typeof(bool))
         {
@@ -251,7 +272,7 @@ namespace CapnpNet
 
       public void Dispose()
       {
-        _array = default(FlatArray<T>);
+        _array = default;
       }
 
       public bool MoveNext()

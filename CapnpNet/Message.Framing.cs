@@ -36,7 +36,7 @@ namespace CapnpNet
   public partial class Message
   {
     // TODO: packing
-    public static async Task<Message> DecodeAsync(Stream s, CancellationToken ct = default(CancellationToken))
+    public static async Task<Message> DecodeAsync(Stream s, CancellationToken ct = default)
     {
       var segmentFactory = new ArrayPoolSegmentFactory();
       var msg = new Message().Init(segmentFactory);

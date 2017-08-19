@@ -109,7 +109,7 @@ namespace CapnpNet
       _disposer?.Dispose();
       
       _disposer = null;
-      _array = default(ArraySegment<byte>);
+      _array = default;
       _fixedMemHandle = null;
       _fixedMemPointer = IntPtr.Zero;
       _byteLength = 0;

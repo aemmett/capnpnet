@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -84,6 +85,7 @@
     <Compile Include="BoolList.cs" />
     <Compile Include="Check.cs" />
     <Compile Include="CompositeList.cs" />
+    <Compile Include="Data.cs" />
     <Compile Include="FlatArray.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="PreferredListEncodingAttribute.cs" />

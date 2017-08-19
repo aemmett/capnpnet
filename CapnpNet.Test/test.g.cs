@@ -109,19 +109,19 @@ namespace Schema
 
     public global::CapnpNet.Text textField
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
-    public global::CapnpNet.FlatArray<byte> dataField
+    public global::CapnpNet.Data dataField
     {
-      get { return new global::CapnpNet.FlatArray<byte>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.Data>(1); }
+      set { _s.WritePointer(1, value); }
     }
 
     public TestAllTypes structField
     {
-      get { return _s.DereferenceStruct<TestAllTypes>(2); }
+      get { return _s.DereferencePointer<TestAllTypes>(2); }
       set { _s.WritePointer(2, value); }
     }
 
@@ -133,104 +133,104 @@ namespace Schema
 
     public global::CapnpNet.FlatArray<global::CapnpNet.Void> voidList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.Void>(_s.DereferenceAbsPointer(3)); }
-      set { _s.WritePointer(3, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Void>>(3); }
+      set { _s.WritePointer(3, value); }
     }
 
     public global::CapnpNet.FlatArray<bool> boolList
     {
-      get { return new global::CapnpNet.FlatArray<bool>(_s.DereferenceAbsPointer(4)); }
-      set { _s.WritePointer(4, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<bool>>(4); }
+      set { _s.WritePointer(4, value); }
     }
 
     public global::CapnpNet.FlatArray<sbyte> int8List
     {
-      get { return new global::CapnpNet.FlatArray<sbyte>(_s.DereferenceAbsPointer(5)); }
-      set { _s.WritePointer(5, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<sbyte>>(5); }
+      set { _s.WritePointer(5, value); }
     }
 
     public global::CapnpNet.FlatArray<short> int16List
     {
-      get { return new global::CapnpNet.FlatArray<short>(_s.DereferenceAbsPointer(6)); }
-      set { _s.WritePointer(6, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<short>>(6); }
+      set { _s.WritePointer(6, value); }
     }
 
     public global::CapnpNet.FlatArray<int> int32List
     {
-      get { return new global::CapnpNet.FlatArray<int>(_s.DereferenceAbsPointer(7)); }
-      set { _s.WritePointer(7, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<int>>(7); }
+      set { _s.WritePointer(7, value); }
     }
 
     public global::CapnpNet.FlatArray<long> int64List
     {
-      get { return new global::CapnpNet.FlatArray<long>(_s.DereferenceAbsPointer(8)); }
-      set { _s.WritePointer(8, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<long>>(8); }
+      set { _s.WritePointer(8, value); }
     }
 
     public global::CapnpNet.FlatArray<byte> uInt8List
     {
-      get { return new global::CapnpNet.FlatArray<byte>(_s.DereferenceAbsPointer(9)); }
-      set { _s.WritePointer(9, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<byte>>(9); }
+      set { _s.WritePointer(9, value); }
     }
 
     public global::CapnpNet.FlatArray<ushort> uInt16List
     {
-      get { return new global::CapnpNet.FlatArray<ushort>(_s.DereferenceAbsPointer(10)); }
-      set { _s.WritePointer(10, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<ushort>>(10); }
+      set { _s.WritePointer(10, value); }
     }
 
     public global::CapnpNet.FlatArray<uint> uInt32List
     {
-      get { return new global::CapnpNet.FlatArray<uint>(_s.DereferenceAbsPointer(11)); }
-      set { _s.WritePointer(11, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<uint>>(11); }
+      set { _s.WritePointer(11, value); }
     }
 
     public global::CapnpNet.FlatArray<ulong> uInt64List
     {
-      get { return new global::CapnpNet.FlatArray<ulong>(_s.DereferenceAbsPointer(12)); }
-      set { _s.WritePointer(12, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<ulong>>(12); }
+      set { _s.WritePointer(12, value); }
     }
 
     public global::CapnpNet.FlatArray<float> float32List
     {
-      get { return new global::CapnpNet.FlatArray<float>(_s.DereferenceAbsPointer(13)); }
-      set { _s.WritePointer(13, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<float>>(13); }
+      set { _s.WritePointer(13, value); }
     }
 
     public global::CapnpNet.FlatArray<double> float64List
     {
-      get { return new global::CapnpNet.FlatArray<double>(_s.DereferenceAbsPointer(14)); }
-      set { _s.WritePointer(14, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<double>>(14); }
+      set { _s.WritePointer(14, value); }
     }
 
     public global::CapnpNet.FlatArray<global::CapnpNet.Text> textList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.Text>(_s.DereferenceAbsPointer(15)); }
-      set { _s.WritePointer(15, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Text>>(15); }
+      set { _s.WritePointer(15, value); }
     }
 
-    public global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<byte>> dataList
+    public global::CapnpNet.FlatArray<global::CapnpNet.Data> dataList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<byte>>(_s.DereferenceAbsPointer(16)); }
-      set { _s.WritePointer(16, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Data>>(16); }
+      set { _s.WritePointer(16, value); }
     }
 
     public global::CapnpNet.FlatArray<TestAllTypes> structList
     {
-      get { return new global::CapnpNet.FlatArray<TestAllTypes>(_s.DereferenceAbsPointer(17)); }
-      set { _s.WritePointer(17, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<TestAllTypes>>(17); }
+      set { _s.WritePointer(17, value); }
     }
 
     public global::CapnpNet.FlatArray<TestEnum> enumList
     {
-      get { return new global::CapnpNet.FlatArray<TestEnum>(_s.DereferenceAbsPointer(18)); }
-      set { _s.WritePointer(18, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<TestEnum>>(18); }
+      set { _s.WritePointer(18, value); }
     }
 
     public global::CapnpNet.FlatArray<global::CapnpNet.Void> interfaceList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.Void>(_s.DereferenceAbsPointer(19)); }
-      set { _s.WritePointer(19, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Void>>(19); }
+      set { _s.WritePointer(19, value); }
     }
   }
 
@@ -331,19 +331,19 @@ namespace Schema
 
     public global::CapnpNet.Text textField
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
-    public global::CapnpNet.FlatArray<byte> dataField
+    public global::CapnpNet.Data dataField
     {
-      get { return new global::CapnpNet.FlatArray<byte>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.Data>(1); }
+      set { _s.WritePointer(1, value); }
     }
 
     public TestAllTypes structField
     {
-      get { return _s.DereferenceStruct<TestAllTypes>(2); }
+      get { return _s.DereferencePointer<TestAllTypes>(2); }
       set { _s.WritePointer(2, value); }
     }
 
@@ -355,104 +355,104 @@ namespace Schema
 
     public global::CapnpNet.FlatArray<global::CapnpNet.Void> voidList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.Void>(_s.DereferenceAbsPointer(3)); }
-      set { _s.WritePointer(3, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Void>>(3); }
+      set { _s.WritePointer(3, value); }
     }
 
     public global::CapnpNet.FlatArray<bool> boolList
     {
-      get { return new global::CapnpNet.FlatArray<bool>(_s.DereferenceAbsPointer(4)); }
-      set { _s.WritePointer(4, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<bool>>(4); }
+      set { _s.WritePointer(4, value); }
     }
 
     public global::CapnpNet.FlatArray<sbyte> int8List
     {
-      get { return new global::CapnpNet.FlatArray<sbyte>(_s.DereferenceAbsPointer(5)); }
-      set { _s.WritePointer(5, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<sbyte>>(5); }
+      set { _s.WritePointer(5, value); }
     }
 
     public global::CapnpNet.FlatArray<short> int16List
     {
-      get { return new global::CapnpNet.FlatArray<short>(_s.DereferenceAbsPointer(6)); }
-      set { _s.WritePointer(6, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<short>>(6); }
+      set { _s.WritePointer(6, value); }
     }
 
     public global::CapnpNet.FlatArray<int> int32List
     {
-      get { return new global::CapnpNet.FlatArray<int>(_s.DereferenceAbsPointer(7)); }
-      set { _s.WritePointer(7, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<int>>(7); }
+      set { _s.WritePointer(7, value); }
     }
 
     public global::CapnpNet.FlatArray<long> int64List
     {
-      get { return new global::CapnpNet.FlatArray<long>(_s.DereferenceAbsPointer(8)); }
-      set { _s.WritePointer(8, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<long>>(8); }
+      set { _s.WritePointer(8, value); }
     }
 
     public global::CapnpNet.FlatArray<byte> uInt8List
     {
-      get { return new global::CapnpNet.FlatArray<byte>(_s.DereferenceAbsPointer(9)); }
-      set { _s.WritePointer(9, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<byte>>(9); }
+      set { _s.WritePointer(9, value); }
     }
 
     public global::CapnpNet.FlatArray<ushort> uInt16List
     {
-      get { return new global::CapnpNet.FlatArray<ushort>(_s.DereferenceAbsPointer(10)); }
-      set { _s.WritePointer(10, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<ushort>>(10); }
+      set { _s.WritePointer(10, value); }
     }
 
     public global::CapnpNet.FlatArray<uint> uInt32List
     {
-      get { return new global::CapnpNet.FlatArray<uint>(_s.DereferenceAbsPointer(11)); }
-      set { _s.WritePointer(11, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<uint>>(11); }
+      set { _s.WritePointer(11, value); }
     }
 
     public global::CapnpNet.FlatArray<ulong> uInt64List
     {
-      get { return new global::CapnpNet.FlatArray<ulong>(_s.DereferenceAbsPointer(12)); }
-      set { _s.WritePointer(12, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<ulong>>(12); }
+      set { _s.WritePointer(12, value); }
     }
 
     public global::CapnpNet.FlatArray<float> float32List
     {
-      get { return new global::CapnpNet.FlatArray<float>(_s.DereferenceAbsPointer(13)); }
-      set { _s.WritePointer(13, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<float>>(13); }
+      set { _s.WritePointer(13, value); }
     }
 
     public global::CapnpNet.FlatArray<double> float64List
     {
-      get { return new global::CapnpNet.FlatArray<double>(_s.DereferenceAbsPointer(14)); }
-      set { _s.WritePointer(14, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<double>>(14); }
+      set { _s.WritePointer(14, value); }
     }
 
     public global::CapnpNet.FlatArray<global::CapnpNet.Text> textList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.Text>(_s.DereferenceAbsPointer(15)); }
-      set { _s.WritePointer(15, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Text>>(15); }
+      set { _s.WritePointer(15, value); }
     }
 
-    public global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<byte>> dataList
+    public global::CapnpNet.FlatArray<global::CapnpNet.Data> dataList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<byte>>(_s.DereferenceAbsPointer(16)); }
-      set { _s.WritePointer(16, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Data>>(16); }
+      set { _s.WritePointer(16, value); }
     }
 
     public global::CapnpNet.FlatArray<TestAllTypes> structList
     {
-      get { return new global::CapnpNet.FlatArray<TestAllTypes>(_s.DereferenceAbsPointer(17)); }
-      set { _s.WritePointer(17, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<TestAllTypes>>(17); }
+      set { _s.WritePointer(17, value); }
     }
 
     public global::CapnpNet.FlatArray<TestEnum> enumList
     {
-      get { return new global::CapnpNet.FlatArray<TestEnum>(_s.DereferenceAbsPointer(18)); }
-      set { _s.WritePointer(18, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<TestEnum>>(18); }
+      set { _s.WritePointer(18, value); }
     }
 
     public global::CapnpNet.FlatArray<global::CapnpNet.Void> interfaceList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.Void>(_s.DereferenceAbsPointer(19)); }
-      set { _s.WritePointer(19, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.Void>>(19); }
+      set { _s.WritePointer(19, value); }
     }
   }
 
@@ -487,7 +487,7 @@ namespace Schema
 
     public global::CapnpNet.AbsPointer anyPointerField
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -523,19 +523,19 @@ namespace Schema
 
     public global::CapnpNet.Struct anyStructField
     {
-      get { return _s.DereferenceRawStruct(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Struct>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer anyListField
     {
-      get { return _s.DereferenceAbsPointer(1); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(1); }
       set { _s.WritePointer(1, value); }
     }
 
     public global::CapnpNet.Rpc.ICapability capabilityField
     {
-      get { return _s.ReadInterface<global::CapnpNet.Rpc.ICapability>(2); }
+      get { return _s.DereferencePointer<global::CapnpNet.Rpc.ICapability>(2); }
       set { _s.WritePointer(2, value); }
     }
   }
@@ -571,55 +571,55 @@ namespace Schema
 
     public global::CapnpNet.Text foo
     {
-      get { return _s.DereferenceText(3); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(3); }
       set { _s.WritePointer(3, value); }
     }
 
     public global::CapnpNet.Text bar
     {
-      get { return _s.DereferenceText(2); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(2); }
       set { _s.WritePointer(2, value); }
     }
 
     public global::CapnpNet.Text baz
     {
-      get { return _s.DereferenceText(8); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(8); }
       set { _s.WritePointer(8, value); }
     }
 
     public global::CapnpNet.Text qux
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.Text quux
     {
-      get { return _s.DereferenceText(6); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(6); }
       set { _s.WritePointer(6, value); }
     }
 
     public global::CapnpNet.Text corge
     {
-      get { return _s.DereferenceText(4); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(4); }
       set { _s.WritePointer(4, value); }
     }
 
     public global::CapnpNet.Text grault
     {
-      get { return _s.DereferenceText(1); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
       set { _s.WritePointer(1, value); }
     }
 
     public global::CapnpNet.Text garply
     {
-      get { return _s.DereferenceText(7); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(7); }
       set { _s.WritePointer(7, value); }
     }
 
     public global::CapnpNet.Text waldo
     {
-      get { return _s.DereferenceText(5); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(5); }
       set { _s.WritePointer(5, value); }
     }
   }
@@ -714,7 +714,7 @@ namespace Schema
 
       public global::CapnpNet.Text u0f0sp
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
@@ -750,7 +750,7 @@ namespace Schema
 
       public global::CapnpNet.Text u0f1sp
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -858,13 +858,13 @@ namespace Schema
 
       public global::CapnpNet.Text u1f0sp
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
 
       public global::CapnpNet.Text u1f1sp
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
 
@@ -900,7 +900,7 @@ namespace Schema
 
       public global::CapnpNet.Text u1f2sp
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
     }
@@ -1093,7 +1093,7 @@ namespace Schema
 
     public global::CapnpNet.Text before
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -1117,7 +1117,7 @@ namespace Schema
 
     public global::CapnpNet.Text after
     {
-      get { return _s.DereferenceText(1); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
       set { _s.WritePointer(1, value); }
     }
   }
@@ -1300,7 +1300,7 @@ namespace Schema
 
         public global::CapnpNet.Text garply
         {
-          get { return _s.DereferenceText(0); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
           set { _s.WritePointer(0, value); }
         }
       }
@@ -1318,7 +1318,7 @@ namespace Schema
 
         public global::CapnpNet.Text grault
         {
-          get { return _s.DereferenceText(0); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
           set { _s.WritePointer(0, value); }
         }
 
@@ -1342,13 +1342,13 @@ namespace Schema
 
         public global::CapnpNet.Text grault
         {
-          get { return _s.DereferenceText(0); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
           set { _s.WritePointer(0, value); }
         }
 
         public global::CapnpNet.Text garply
         {
-          get { return _s.DereferenceText(1); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
           set { _s.WritePointer(1, value); }
         }
       }
@@ -1446,26 +1446,26 @@ namespace Schema
 
         public global::CapnpNet.Text plugh
         {
-          get { return _s.DereferenceText(2); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(2); }
           set { _s.WritePointer(2, value); }
         }
 
         public global::CapnpNet.Text xyzzy
         {
-          get { return _s.DereferenceText(4); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(4); }
           set { _s.WritePointer(4, value); }
         }
       }
 
       public global::CapnpNet.Text fred
       {
-        get { return _s.DereferenceText(2); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(2); }
         set { _s.WritePointer(2, value); }
       }
 
       public global::CapnpNet.Text waldo
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -1532,26 +1532,26 @@ namespace Schema
 
         public global::CapnpNet.Text plugh
         {
-          get { return _s.DereferenceText(3); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(3); }
           set { _s.WritePointer(3, value); }
         }
 
         public global::CapnpNet.Text xyzzy
         {
-          get { return _s.DereferenceText(5); }
+          get { return _s.DereferencePointer<global::CapnpNet.Text>(5); }
           set { _s.WritePointer(5, value); }
         }
       }
 
       public global::CapnpNet.Text fred
       {
-        get { return _s.DereferenceText(3); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(3); }
         set { _s.WritePointer(3, value); }
       }
 
       public global::CapnpNet.Text waldo
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
     }
@@ -1588,25 +1588,25 @@ namespace Schema
 
     public TestUnion s16s8s64s8Set
     {
-      get { return _s.DereferenceStruct<TestUnion>(0); }
+      get { return _s.DereferencePointer<TestUnion>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public TestUnion s0sps1s32Set
     {
-      get { return _s.DereferenceStruct<TestUnion>(1); }
+      get { return _s.DereferencePointer<TestUnion>(1); }
       set { _s.WritePointer(1, value); }
     }
 
     public TestUnnamedUnion unnamed1
     {
-      get { return _s.DereferenceStruct<TestUnnamedUnion>(2); }
+      get { return _s.DereferencePointer<TestUnnamedUnion>(2); }
       set { _s.WritePointer(2, value); }
     }
 
     public TestUnnamedUnion unnamed2
     {
-      get { return _s.DereferenceStruct<TestUnnamedUnion>(3); }
+      get { return _s.DereferencePointer<TestUnnamedUnion>(3); }
       set { _s.WritePointer(3, value); }
     }
   }
@@ -1642,7 +1642,7 @@ namespace Schema
 
     public NestedStruct nestedStruct
     {
-      get { return _s.DereferenceStruct<NestedStruct>(0); }
+      get { return _s.DereferencePointer<NestedStruct>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -1787,62 +1787,62 @@ namespace Schema
 
     public global::CapnpNet.FlatArray<Struct0> list0
     {
-      get { return new global::CapnpNet.FlatArray<Struct0>(_s.DereferenceAbsPointer(0)); }
-      set { _s.WritePointer(0, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Struct0>>(0); }
+      set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.FlatArray<Struct1> list1
     {
-      get { return new global::CapnpNet.FlatArray<Struct1>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Struct1>>(1); }
+      set { _s.WritePointer(1, value); }
     }
 
     public global::CapnpNet.FlatArray<Struct8> list8
     {
-      get { return new global::CapnpNet.FlatArray<Struct8>(_s.DereferenceAbsPointer(2)); }
-      set { _s.WritePointer(2, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Struct8>>(2); }
+      set { _s.WritePointer(2, value); }
     }
 
     public global::CapnpNet.FlatArray<Struct16> list16
     {
-      get { return new global::CapnpNet.FlatArray<Struct16>(_s.DereferenceAbsPointer(3)); }
-      set { _s.WritePointer(3, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Struct16>>(3); }
+      set { _s.WritePointer(3, value); }
     }
 
     public global::CapnpNet.FlatArray<Struct32> list32
     {
-      get { return new global::CapnpNet.FlatArray<Struct32>(_s.DereferenceAbsPointer(4)); }
-      set { _s.WritePointer(4, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Struct32>>(4); }
+      set { _s.WritePointer(4, value); }
     }
 
     public global::CapnpNet.FlatArray<Struct64> list64
     {
-      get { return new global::CapnpNet.FlatArray<Struct64>(_s.DereferenceAbsPointer(5)); }
-      set { _s.WritePointer(5, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Struct64>>(5); }
+      set { _s.WritePointer(5, value); }
     }
 
     public global::CapnpNet.FlatArray<StructP> listP
     {
-      get { return new global::CapnpNet.FlatArray<StructP>(_s.DereferenceAbsPointer(6)); }
-      set { _s.WritePointer(6, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<StructP>>(6); }
+      set { _s.WritePointer(6, value); }
     }
 
     public global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<int>> int32ListList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<int>>(_s.DereferenceAbsPointer(7)); }
-      set { _s.WritePointer(7, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<int>>>(7); }
+      set { _s.WritePointer(7, value); }
     }
 
     public global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<global::CapnpNet.Text>> textListList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<global::CapnpNet.Text>>(_s.DereferenceAbsPointer(8)); }
-      set { _s.WritePointer(8, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<global::CapnpNet.Text>>>(8); }
+      set { _s.WritePointer(8, value); }
     }
 
     public global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<TestAllTypes>> structListList
     {
-      get { return new global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<TestAllTypes>>(_s.DereferenceAbsPointer(9)); }
-      set { _s.WritePointer(9, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<TestAllTypes>>>(9); }
+      set { _s.WritePointer(9, value); }
     }
 
     [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
@@ -2086,7 +2086,7 @@ namespace Schema
 
       public global::CapnpNet.Text f
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2122,7 +2122,7 @@ namespace Schema
 
       public global::CapnpNet.Text pad
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2164,7 +2164,7 @@ namespace Schema
 
       public global::CapnpNet.Text pad
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2206,7 +2206,7 @@ namespace Schema
 
       public global::CapnpNet.Text pad
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2248,7 +2248,7 @@ namespace Schema
 
       public global::CapnpNet.Text pad
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2290,7 +2290,7 @@ namespace Schema
 
       public global::CapnpNet.Text pad
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2332,7 +2332,7 @@ namespace Schema
 
       public global::CapnpNet.Text pad
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2368,7 +2368,7 @@ namespace Schema
 
       public global::CapnpNet.Text f
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
@@ -2459,7 +2459,7 @@ namespace Schema
 
     public TestLists lists
     {
-      get { return _s.DereferenceStruct<TestLists>(0); }
+      get { return _s.DereferencePointer<TestLists>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -2501,7 +2501,7 @@ namespace Schema
 
     public global::CapnpNet.Text bar
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
@@ -2531,14 +2531,14 @@ namespace Schema
 
       public global::CapnpNet.Text qux
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
 
       public global::CapnpNet.FlatArray<int> corge
       {
-        get { return new global::CapnpNet.FlatArray<int>(_s.DereferenceAbsPointer(1)); }
-        set { _s.WritePointer(1, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<int>>(1); }
+        set { _s.WritePointer(1, value); }
       }
 
       public float grault
@@ -2568,14 +2568,14 @@ namespace Schema
 
       public global::CapnpNet.Text qux
       {
-        get { return _s.DereferenceText(2); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(2); }
         set { _s.WritePointer(2, value); }
       }
 
       public global::CapnpNet.FlatArray<int> corge
       {
-        get { return new global::CapnpNet.FlatArray<int>(_s.DereferenceAbsPointer(2)); }
-        set { _s.WritePointer(2, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<int>>(2); }
+        set { _s.WritePointer(2, value); }
       }
 
       public float grault
@@ -2623,13 +2623,13 @@ namespace Schema
 
     public global::CapnpNet.Text old2
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public TestOldVersion old3
     {
-      get { return _s.DereferenceStruct<TestOldVersion>(1); }
+      get { return _s.DereferencePointer<TestOldVersion>(1); }
       set { _s.WritePointer(1, value); }
     }
   }
@@ -2671,13 +2671,13 @@ namespace Schema
 
     public global::CapnpNet.Text old2
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public TestNewVersion old3
     {
-      get { return _s.DereferenceStruct<TestNewVersion>(1); }
+      get { return _s.DereferencePointer<TestNewVersion>(1); }
       set { _s.WritePointer(1, value); }
     }
 
@@ -2689,7 +2689,7 @@ namespace Schema
 
     public global::CapnpNet.Text new2
     {
-      get { return _s.DereferenceText(2); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(2); }
       set { _s.WritePointer(2, value); }
     }
   }
@@ -2883,13 +2883,13 @@ namespace Schema
 
       public SomeStruct @struct
       {
-        get { return _s.DereferenceStruct<SomeStruct>(0); }
+        get { return _s.DereferencePointer<SomeStruct>(0); }
         set { _s.WritePointer(0, value); }
       }
 
       public TestAnyPointer @object
       {
-        get { return _s.DereferenceStruct<TestAnyPointer>(0); }
+        get { return _s.DereferencePointer<TestAnyPointer>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -2925,13 +2925,13 @@ namespace Schema
 
       public global::CapnpNet.Text someText
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
       public global::CapnpNet.Text moreText
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
     }
@@ -2968,14 +2968,14 @@ namespace Schema
 
     public global::CapnpNet.Text someText
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.FlatArray<InlineStruct> structList
     {
-      get { return new global::CapnpNet.FlatArray<InlineStruct>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<InlineStruct>>(1); }
+      set { _s.WritePointer(1, value); }
     }
 
     [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
@@ -3015,7 +3015,7 @@ namespace Schema
 
       public global::CapnpNet.Text textField
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -3122,7 +3122,7 @@ namespace Schema
 
     public TestGenerics<Bar, Foo> rev
     {
-      get { return _s.DereferenceStruct<TestGenerics<Bar, Foo>>(1); }
+      get { return _s.DereferencePointer<TestGenerics<Bar, Foo>>(1); }
       set { _s.WritePointer(1, value); }
     }
 
@@ -3223,13 +3223,13 @@ namespace Schema
 
       public Inner innerBound
       {
-        get { return _s.DereferenceStruct<Inner>(2); }
+        get { return _s.DereferencePointer<Inner>(2); }
         set { _s.WritePointer(2, value); }
       }
 
       public Inner innerUnbound
       {
-        get { return _s.DereferenceStruct<Inner>(3); }
+        get { return _s.DereferencePointer<Inner>(3); }
         set { _s.WritePointer(3, value); }
       }
 
@@ -3340,7 +3340,7 @@ namespace Schema
 
         public TestGenerics<TestAllTypes, TestAnyPointer> gen
         {
-          get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>>(1); }
+          get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>>(1); }
           set { _s.WritePointer(1, value); }
         }
       }
@@ -3384,25 +3384,25 @@ namespace Schema
 
       public Inner inner
       {
-        get { return _s.DereferenceStruct<Inner>(1); }
+        get { return _s.DereferencePointer<Inner>(1); }
         set { _s.WritePointer(1, value); }
       }
 
       public Inner2<global::CapnpNet.AbsPointer> inner2
       {
-        get { return _s.DereferenceStruct<Inner2<global::CapnpNet.AbsPointer>>(2); }
+        get { return _s.DereferencePointer<Inner2<global::CapnpNet.AbsPointer>>(2); }
         set { _s.WritePointer(2, value); }
       }
 
       public Inner2<global::CapnpNet.Text> inner2Bind
       {
-        get { return _s.DereferenceStruct<Inner2<global::CapnpNet.Text>>(3); }
+        get { return _s.DereferencePointer<Inner2<global::CapnpNet.Text>>(3); }
         set { _s.WritePointer(3, value); }
       }
 
       public Inner2<global::CapnpNet.Text> inner2Text
       {
-        get { return _s.DereferenceStruct<Inner2<global::CapnpNet.Text>>(4); }
+        get { return _s.DereferencePointer<Inner2<global::CapnpNet.Text>>(4); }
         set { _s.WritePointer(4, value); }
       }
 
@@ -3445,7 +3445,7 @@ namespace Schema
 
     public TestGenerics<Foo, Bar> value
     {
-      get { return _s.DereferenceStruct<TestGenerics<Foo, Bar>>(0); }
+      get { return _s.DereferencePointer<TestGenerics<Foo, Bar>>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -3481,7 +3481,7 @@ namespace Schema
 
     public TestGenericsWrapper<global::CapnpNet.Text, TestAllTypes> value
     {
-      get { return _s.DereferenceStruct<TestGenericsWrapper<global::CapnpNet.Text, TestAllTypes>>(0); }
+      get { return _s.DereferencePointer<TestGenericsWrapper<global::CapnpNet.Text, TestAllTypes>>(0); }
       set { _s.WritePointer(0, value); }
     }
   }
@@ -3674,121 +3674,121 @@ namespace Schema
 
     public TestGenerics<TestAllTypes, TestAnyPointer> basic
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>>(0); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public TestGenerics<TestAllTypes, TestAnyPointer>.Inner inner
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>.Inner>(1); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>.Inner>(1); }
       set { _s.WritePointer(1, value); }
     }
 
     public TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.Text> inner2
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.Text>>(2); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.Text>>(2); }
       set { _s.WritePointer(2, value); }
     }
 
     public TestGenerics<global::CapnpNet.AbsPointer, global::CapnpNet.AbsPointer> unspecified
     {
-      get { return _s.DereferenceStruct<TestGenerics<global::CapnpNet.AbsPointer, global::CapnpNet.AbsPointer>>(3); }
+      get { return _s.DereferencePointer<TestGenerics<global::CapnpNet.AbsPointer, global::CapnpNet.AbsPointer>>(3); }
       set { _s.WritePointer(3, value); }
     }
 
     public TestGenerics<global::CapnpNet.AbsPointer, global::CapnpNet.AbsPointer>.Inner2<global::CapnpNet.Text> unspecifiedInner
     {
-      get { return _s.DereferenceStruct<TestGenerics<global::CapnpNet.AbsPointer, global::CapnpNet.AbsPointer>.Inner2<global::CapnpNet.Text>>(4); }
+      get { return _s.DereferencePointer<TestGenerics<global::CapnpNet.AbsPointer, global::CapnpNet.AbsPointer>.Inner2<global::CapnpNet.Text>>(4); }
       set { _s.WritePointer(4, value); }
     }
 
     public TestGenericsWrapper<TestAllTypes, TestAnyPointer> wrapper
     {
-      get { return _s.DereferenceStruct<TestGenericsWrapper<TestAllTypes, TestAnyPointer>>(8); }
+      get { return _s.DereferencePointer<TestGenericsWrapper<TestAllTypes, TestAnyPointer>>(8); }
       set { _s.WritePointer(8, value); }
     }
 
     public TestGenerics<ITestInterface, global::CapnpNet.Text> cap
     {
-      get { return _s.DereferenceStruct<TestGenerics<ITestInterface, global::CapnpNet.Text>>(18); }
+      get { return _s.DereferencePointer<TestGenerics<ITestInterface, global::CapnpNet.Text>>(18); }
       set { _s.WritePointer(18, value); }
     }
 
-    public TestGenerics<TestAllTypes, global::CapnpNet.FlatArray<uint>>.IInterface<global::CapnpNet.FlatArray<byte>> genericCap
+    public TestGenerics<TestAllTypes, global::CapnpNet.FlatArray<uint>>.IInterface<global::CapnpNet.Data> genericCap
     {
-      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, global::CapnpNet.FlatArray<uint>>.IInterface<global::CapnpNet.FlatArray<byte>>>(19); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, global::CapnpNet.FlatArray<uint>>.IInterface<global::CapnpNet.Data>>(19); }
       set { _s.WritePointer(19, value); }
     }
 
     public TestGenerics<TestAllTypes, global::CapnpNet.Text> @default
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, global::CapnpNet.Text>>(5); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, global::CapnpNet.Text>>(5); }
       set { _s.WritePointer(5, value); }
     }
 
     public TestGenerics<TestAllTypes, global::CapnpNet.Text>.Inner defaultInner
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, global::CapnpNet.Text>.Inner>(6); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, global::CapnpNet.Text>.Inner>(6); }
       set { _s.WritePointer(6, value); }
     }
 
     public TestUseGenerics defaultUser
     {
-      get { return _s.DereferenceStruct<TestUseGenerics>(7); }
+      get { return _s.DereferencePointer<TestUseGenerics>(7); }
       set { _s.WritePointer(7, value); }
     }
 
     public TestGenericsWrapper<global::CapnpNet.Text, TestAllTypes> defaultWrapper
     {
-      get { return _s.DereferenceStruct<TestGenericsWrapper<global::CapnpNet.Text, TestAllTypes>>(9); }
+      get { return _s.DereferencePointer<TestGenericsWrapper<global::CapnpNet.Text, TestAllTypes>>(9); }
       set { _s.WritePointer(9, value); }
     }
 
     public TestGenericsWrapper2 defaultWrapper2
     {
-      get { return _s.DereferenceStruct<TestGenericsWrapper2>(10); }
+      get { return _s.DereferencePointer<TestGenericsWrapper2>(10); }
       set { _s.WritePointer(10, value); }
     }
 
     public TestAllTypes aliasFoo
     {
-      get { return _s.DereferenceStruct<TestAllTypes>(11); }
+      get { return _s.DereferencePointer<TestAllTypes>(11); }
       set { _s.WritePointer(11, value); }
     }
 
     public TestGenerics<TestAllTypes, TestAnyPointer>.Inner aliasInner
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>.Inner>(12); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>.Inner>(12); }
       set { _s.WritePointer(12, value); }
     }
 
     public TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.AbsPointer> aliasInner2
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.AbsPointer>>(13); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.AbsPointer>>(13); }
       set { _s.WritePointer(13, value); }
     }
 
     public TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.FlatArray<uint>> aliasInner2Bind
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.FlatArray<uint>>>(14); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.FlatArray<uint>>>(14); }
       set { _s.WritePointer(14, value); }
     }
 
     public TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.Text> aliasInner2Text
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.Text>>(15); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, TestAnyPointer>.Inner2<global::CapnpNet.Text>>(15); }
       set { _s.WritePointer(15, value); }
     }
 
     public global::CapnpNet.Text aliasRev
     {
-      get { return _s.DereferenceText(16); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(16); }
       set { _s.WritePointer(16, value); }
     }
 
     public TestGenerics<TestAllTypes, global::CapnpNet.FlatArray<uint>>.UseAliases useAliases
     {
-      get { return _s.DereferenceStruct<TestGenerics<TestAllTypes, global::CapnpNet.FlatArray<uint>>.UseAliases>(17); }
+      get { return _s.DereferencePointer<TestGenerics<TestAllTypes, global::CapnpNet.FlatArray<uint>>.UseAliases>(17); }
       set { _s.WritePointer(17, value); }
     }
   }
@@ -3865,7 +3865,7 @@ namespace Schema
     public const float float32Const = 1234.5F;
     public const double float64Const = -1.23E+47;
     public static readonly global::CapnpNet.Text textConst = default (global::CapnpNet.Text) /*not yet supported*/;
-    public static readonly global::CapnpNet.FlatArray<byte> dataConst = default (global::CapnpNet.FlatArray<byte>) /*not yet supported*/;
+    public static readonly global::CapnpNet.Data dataConst = default (global::CapnpNet.Data) /*not yet supported*/;
     public static readonly TestAllTypes structConst = default (TestAllTypes) /*not yet supported*/;
     public const TestEnum enumConst = (TestEnum)5;
     public static readonly global::CapnpNet.FlatArray<global::CapnpNet.Void> voidListConst = default (global::CapnpNet.FlatArray<global::CapnpNet.Void>) /*not yet supported*/;
@@ -3881,7 +3881,7 @@ namespace Schema
     public static readonly global::CapnpNet.FlatArray<float> float32ListConst = default (global::CapnpNet.FlatArray<float>) /*not yet supported*/;
     public static readonly global::CapnpNet.FlatArray<double> float64ListConst = default (global::CapnpNet.FlatArray<double>) /*not yet supported*/;
     public static readonly global::CapnpNet.FlatArray<global::CapnpNet.Text> textListConst = default (global::CapnpNet.FlatArray<global::CapnpNet.Text>) /*not yet supported*/;
-    public static readonly global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<byte>> dataListConst = default (global::CapnpNet.FlatArray<global::CapnpNet.FlatArray<byte>>) /*not yet supported*/;
+    public static readonly global::CapnpNet.FlatArray<global::CapnpNet.Data> dataListConst = default (global::CapnpNet.FlatArray<global::CapnpNet.Data>) /*not yet supported*/;
     public static readonly global::CapnpNet.FlatArray<TestAllTypes> structListConst = default (global::CapnpNet.FlatArray<TestAllTypes>) /*not yet supported*/;
     public static readonly global::CapnpNet.FlatArray<TestEnum> enumListConst = default (global::CapnpNet.FlatArray<TestEnum>) /*not yet supported*/;
   }
@@ -3918,7 +3918,7 @@ namespace Schema
 
   public static partial class GlobalConstants
   {
-    public static readonly global::CapnpNet.FlatArray<byte> embeddedData = default (global::CapnpNet.FlatArray<byte>) /*not yet supported*/;
+    public static readonly global::CapnpNet.Data embeddedData = default (global::CapnpNet.Data) /*not yet supported*/;
   }
 
   public static partial class GlobalConstants
@@ -3967,25 +3967,25 @@ namespace Schema
 
     public global::CapnpNet.AbsPointer anyKindAsStruct
     {
-      get { return _s.DereferenceAbsPointer(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.Struct anyStructAsStruct
     {
-      get { return _s.DereferenceRawStruct(1); }
+      get { return _s.DereferencePointer<global::CapnpNet.Struct>(1); }
       set { _s.WritePointer(1, value); }
     }
 
     public global::CapnpNet.AbsPointer anyKindAsList
     {
-      get { return _s.DereferenceAbsPointer(2); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(2); }
       set { _s.WritePointer(2, value); }
     }
 
     public global::CapnpNet.AbsPointer anyListAsList
     {
-      get { return _s.DereferenceAbsPointer(3); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(3); }
       set { _s.WritePointer(3, value); }
     }
   }
@@ -4080,7 +4080,7 @@ namespace Schema
 
       public global::CapnpNet.Text x
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -4116,7 +4116,7 @@ namespace Schema
 
       public TestAllTypes s
       {
-        get { return _s.DereferenceStruct<TestAllTypes>(0); }
+        get { return _s.DereferencePointer<TestAllTypes>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -4219,13 +4219,13 @@ namespace Schema
 
       public global::CapnpNet.Text s
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
       public Box outBox
       {
-        get { return _s.DereferenceStruct<Box>(1); }
+        get { return _s.DereferencePointer<Box>(1); }
         set { _s.WritePointer(1, value); }
       }
     }
@@ -4267,14 +4267,14 @@ namespace Schema
 
       public global::CapnpNet.AbsPointer obj
       {
-        get { return _s.DereferenceAbsPointer(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(1); }
         set { _s.WritePointer(1, value); }
       }
 
       public global::CapnpNet.FlatArray<ITestInterface> list
       {
-        get { return new global::CapnpNet.FlatArray<ITestInterface>(_s.DereferenceAbsPointer(2)); }
-        set { _s.WritePointer(2, value.Pointer); }
+        get { return _s.DereferencePointer<global::CapnpNet.FlatArray<ITestInterface>>(2); }
+        set { _s.WritePointer(2, value); }
       }
     }
 
@@ -4441,7 +4441,7 @@ namespace Schema
 
       public global::CapnpNet.Text t
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -4483,7 +4483,7 @@ namespace Schema
 
       public global::CapnpNet.Text t
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
@@ -4647,7 +4647,7 @@ namespace Schema
 
       public global::CapnpNet.Text s
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -4719,7 +4719,7 @@ namespace Schema
 
       public global::CapnpNet.Text s
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -4863,7 +4863,7 @@ namespace Schema
 
       public global::CapnpNet.Text s
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -5043,7 +5043,7 @@ namespace Schema
 
       public global::CapnpNet.Text a
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
@@ -5055,7 +5055,7 @@ namespace Schema
 
       public global::CapnpNet.Text c
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
     }
@@ -5091,13 +5091,13 @@ namespace Schema
 
       public global::CapnpNet.Text d
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
       public global::CapnpNet.Text e
       {
-        get { return _s.DereferenceText(1); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(1); }
         set { _s.WritePointer(1, value); }
       }
     }
@@ -5205,7 +5205,7 @@ namespace Schema
 
       public global::CapnpNet.Text str
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -5456,7 +5456,7 @@ namespace Schema
 
       public global::CapnpNet.Text text
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
     }
@@ -5499,8 +5499,8 @@ namespace Schema
 
     public global::CapnpNet.FlatArray<TestMembrane.IThing> list
     {
-      get { return new global::CapnpNet.FlatArray<TestMembrane.IThing>(_s.DereferenceAbsPointer(1)); }
-      set { _s.WritePointer(1, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<TestMembrane.IThing>>(1); }
+      set { _s.WritePointer(1, value); }
     }
   }
 
@@ -5535,8 +5535,8 @@ namespace Schema
 
     public global::CapnpNet.FlatArray<Element> list
     {
-      get { return new global::CapnpNet.FlatArray<Element>(_s.DereferenceAbsPointer(0)); }
-      set { _s.WritePointer(0, value.Pointer); }
+      get { return _s.DereferencePointer<global::CapnpNet.FlatArray<Element>>(0); }
+      set { _s.WritePointer(0, value); }
     }
 
     [global::CapnpNet.PreferredListEncoding(global::CapnpNet.ElementSize.Composite)]
@@ -5570,7 +5570,7 @@ namespace Schema
 
       public global::CapnpNet.Text text
       {
-        get { return _s.DereferenceText(0); }
+        get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
         set { _s.WritePointer(0, value); }
       }
 
@@ -5671,13 +5671,13 @@ namespace Schema
 
     public TestSturdyRefHostId hostId
     {
-      get { return _s.DereferenceStruct<TestSturdyRefHostId>(0); }
+      get { return _s.DereferencePointer<TestSturdyRefHostId>(0); }
       set { _s.WritePointer(0, value); }
     }
 
     public global::CapnpNet.AbsPointer objectId
     {
-      get { return _s.DereferenceAbsPointer(1); }
+      get { return _s.DereferencePointer<global::CapnpNet.AbsPointer>(1); }
       set { _s.WritePointer(1, value); }
     }
   }
@@ -5713,7 +5713,7 @@ namespace Schema
 
     public global::CapnpNet.Text host
     {
-      get { return _s.DereferenceText(0); }
+      get { return _s.DereferencePointer<global::CapnpNet.Text>(0); }
       set { _s.WritePointer(0, value); }
     }
   }

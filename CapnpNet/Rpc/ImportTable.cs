@@ -70,7 +70,7 @@ namespace CapnpNet.Rpc
         {
           var copy = entry.value;
           entry.key = 0;
-          entry.value = default(T);
+          entry.value = default;
           entry.active = false;
           _count--;
           return copy;

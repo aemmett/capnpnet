@@ -62,8 +62,8 @@ namespace CapnpNet
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Xor(float a, float b)
     {
-      if (a == default(float)) return b;
-      if (b == default(float)) return a;
+      if (a == default) return b;
+      if (b == default) return a;
 
       var val = new Float32Helper();
       var def = new Float32Helper();
@@ -76,8 +76,8 @@ namespace CapnpNet
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double Xor(double a, double b)
     {
-      if (a == default(double)) return b;
-      if (b == default(double)) return a;
+      if (a == default) return b;
+      if (b == default) return a;
 
       var val = new Float64Helper();
       var def = new Float64Helper();

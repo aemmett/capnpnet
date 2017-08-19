@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace CapnpNet
 {
+  [StructLayout(LayoutKind.Sequential)]
   public struct Text : IPureAbsPointer
   {
     private readonly FlatArray<byte> _bytes;

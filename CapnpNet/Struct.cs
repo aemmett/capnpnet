@@ -83,7 +83,7 @@ namespace CapnpNet
     }
   }
   
-  public struct Struct : IAbsPointer
+  public struct Struct : IStruct
   {
     private readonly Segment _segment;
     private readonly int _structWordOffset; // in the encoding spec, technically this is a uint, but currently I bottom out at an API that uses int :(
@@ -125,6 +125,8 @@ namespace CapnpNet
       _pointerWords = pointerWords;
       _upgradedListElementByteOffset = upgradedListElementSize;
     }
+
+    Struct IStruct.Struct => this;
 
     public AbsPointer Pointer => new AbsPointer(_segment, 0, new StructPointer()
     {
@@ -202,18 +204,10 @@ namespace CapnpNet
 
       return size;
     }
-
-    public AbsPointer ToAbsPointer() => new AbsPointer(_segment, 0, new StructPointer
-    {
-      Type = PointerType.Struct,
-      WordOffset = _structWordOffset,
-      DataWords = _dataWords,
-      PointerWords = _pointerWords,
-    });
-
+    
     public Struct CopyTo(Message dest)
     {
-      if (this.IsEmpty) return default(Struct);
+      if (this.IsEmpty) return default;
 
       if (this.Segment.Message == dest) return this;
 
@@ -266,8 +260,11 @@ namespace CapnpNet
     {
       if (this.DereferenceCore(pointerIndex, out var pointer, out var baseOffset, out var targetSegment))
       {
-        if (ReflectionCache<T>.ImplementsICapability)
+        if (typeof(T) == typeof(ICapability)
+          || ReflectionCache<T>.ImplementsICapability)
         {
+          // TODO: handle default
+
           Check.IsTrue(pointer.Type == PointerType.Other && pointer.OtherPointerType == OtherPointerType.Capability);
 
           ref var capEntry = ref this.Segment.Message.LocalCaps.TryGet(pointer.CapabilityId, out var found);
@@ -312,7 +309,7 @@ namespace CapnpNet
       }
 
       // TODO: how to handle default?
-      return default(AbsPointer);
+      return default;
     }
 
     public Struct DereferenceRawStruct(int pointerIndex)
@@ -335,7 +332,7 @@ namespace CapnpNet
       }
 
       // TODO: how to handle default?
-      return default(T);
+      return default;
     }
 
     public Text DereferenceText(int pointerIndex)
@@ -410,11 +407,11 @@ namespace CapnpNet
     {
       if (pointerIndex >= this.PointerWords)
       {
-        return default(T);
+        return default;
       }
 
       ref Pointer otherPointer = ref this.GetPointer(pointerIndex);
-      if (otherPointer == default(Pointer)) throw new NotSupportedException(); // TODO: default?
+      if (otherPointer == default) throw new NotSupportedException(); // TODO: default?
 
       if (otherPointer.Type != PointerType.Other
         || otherPointer.OtherPointerType != OtherPointerType.Capability)
@@ -432,7 +429,7 @@ namespace CapnpNet
 
       if (pointerIndex >= this.PointerWords)
       {
-        pointer = default(Pointer);
+        pointer = default;
         baseOffset = 0;
         targetSegment = null;
         return false;
@@ -440,7 +437,7 @@ namespace CapnpNet
       
       pointer = this.GetPointer(pointerIndex);
       
-      if (pointer == default(Pointer))
+      if (pointer == default)
       {
         baseOffset = 0;
         targetSegment = null;
@@ -465,13 +462,13 @@ namespace CapnpNet
       if (_upgradedListElementByteOffset >= 0)
       {
         // this is a list element upgraded to a struct; only the first field is present
-        if (index > 0) return default(T);
+        if (index > 0) return default;
         
         return Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + _upgradedListElementByteOffset / Unsafe.SizeOf<T>() | Byte.unit]);
       }
       else
       {
-        if (index * Unsafe.SizeOf<T>() >= _dataWords * sizeof(ulong)) return default(T);
+        if (index * Unsafe.SizeOf<T>() >= _dataWords * sizeof(ulong)) return default;
 
         return Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + index * Unsafe.SizeOf<T>() | Byte.unit]);
       }
