@@ -57,7 +57,6 @@ TODO
   - Check for integer overflows. I'm pretty sure there's a lot of them when
     dealing with >2GB (possibly smaller) messages, may potentially compromise
     memory safety / process stability
-- Special type for ":Data"
 - Packing/unpacking
 - dynamic API
 
