@@ -1,11 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using CapnpNet.Schema;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.IO;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CapnpNet.Schema.Tests
 {
@@ -23,15 +19,18 @@ namespace CapnpNet.Schema.Tests
 
       var cgr = msg.GetRoot<CodeGeneratorRequest>();
 
-      Node GetNode(ulong id) => cgr.nodes.First(n => n.id == id);
+      var sc = new SchemaContainer();
 
-      var fileNode = GetNode(cgr.requestedFiles[0].id);
-      var node = cgr.nodes
-        .First(n => n.displayName.ToString().EndsWith("CapnpVersion"));
-
-      dynamic sut = ((IStruct)cgr.capnpVersion).Struct.AsDynamic(new SchemaNode(node));
+      foreach (var node in cgr.nodes)
+      {
+        sc.Nodes.Add(node.id, new SchemaNode(sc, node));
+      }
       
-      byte minor = sut.minor;
+      SchemaNode GetNode(string name) => sc[cgr.nodes.First(n => n.displayName.ToString().EndsWith(name)).id];
+      
+      dynamic sut = msg.Root.AsDynamic(GetNode("CodeGeneratorRequest"));
+      
+      byte minor = sut.capnpVersion.minor;
       Console.WriteLine(minor);
     }
   }

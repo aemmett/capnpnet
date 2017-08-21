@@ -18,14 +18,24 @@ namespace CapnpNet.Schema
     }
   }
 
+  public sealed class SchemaContainer
+  {
+    public Dictionary<ulong, SchemaNode> Nodes { get; } = new Dictionary<ulong, SchemaNode>();
+
+    public SchemaNode this[ulong id] => this.Nodes[id];
+  }
+
   public sealed class SchemaNode
   {
-    public SchemaNode(Node node)
+    public SchemaNode(SchemaContainer container, Node node)
     {
+      this.Container = container;
       this.Node = node;
     }
 
     public Node Node { get; }
+
+    public SchemaContainer Container { get; }
   }
 
   public struct DynamicStruct : IDynamicMetaObjectProvider
@@ -55,17 +65,24 @@ namespace CapnpNet.Schema
       public override DynamicMetaObject BindGetMember(GetMemberBinder binder)
       {
         var ds = (DynamicStruct)this.Value;
+        var dsP = Parameter(typeof(DynamicStruct), "ds");
+        var structExp = Property(dsP, "Struct");
         var node = ds.SchemaNode.Node;
+        Expression valueExp;
         switch (node.which)
         {
           case Node.Union.@struct:
             foreach (var field in node.@struct.fields)
             {
               if (field.name.ToString() != binder.Name) continue;
-
+              
               if (field.Is(out Field.groupGroup group))
               {
-                throw new NotImplementedException();
+                var newSchemaNode = ds.SchemaNode.Container[group.typeId];
+                valueExp = New(
+                  typeof(DynamicStruct).GetConstructor(new[] { typeof(SchemaNode), typeof(Struct) }),
+                  Constant(newSchemaNode),
+                  structExp);
               }
               else if (field.Is(out Field.slotGroup slot))
               {
@@ -100,7 +117,8 @@ namespace CapnpNet.Schema
                   case Type.Union.anyPointer:
                     readMethod = "DereferencePointer";
                     defaultValue = null;
-                    type = null; // TODO
+                    type = null;
+                    
                     break;
                   default:
                     throw new NotSupportedException();
@@ -108,35 +126,46 @@ namespace CapnpNet.Schema
                 
                 if (readMethod.StartsWith("Read"))
                 {
-                  var dsP = Parameter(typeof(DynamicStruct), "ds");
-                  var target = Block(
-                    new[] { dsP },
-                    Assign(dsP, Convert(this.Expression, typeof(DynamicStruct))),
-                    Condition(
-                      Equal(Property(dsP, "SchemaNode"), Constant(ds.SchemaNode)),
-                      Convert(
-                        Call(
-                          Property(dsP, "Struct"),
-                          typeof(Struct).GetMethod(readMethod),
-                          Constant((int)slot.offset),
-                          Constant(defaultValue)),
-                        binder.ReturnType),
-                      binder.GetUpdateExpression(binder.ReturnType)));
-                  
-                  return new DynamicMetaObject(
-                    target,
-                    BindingRestrictions.GetTypeRestriction(this.Expression, typeof(DynamicStruct)));
+                  valueExp = Call(
+                    structExp,
+                    typeof(Struct).GetMethod(readMethod),
+                    Constant((int)slot.offset),
+                    Constant(defaultValue));
                 }
-                else
+                else if (slot.type.Is(out Type.structGroup @struct))
                 {
-                  throw new NotImplementedException();
+                  var newSchemaNode = ds.SchemaNode.Container[@struct.typeId];
+                  valueExp = New(
+                    typeof(DynamicStruct).GetConstructor(new[] { typeof(SchemaNode), typeof(Struct) }),
+                    Constant(newSchemaNode),
+                    Call(
+                      structExp,
+                      typeof(Struct).GetMethod("DereferencePointer").MakeGenericMethod(typeof(Struct)),
+                      Constant((int)slot.offset)));
                 }
+                else throw new NotImplementedException();
               }
               else throw new NotSupportedException();
+              
+              var target = Block(
+                new[] { dsP },
+                Assign(dsP, Convert(this.Expression, typeof(DynamicStruct))),
+                Condition(
+                  // if 'this' refers to a new with the same schema...
+                  Equal(Property(dsP, "SchemaNode"), Constant(ds.SchemaNode)),
+                  // then: perform the get-member
+                  Convert(
+                    valueExp,
+                    binder.ReturnType),
+                  // else: try to look up the member under the other schema
+                  binder.GetUpdateExpression(binder.ReturnType)));
+                  
+              return new DynamicMetaObject(
+                target,
+                BindingRestrictions.GetTypeRestriction(this.Expression, typeof(DynamicStruct)));
             }
 
-            // TODO: fallback binder
-            throw new InvalidOperationException("Name not found");
+            return binder.FallbackGetMember(this);
           case Node.Union.@enum:
             break;
           case Node.Union.@interface:
