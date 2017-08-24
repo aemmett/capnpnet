@@ -70,8 +70,8 @@ namespace CapnpNet
     public static Message Decode(byte[] array)
     {
       if (array.Length <= 8) throw new ArgumentException("array too small", nameof(array));
-
-      var msg = new Message().Init(null);
+      
+      var msg = new Message().Init(new ArrayPoolSegmentFactory());
 
       ref int ptr = ref Unsafe.As<byte, int>(ref array[0]);
       int segmentCount = ptr + 1;

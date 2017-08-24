@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using CapnpNet.Test.Properties;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CapnpNet.Schema.Tests
@@ -11,11 +12,7 @@ namespace CapnpNet.Schema.Tests
     [TestMethod()]
     public void NodeDynamicProviderTest()
     {
-      Message msg;
-      using (var file = File.OpenRead(@"schema.bin"))
-      {
-        msg = Message.DecodeAsync(file).Result;
-      }
+      Message msg = Message.Decode(Resources.schema);
 
       var cgr = msg.GetRoot<CodeGeneratorRequest>();
 

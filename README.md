@@ -39,28 +39,32 @@ TODO
 ----
 
 ### Bugs / unimplemented cases
+
 - Missing edge cases
   - Pointer field defaults
-  - Copying messages with lists containing pointers
 - Codegen improvements
   - annotations to control codegen (namespace, etc.)
   - missing metadata
 - Equals, GetHashCode boilerplate
-- Better AnyPointer support
 - APIs to support easier writing
   - Implement more standard interfaces?
   - Automatic discriminant setting/validation?
 - Runtime and compiler version safety checks
 
+### Work in progress
+
+- dynamic API
+
 ### Missing features
+
 - Tests / documentation
   - Check for integer overflows. I'm pretty sure there's a lot of them when
     dealing with >2GB (possibly smaller) messages, may potentially compromise
     memory safety / process stability
 - Packing/unpacking
-- dynamic API
 
 ### Nice to haves
+
 - VS integration
 - .Net Core compatibility
   - what does this entail? Do I need to make unsafe code optional?

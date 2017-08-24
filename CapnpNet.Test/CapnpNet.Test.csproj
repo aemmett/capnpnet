@@ -61,15 +61,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NodeDynamicProviderTests.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SegmentTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="test.g.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="schema.bin">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="schema.bin" />
     <None Include="test.capnp" />
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +84,12 @@
       <Project>{e83f472a-663e-4b5e-815d-90d066681352}</Project>
       <Name>CapnpNet</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

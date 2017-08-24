@@ -88,6 +88,7 @@
     <Compile Include="Data.cs" />
     <Compile Include="FlatArray.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="PackStream.cs" />
     <Compile Include="PreferredListEncodingAttribute.cs" />
     <Compile Include="ReflectionCache.cs" />
     <Compile Include="Rpc\ExportTable.cs" />
