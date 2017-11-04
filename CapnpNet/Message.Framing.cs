@@ -8,26 +8,22 @@ using System.Threading.Tasks;
 
 namespace CapnpNet
 {
-  [StructLayout(LayoutKind.Explicit)]
+  [StructLayout(LayoutKind.Explicit, Size = 64)]
   public struct Pack64B<T> where T : struct
   {
-    public const int NUM_BYTES = 64;
-
     [FieldOffset(0)]
     private T _b0;
-    [FieldOffset(NUM_BYTES - 1)]
-    private byte _b63;
 
     public T this[int index]
     {
       get
       {
-        Check.Range(index, NUM_BYTES / Unsafe.SizeOf<T>());
+        Check.Range(index, 64 / Unsafe.SizeOf<T>());
         return Unsafe.Add(ref _b0, index);
       }
       set
       {
-        Check.Range(index, NUM_BYTES / Unsafe.SizeOf<T>());
+        Check.Range(index, 64 / Unsafe.SizeOf<T>());
         Unsafe.Add(ref _b0, index) = value;
       }
     }

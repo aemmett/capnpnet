@@ -76,10 +76,10 @@ namespace CapnpNet
         {
           bool c = (tag & 0x01) > 0;
           byte b = Unsafe.As<bool, byte>(ref c); // c ? 1 : 0
-          buffer[o + n] = ((byte)-b) & tag;
+          buffer[o + n] = (byte)(((byte)-b) & tag);
         }
 
-        this.BaseStream.
+        //this.BaseStream.
       }
 
       return writeCount;

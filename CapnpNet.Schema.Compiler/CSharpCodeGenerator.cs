@@ -271,7 +271,7 @@ namespace CapnpNet.Schema.Compiler
         {{";
       
       foreach (var tuple in i.methods
-        .Select((method, ordinal) => ((method, ordinal)))
+        .Select((method, ordinal) => ((method: method, ordinal)))
         .OrderBy(m => m.method.codeOrder))
       {
         var (method, ordinal) = tuple;

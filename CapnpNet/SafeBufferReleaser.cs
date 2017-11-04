@@ -7,22 +7,22 @@ namespace CapnpNet
   {
     private SafeBuffer _safeBuffer;
 
-    public bool IsDisposed { get; private set; } = true;
-    
     public SafeBufferReleaser(SafeBuffer safeBuffer) => this.Init(safeBuffer);
 
+    public bool IsDisposed { get; private set; } = true;
+    
     public void Init(SafeBuffer safeBuffer)
     {
       if (this.IsDisposed == false) throw new InvalidOperationException("Previous pointer not disposed");
 
       _safeBuffer = safeBuffer;
-      IsDisposed = false;
+      this.IsDisposed = false;
     }
 
     #region IDisposable Support
     private void Dispose(bool disposing)
     {
-      if (IsDisposed == false)
+      if (this.IsDisposed == false)
       {
         if (disposing)
         {
@@ -32,7 +32,7 @@ namespace CapnpNet
         _safeBuffer.ReleasePointer();
         _safeBuffer = null;
 
-        IsDisposed = true;
+        this.IsDisposed = true;
       }
     }
     

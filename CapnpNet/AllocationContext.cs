@@ -30,4 +30,21 @@ namespace CapnpNet
       return new Struct(this.Segment, offset, dataWords, pointerWords);
     }
   }
+
+  public struct AllocationContext<T>
+  {
+    private int _nextByteOffset;
+    private int _count;
+
+    public AllocationContext(Segment segment, int byteOffset, int count)
+    {
+      this.Segment = segment;
+      _nextByteOffset = byteOffset;
+      _count = count;
+    }
+
+    public Segment Segment { get; }
+
+
+  }
 }
