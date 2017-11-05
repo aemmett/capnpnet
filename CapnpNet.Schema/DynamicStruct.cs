@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,6 +41,11 @@ namespace CapnpNet.Schema
 
   public struct DynamicStruct : IDynamicMetaObjectProvider
   {
+    private static readonly ConstructorInfo DynamicStructConstructor = typeof(DynamicStruct)
+      .GetTypeInfo()
+      .DeclaredConstructors
+      .First(ci => ci.GetParameters().Length == 2);
+
     public DynamicStruct(SchemaNode schemaNode, Struct @struct)
     {
       this.SchemaNode = schemaNode;
@@ -80,7 +86,7 @@ namespace CapnpNet.Schema
               {
                 var newSchemaNode = ds.SchemaNode.Container[group.typeId];
                 valueExp = New(
-                  typeof(DynamicStruct).GetConstructor(new[] { typeof(SchemaNode), typeof(Struct) }),
+                  DynamicStructConstructor,
                   Constant(newSchemaNode),
                   structExp);
               }
@@ -128,7 +134,7 @@ namespace CapnpNet.Schema
                 {
                   valueExp = Call(
                     structExp,
-                    typeof(Struct).GetMethod(readMethod),
+                    typeof(Struct).GetTypeInfo().GetDeclaredMethod(readMethod),
                     Constant((int)slot.offset),
                     Constant(defaultValue));
                 }
@@ -136,11 +142,11 @@ namespace CapnpNet.Schema
                 {
                   var newSchemaNode = ds.SchemaNode.Container[@struct.typeId];
                   valueExp = New(
-                    typeof(DynamicStruct).GetConstructor(new[] { typeof(SchemaNode), typeof(Struct) }),
+                    DynamicStructConstructor,
                     Constant(newSchemaNode),
                     Call(
                       structExp,
-                      typeof(Struct).GetMethod("DereferencePointer").MakeGenericMethod(typeof(Struct)),
+                      typeof(Struct).GetTypeInfo().GetDeclaredMethod("DereferencePointer").MakeGenericMethod(typeof(Struct)),
                       Constant((int)slot.offset)));
                 }
                 else throw new NotImplementedException();

@@ -109,6 +109,7 @@ namespace CapnpNet
         {
           await dest.WriteAsync(arr.Array, arr.Offset, seg.AllocationIndex * sizeof(ulong));
         }
+#if UNSAFE
         else if (seg.IsFixedMemory)
         {
           UnmanagedMemoryStream readStream;
@@ -123,7 +124,8 @@ namespace CapnpNet
           {
             await readStream.CopyToAsync(dest);
           }
-        }
+        } 
+#endif
         else
         {
           // TODO: ask for pin

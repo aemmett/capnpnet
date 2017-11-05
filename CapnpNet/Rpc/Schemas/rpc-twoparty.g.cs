@@ -19,8 +19,9 @@ namespace CapnpNet.Rpc.TwoParty
     global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
+
+    AbsPointer IAbsPointer.Pointer => _s.Pointer;
 
     public uint joinId
     {
@@ -58,8 +59,9 @@ namespace CapnpNet.Rpc.TwoParty
     global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
+
+    AbsPointer IAbsPointer.Pointer => _s.Pointer;
   }
 
   public struct JoinKeyPart : IStruct
@@ -79,8 +81,9 @@ namespace CapnpNet.Rpc.TwoParty
     global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
+
+    AbsPointer IAbsPointer.Pointer => _s.Pointer;
 
     public uint joinId
     {
@@ -118,8 +121,9 @@ namespace CapnpNet.Rpc.TwoParty
     global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
+
+    AbsPointer IAbsPointer.Pointer => _s.Pointer;
 
     public Side side
     {
@@ -151,8 +155,9 @@ namespace CapnpNet.Rpc.TwoParty
     global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
+
+    AbsPointer IAbsPointer.Pointer => _s.Pointer;
 
     public uint joinId
     {
@@ -178,7 +183,8 @@ namespace CapnpNet.Rpc.TwoParty
     global::CapnpNet.Struct IStruct.Struct
     {
       get { return _s; }
-      set { _s = value; }
     }
+
+    AbsPointer IAbsPointer.Pointer => _s.Pointer;
   }
 }

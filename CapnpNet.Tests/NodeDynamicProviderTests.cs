@@ -1,18 +1,21 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using CapnpNet.Test.Properties;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Reflection;
+using System.Threading.Tasks;
+using CapnpNet.Schema;
+using Xunit;
 
-namespace CapnpNet.Schema.Tests
+namespace CapnpNet.Tests
 {
-  [TestClass()]
   public class NodeDynamicProviderTests
   {
-    [TestMethod()]
-    public void NodeDynamicProviderTest()
+    [Fact]
+    public async Task NodeDynamicProviderTest()
     {
-      Message msg = Message.Decode(Resources.schema);
+      var schema = typeof(NodeDynamicProviderTests).GetTypeInfo().Assembly
+        .GetManifestResourceStream("CapnpNet.Tests.schema.bin");
+
+      Message msg = await Message.DecodeAsync(schema);
 
       var cgr = msg.GetRoot<CodeGeneratorRequest>();
 

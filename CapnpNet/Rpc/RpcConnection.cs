@@ -1,4 +1,4 @@
-﻿using Nito.AsyncEx;
+﻿//using Nito.AsyncEx;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+//using System.Threading.Tasks.Dataflow;
 
 namespace CapnpNet.Rpc
 {
@@ -20,7 +20,7 @@ namespace CapnpNet.Rpc
     private MessageStream _msgStream;
     private ArrayPoolSegmentFactory _segFactory;
     private CancellationTokenSource _ctSource;
-    private AsyncCountdownEvent _inFlightCounter;
+    //private AsyncCountdownEvent _inFlightCounter;
     private ConcurrentQueue<System.Exception> _exceptions;
 
     [StructLayout(LayoutKind.Auto)]
@@ -74,7 +74,7 @@ namespace CapnpNet.Rpc
 
     public async Task StartReadLoop()
     {
-      _inFlightCounter = new AsyncCountdownEvent(1);
+      //_inFlightCounter = new AsyncCountdownEvent(1);
 
       var ct = _ctSource.Token;
       while (ct.IsCancellationRequested == false)
@@ -83,8 +83,8 @@ namespace CapnpNet.Rpc
         this.Process(msg);
       }
 
-      _inFlightCounter.Signal();
-      await _inFlightCounter.WaitAsync();
+      //_inFlightCounter.Signal();
+      //await _inFlightCounter.WaitAsync();
 
       if (_exceptions.Count > 0)
       {
@@ -107,11 +107,11 @@ namespace CapnpNet.Rpc
       }
       else
       {
-        _inFlightCounter.AddCount();
+        //_inFlightCounter.AddCount();
         task.ContinueWith(t =>
         {
           this.Consume(t);
-          _inFlightCounter.Signal();
+          //_inFlightCounter.Signal();
         }, TaskContinuationOptions.ExecuteSynchronously);
       }
     }
@@ -315,9 +315,9 @@ namespace CapnpNet.Rpc
     {
       if (_capToExportId.TryGetValue(cap, out uint id) == false)
       {
-        ref Export export = ref _exports.Next(out id);
-        export.capability = cap;
-        export.refCount = 1;
+        //ref Export export = ref _exports.Next(out id);
+        //export.capability = cap;
+        //export.refCount = 1;
         _capToExportId[cap] = id;
       }
       else

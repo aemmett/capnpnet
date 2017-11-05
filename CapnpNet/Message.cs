@@ -254,7 +254,7 @@ namespace CapnpNet
       _lastSegment = segment;
       segment.SegmentIndex = (prevSegment?.SegmentIndex + 1) ?? 0;
 
-#if TRACE
+#if TRACE && UNSAFE
       unsafe { Trace.WriteLine($"Adding segment {(long)Unsafe.AsPointer(ref segment[0 | Byte.unit]):X8}"); }
 #endif
 

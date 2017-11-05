@@ -11,13 +11,13 @@ namespace CapnpNet.Rpc
     private T[] _slots = new T[16]; // TODO: pool
 
     // TODO: find a priority queue implementation
-    private SortedList<uint, uint> _freeList;
+    //private SortedList<uint, uint> _freeList;
 
     private uint _nextId;
     
     public ref T TryGet(uint key, out bool valid)
     {
-      valid = key < _nextId && _freeList?.ContainsKey(key) == false;
+      valid = key < _nextId; // && _freeList?.ContainsKey(key) == false;
       if (!valid) return ref _empty;
 
       return ref _slots[key];
@@ -41,27 +41,27 @@ namespace CapnpNet.Rpc
 
       T copy = val;
       val = default;
-      if (_freeList == null) _freeList = new SortedList<uint, uint>();
+      //if (_freeList == null) _freeList = new SortedList<uint, uint>();
 
-      _freeList.Add(key, key);
+      //_freeList.Add(key, key);
       return copy;
     }
 
-    public ref T Next(out uint id)
-    {
-      if (_freeList?.Count > 0)
-      {
-        id = _freeList.Keys[0];
-        _freeList.RemoveAt(0);
-      }
-      else
-      {
-        id = _nextId;
-        _nextId++;
-      }
+    //public ref T Next(out uint id)
+    //{
+    //  if (_freeList?.Count > 0)
+    //  {
+    //    id = _freeList.Keys[0];
+    //    _freeList.RemoveAt(0);
+    //  }
+    //  else
+    //  {
+    //    id = _nextId;
+    //    _nextId++;
+    //  }
 
-      return ref this.GetOrAdd(id);
-    }
+    //  return ref this.GetOrAdd(id);
+    //}
   }
 
   //public struct ReplyContext

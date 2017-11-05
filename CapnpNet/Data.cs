@@ -35,6 +35,7 @@ namespace CapnpNet
           arraySegment.Offset,
           arraySegment.Count);
       }
+      #if UNSAFE
       else if (this.Segment.Is(out SafeBuffer safeBuffer))
       {
         return new UnmanagedMemoryStream(
@@ -51,6 +52,7 @@ namespace CapnpNet
             fixedMemory.length.ToInt64());
         }
       }
+      #endif
 
       throw new NotSupportedException();
     }

@@ -23,6 +23,7 @@ namespace CapnpNet
         if (preferredElementSize.HasValue == false)
         {
           preferredElementSize = typeof(T)
+            .GetTypeInfo()
             .GetCustomAttribute<PreferredListEncodingAttribute>()
             ?.ElementSize;
         }
@@ -33,14 +34,14 @@ namespace CapnpNet
 
     static ReflectionCache()
     {
-      Type[] interfaces = typeof(T).GetInterfaces();
+      var interfaces = typeof(T).GetTypeInfo().ImplementedInterfaces.ToList();
       ImplementsIStruct = interfaces.Contains(typeof(IStruct));
       // TODO: validate type meets IPure* contracts
       ImplementsIPureAbsPointer = interfaces.Contains(typeof(IPureAbsPointer));
       ImplementsIAbsPointer = ImplementsIPureAbsPointer || interfaces.Contains(typeof(IAbsPointer));
       ImplementsICapability = interfaces.Contains(typeof(ICapability));
-      KnownDataWords = (ushort)(int)(typeof(T).GetField("KNOWN_DATA_WORDS")?.GetValue(null) ?? 0);
-      KnownPointerWords = (ushort)(int)(typeof(T).GetField("KNOWN_POINTER_WORDS")?.GetValue(null) ?? 0);
+      KnownDataWords = (ushort)(int)(typeof(T).GetTypeInfo().GetDeclaredField("KNOWN_DATA_WORDS")?.GetValue(null) ?? 0);
+      KnownPointerWords = (ushort)(int)(typeof(T).GetTypeInfo().GetDeclaredField("KNOWN_POINTER_WORDS")?.GetValue(null) ?? 0);
     }
   }
 }

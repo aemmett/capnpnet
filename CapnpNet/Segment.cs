@@ -45,11 +45,15 @@ namespace CapnpNet
         if (_array.Array != null) return ref _array.Array[_array.Offset + byteIndex];
         else
         {
+#if UNSAFE
           unsafe
           {
             Check.Range(byteIndex, _byteLength);
             return ref Unsafe.AsRef<byte>((byte*)_fixedMemPointer.ToPointer() + byteIndex);
-          }
+          } 
+#else
+          throw new NotSupportedException();
+#endif
         };
       }
     }
@@ -72,6 +76,7 @@ namespace CapnpNet
       return this;
     }
 
+#if UNSAFE
     public Segment Init(Message message, SafeBuffer safeBuffer)
     {
       if (this.Message != null) throw new InvalidOperationException("Segment already initialized");
@@ -80,7 +85,7 @@ namespace CapnpNet
 
       this.Message = message;
       _byteLength = (int)safeBuffer.ByteLength;
-      
+
       _fixedMemHandle = safeBuffer;
       unsafe
       {
@@ -102,8 +107,9 @@ namespace CapnpNet
           }
         }
       }
-    }
-    
+    } 
+#endif
+
     public void Dispose()
     {
       _disposer?.Dispose();

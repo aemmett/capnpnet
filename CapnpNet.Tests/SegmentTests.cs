@@ -1,11 +1,10 @@
 using CapnpNet;
 using CapnpNet.Rpc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using Xunit;
 
-namespace CapnpNet.Test
+namespace CapnpNet.Tests
 {
-  [TestClass]
   public class SegmentTests
   {
     //private Segment CreateSegment()
@@ -15,7 +14,7 @@ namespace CapnpNet.Test
 
     //}
 
-    [TestMethod]
+    [Fact]
     public void RpcTest()
     {
       var msg = new Message();
@@ -30,7 +29,7 @@ namespace CapnpNet.Test
         }
       });
       
-      Assert.AreEqual(
+      Assert.Equal(
         msg.Segments[0][0 | Word.unit],
         new StructPointer
         {
@@ -55,13 +54,13 @@ namespace CapnpNet.Test
       ms2.Position = 0;
       var msg2 = Message.DecodeAsync(ms2).Result;
       var rpcMsg2 = msg2.GetRoot<Rpc.Message>();
-      Assert.AreEqual(
+      Assert.Equal(
         Rpc.Message.Union.unimplemented,
         rpcMsg2.which);
-      Assert.AreEqual(
+      Assert.Equal(
         Rpc.Message.Union.join,
         rpcMsg2.unimplemented.which);
-      Assert.AreEqual(
+      Assert.Equal(
         123U,
         rpcMsg2
           .unimplemented

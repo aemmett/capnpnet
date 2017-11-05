@@ -28,6 +28,7 @@ namespace CapnpNet
         Encoding.UTF8.GetBytes(str, 0, str.Length, arrSeg.Array, writeOffset);
         arrSeg.Array[writeOffset + byteCount - 1] = 0; // null terminator
       }
+#if UNSAFE
       else if (segment.IsFixedMemory)
       {
         unsafe
@@ -39,7 +40,8 @@ namespace CapnpNet
             ptr[byteCount - 1] = 0;
           }
         }
-      }
+      } 
+#endif
       else
       {
         // TODO: ask for pin
