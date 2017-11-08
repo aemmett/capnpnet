@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.1</TargetFramework>
+    <Authors>Alec Emmett</Authors>
+    <Company>Alec Emmett</Company>
+    <Version>0.1.0-pre</Version>
+    <Description>A C# implementation of Cap'n Proto</Description>
+    <PackageLicenseUrl>https://github.com/aemmett/capnpnet/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/aemmett/capnpnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/aemmett/capnpnet</RepositoryUrl>
+    <PackageTags>capnproto</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

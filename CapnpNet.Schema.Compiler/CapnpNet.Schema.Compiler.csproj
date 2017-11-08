@@ -2,15 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>latest</LangVersion>
+    <RuntimeIdentifiers>win-x86</RuntimeIdentifiers>
+    <Authors>Alec Emmett</Authors>
+    <Company>Alec Emmett</Company>
+    <Product />
+    <Description>A C# implementation of Cap'n Proto</Description>
+    <Version>0.1.0-pre</Version>
+    <PackageProjectUrl>https://github.com/aemmett/capnpnet</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/aemmett/capnpnet/blob/master/LICENSE.md</PackageLicenseUrl>
+    <AssemblyName>capnp-csharp</AssemblyName>
+    <PackageTags>capnproto</PackageTags>
+    <RepositoryUrl>https://github.com/aemmett/capnpnet</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
