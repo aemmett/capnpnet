@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -24,10 +25,10 @@ namespace CapnpNet.Rpc
     private ConcurrentQueue<System.Exception> _exceptions;
 
     [StructLayout(LayoutKind.Auto)]
-    private struct Question
+    internal struct Question
     {
+      public TaskCompletionSource<bool> answerReceived;
       public List<uint> paramExports;
-      public bool isAwaitingReturn;
       public bool isTailCall;
     }
     [StructLayout(LayoutKind.Auto)]
@@ -70,6 +71,14 @@ namespace CapnpNet.Rpc
       _exports = new ExportTable<Export>();
       _bootstrapCap = bootstrapCapability;
       _capToExportId = new Dictionary<ICapability, uint>();
+    }
+
+    public TCap GetMain<TCap>()
+      where TCap : class, ICapability
+    {
+      // TODO: if client, request bootstrap capability
+      // - is this an asynchronous op? Can it be pipelined?
+      return Unsafe.As<TCap>(_bootstrapCap);
     }
 
     public async Task StartReadLoop()
@@ -132,9 +141,9 @@ namespace CapnpNet.Rpc
         }
         else if (message.Is(out Bootstrap bootstrap))
         {
-          var reply = new CapnpNet.Message().Init(_segFactory);
+          var reply = new CapnpNet.Message().Init(_segFactory, true);
           //await reply.PreAllocateAsync(senderMsg.CalculateSize() + 3);
-          reply.Allocate(0, 1).WritePointer(0, new Return(reply)
+          reply.SetRoot(new Return(reply)
           {
             answerId = bootstrap.questionId,
             which = Return.Union.results,
@@ -244,7 +253,8 @@ namespace CapnpNet.Rpc
             // TODO: copy data, or just move segments?
             
             await reply.PreAllocateAsync(senderMsg.CalculateSize() + 3);
-            reply.Allocate(0, 1).WritePointer(0, new Message(reply)
+            reply.Allocate(1); // HACK: allocate root pointer after pre-alloc
+            reply.SetRoot(new Message(reply)
             {
               which = Message.Union.unimplemented,
               unimplemented = msg.CopyTo(reply),
@@ -302,13 +312,18 @@ namespace CapnpNet.Rpc
         // TODO: exception
       }
       
-      async Task Run(CapnpNet.Message m)
+      this.SendAndDispose(msg);
+    }
+    
+    public void SendAndDispose(CapnpNet.Message msg)
+    {
+      async Task Run(MessageStream msgStream, CapnpNet.Message m)
       {
-        await _msgStream.WriteAsync(m);
+        await msgStream.WriteAsync(m);
         m.Dispose();
       }
 
-      this.Consume(Run(msg));
+      this.Consume(Run(_msgStream, msg));
     }
 
     private uint ExportCap(ICapability cap)
@@ -338,7 +353,14 @@ namespace CapnpNet.Rpc
       _segFactory = null;
     }
 
-    internal CapnpNet.Message CreateMessage() => new CapnpNet.Message().Init(_segFactory);
+    internal CapnpNet.Message CreateMessage() => new CapnpNet.Message().Init(_segFactory, false);
+
+    internal ref Question AllocateQuestion(out uint id)
+    {
+      return ref _questions.Next(out id);
+    }
+
+    
   }
   
   public struct CallContext
@@ -372,7 +394,7 @@ namespace CapnpNet.Rpc
 
         msg.PreAllocate(3 + sizeHint ?? 5);
 
-        msg.Allocate(0, 1).WritePointer(0, new Message(msg)
+        msg.SetRoot(new Message(msg)
         {
           @return = new Return(msg)
           {

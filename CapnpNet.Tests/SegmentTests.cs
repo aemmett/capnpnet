@@ -14,13 +14,23 @@ namespace CapnpNet.Tests
 
     //}
 
+    public void RpcStrawman()
+    {
+      RpcConnection con = null;
+
+      var service = con.GetMain<global::Schema.ITestInterface>();
+      
+      
+    }
+
     [Fact]
     public void RpcTest()
     {
       var msg = new Message();
-      msg.Init(new ArrayPoolSegmentFactory());
+      msg.Init(new ArrayPoolSegmentFactory(), false);
       msg.PreAllocate(10);
-      msg.Allocate(0, 1).WritePointer(0, new Rpc.Message(msg)
+      msg.Allocate(1); // HACK allocate root pointer after pre-alloc
+      msg.SetRoot(new Rpc.Message(msg)
       {
         which = Rpc.Message.Union.join,
         join = new Join(msg)
@@ -30,14 +40,14 @@ namespace CapnpNet.Tests
       });
       
       Assert.Equal(
-        msg.Segments[0][0 | Word.unit],
         new StructPointer
         {
           Type = PointerType.Struct,
           WordOffset = 0,
           DataWords = 1,
           PointerWords = 1
-        }.RawValue);
+        }.ToString(),
+        new Pointer(msg.Segments[0][0 | Word.unit]).ToString());
 
       //var ms = new MemoryStream();
       //msg.SerializeAsync(ms).Wait();

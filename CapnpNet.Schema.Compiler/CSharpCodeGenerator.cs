@@ -207,11 +207,12 @@ namespace CapnpNet.Schema.Compiler
         public struct {name.Identifier}{genericParamSpec} : {CnNamespace}.IStruct
           {this.GetGenericConstraints(genericParams)}
         {{
-          public const int KNOWN_DATA_WORDS = {s.dataWordCount.ToString()};
-          public const int KNOWN_POINTER_WORDS = {s.pointerCount.ToString()};
+          public const int KnownDataWords = {s.dataWordCount.ToString()};
+          public const int KnownPointerWords = {s.pointerCount.ToString()};
+          public const int KnownTotalWords = {(s.dataWordCount + s.pointerCount).ToString()};
           private {StructType} _s;
-          public {name.Identifier}(ref {CnNamespace}.AllocationContext allocContext) : this(allocContext.Allocate(KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS)) {{ }}
-          public {name.Identifier}({MessageType} m) : this(m, KNOWN_DATA_WORDS, KNOWN_POINTER_WORDS) {{ }}
+          public {name.Identifier}(ref {CnNamespace}.AllocationContext allocContext) : this(allocContext.Allocate(KnownDataWords, KnownPointerWords)) {{ }}
+          public {name.Identifier}({MessageType} m) : this(m, KnownDataWords, KnownPointerWords) {{ }}
           public {name.Identifier}({MessageType} m, ushort dataWords, ushort pointers) : this(m.Allocate(dataWords, pointers)) {{ }}
           public {name.Identifier}({StructType} s) {{ _s = s; }}
 

@@ -35,7 +35,7 @@ namespace CapnpNet
     public static async Task<Message> DecodeAsync(Stream s, CancellationToken ct = default)
     {
       var segmentFactory = new ArrayPoolSegmentFactory();
-      var msg = new Message().Init(segmentFactory);
+      var msg = new Message().Init(segmentFactory, false);
       var intBuf = ArrayPool<byte>.Shared.Rent(16);
       var bytesRead = await s.ReadAsync(intBuf, 0, 4, ct);
       if (bytesRead < 4) throw new InvalidOperationException("Expected more data");
@@ -67,7 +67,7 @@ namespace CapnpNet
     {
       if (array.Length <= 8) throw new ArgumentException("array too small", nameof(array));
       
-      var msg = new Message().Init(new ArrayPoolSegmentFactory());
+      var msg = new Message().Init(new ArrayPoolSegmentFactory(), false);
 
       ref int ptr = ref Unsafe.As<byte, int>(ref array[0]);
       int segmentCount = ptr + 1;

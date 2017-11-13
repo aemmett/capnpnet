@@ -9,10 +9,10 @@
     <Company>Alec Emmett</Company>
     <Product />
     <Description>A C# implementation of Cap'n Proto</Description>
-    <Version>0.1.0-pre</Version>
+    <Version>0.1.0-alpha</Version>
     <PackageProjectUrl>https://github.com/aemmett/capnpnet</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/aemmett/capnpnet/blob/master/LICENSE.md</PackageLicenseUrl>
-    <AssemblyName>capnp-csharp</AssemblyName>
+    <AssemblyName>capnpc-csharp</AssemblyName>
     <PackageTags>capnproto</PackageTags>
     <RepositoryUrl>https://github.com/aemmett/capnpnet</RepositoryUrl>
   </PropertyGroup>

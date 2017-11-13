@@ -54,6 +54,11 @@ namespace CapnpNet
     [FieldOffset(4)]
     private uint _ui4;
 
+    public Pointer(ulong raw) : this()
+    {
+      _raw = raw;
+    }
+
     public ulong RawValue => _raw;
 
     public PointerType Type
@@ -83,6 +88,15 @@ namespace CapnpNet
     public override int GetHashCode()
     {
       return _raw.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+      return this.Is(out StructPointer s) ? s.ToString()
+        : this.Is(out ListPointer l) ? l.ToString()
+        : this.Is(out FarPointer f) ? f.ToString()
+        : this.Is(out OtherPointer o) ? o.ToString()
+        : this.RawValue.ToString("X8");
     }
 
     public static bool operator ==(Pointer a, Pointer b)
@@ -281,6 +295,11 @@ namespace CapnpNet
     {
       get { return _p.PointerWords; }
       set { _p.PointerWords = value; }
+    }
+
+    public override string ToString()
+    {
+      return $"StructPtr(O={this.WordOffset},D={this.DataWords},P={this.PointerWords})";
     }
   }
 

@@ -89,7 +89,7 @@ namespace CapnpNet
     private readonly int _structWordOffset; // in the encoding spec, technically this is a uint, but currently I bottom out at an API that uses int :(
     private readonly ushort _dataWords, _pointerWords;
     private readonly sbyte _upgradedListElementByteOffset;
-
+    
     public static bool operator ==(Struct a, Struct b)
     {
       return a._segment == b._segment

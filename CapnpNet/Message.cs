@@ -93,6 +93,7 @@ namespace CapnpNet
     }
   }
 
+  // consider struct Message<TRoot> wrapper?
   public partial class Message : IDisposable
   {
     private ISegmentFactory _segmentFactory;
@@ -142,23 +143,32 @@ namespace CapnpNet
     {
       get
       {
+        // TOOD: follow far pointer?
         var rootPointer = Unsafe.As<ulong, Pointer>(ref _firstSegment[0 | Word.unit]);
         return new Struct(_firstSegment, 1, (StructPointer)rootPointer);
+      }
+      set
+      {
+        new Struct(_firstSegment, 0, 0, 1).WritePointer(0, value);
       }
     }
 
     internal RefList<CapEntry> LocalCaps { get; set; }
 
     public T GetRoot<T>() where T : struct, IStruct => this.Root.As<T>();
+    public void SetRoot<T>(T @struct) where T : struct, IStruct => this.Root = @struct.Struct;
 
     public int CalculateSize() => this.Root.CalculateSize();
 
-    public Message Init(ISegmentFactory segmentFactory)
+    public Message Init(ISegmentFactory segmentFactory, bool allocateRootPointer)
     {
       Check.NotNull(segmentFactory, nameof(segmentFactory));
 
       _segmentFactory = segmentFactory;
       this.WordsToLive = 64 * 1024 * 1024 / 8; // 64MB
+
+      if (allocateRootPointer) this.Allocate(1); // root pointer
+
       return this;
     }
 

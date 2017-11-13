@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.1</TargetFramework>
     <Authors>Alec Emmett</Authors>
     <Company>Alec Emmett</Company>
-    <Version>0.1.0-pre</Version>
+    <Version>0.1.0-alpha</Version>
     <Description>A C# implementation of Cap'n Proto</Description>
     <PackageLicenseUrl>https://github.com/aemmett/capnpnet/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/aemmett/capnpnet</PackageProjectUrl>

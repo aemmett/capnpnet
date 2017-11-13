@@ -4,7 +4,8 @@ Status
 ------
 
 Currently work in progress. Still hacking on the code, but it appears the
-schema compiler is working at least. There are still some known bugs.
+schema compiler is working (for the most part) at least. There are still some
+known bugs.
 
 This implementation is based around the ability to perform pointer arithmetic
 and reinterpret casts on "managed pointers" (`ref` keyword), allowing one
@@ -45,6 +46,7 @@ TODO
 - Codegen improvements
   - annotations to control codegen (namespace, etc.)
   - missing metadata
+  - auto-guess namespace by looking for project/solution files, using directory hierarchy?
 - Equals, GetHashCode boilerplate
 - APIs to support easier writing
   - Implement more standard interfaces?
@@ -54,6 +56,7 @@ TODO
 ### Work in progress
 
 - dynamic API
+- Packing/unpacking
 
 ### Missing features
 
@@ -61,7 +64,6 @@ TODO
   - Check for integer overflows. I'm pretty sure there's a lot of them when
     dealing with >2GB (possibly smaller) messages, may potentially compromise
     memory safety / process stability
-- Packing/unpacking
 
 ### Nice to haves
 

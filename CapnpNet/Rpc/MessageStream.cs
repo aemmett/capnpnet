@@ -23,7 +23,7 @@ namespace CapnpNet.Rpc
 
     public async Task<CapnpNet.Message> ReceiveAsync()
     {
-      var msg = new CapnpNet.Message().Init(null);
+      var msg = new CapnpNet.Message().Init(null, false);
       var intBuf = ArrayPool<byte>.Shared.Rent(16);
       var bytesRead = await _readStream.ReadAsync(intBuf, 0, 4);
       if (bytesRead < intBuf.Length) throw new InvalidOperationException("Expected more data");

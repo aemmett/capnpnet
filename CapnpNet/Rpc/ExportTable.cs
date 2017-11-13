@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace CapnpNet.Rpc
 {
+  // TODO: threading concerns (currently assume RpcConnection is 
   internal sealed class ExportTable<T>
   {
     private static T _empty;
@@ -12,6 +13,7 @@ namespace CapnpNet.Rpc
 
     // TODO: find a priority queue implementation
     //private SortedList<uint, uint> _freeList;
+    private List<uint> _freeList;
 
     private uint _nextId;
     
@@ -42,26 +44,27 @@ namespace CapnpNet.Rpc
       T copy = val;
       val = default;
       //if (_freeList == null) _freeList = new SortedList<uint, uint>();
+      if (_freeList == null) _freeList = new List<uint>();
 
-      //_freeList.Add(key, key);
+      _freeList.Add(key);
       return copy;
     }
 
-    //public ref T Next(out uint id)
-    //{
-    //  if (_freeList?.Count > 0)
-    //  {
-    //    id = _freeList.Keys[0];
-    //    _freeList.RemoveAt(0);
-    //  }
-    //  else
-    //  {
-    //    id = _nextId;
-    //    _nextId++;
-    //  }
+    public ref T Next(out uint id)
+    {
+      if (_freeList?.Count > 0)
+      {
+        id = _freeList[0];
+        _freeList.RemoveAt(0);
+      }
+      else
+      {
+        id = _nextId;
+        _nextId++;
+      }
 
-    //  return ref this.GetOrAdd(id);
-    //}
+      return ref this.GetOrAdd(id);
+    }
   }
 
   //public struct ReplyContext

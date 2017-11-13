@@ -4,7 +4,7 @@
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <OldToolsVersion>15.0</OldToolsVersion>
     <UpgradeBackupLocation>C:\Projects\Programming\C#\capnpnet\Backup\</UpgradeBackupLocation>
-    <Version>0.1.0-pre</Version>
+    <Version>0.1.0-alpha</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Alec Emmett</Authors>
     <Company>Alec Emmett</Company>
