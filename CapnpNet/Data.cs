@@ -9,6 +9,25 @@ namespace CapnpNet
   {
     private readonly FlatArray<byte> _bytes;
 
+    public Data(Message message, byte[] data)
+    {
+      _bytes = new FlatArray<byte>(message, data.Length, out _);
+      var seg = _bytes.Pointer.Segment;
+      if (seg.Is(out ArraySegment<byte> arrSeg))
+      {
+        Buffer.BlockCopy(data, 0, arrSeg.Array, arrSeg.Offset, data.Length);
+      }
+      else
+      {
+        throw new NotImplementedException();
+      }
+    }
+
+    public Data(Message message, int numBytes, out AllocationContext allocationContext)
+    {
+      _bytes = new FlatArray<byte>(message, numBytes, out allocationContext);
+    }
+
     public Segment Segment => this.Pointer.Segment;
 
     public AbsPointer Pointer => _bytes.Pointer;
@@ -23,6 +42,8 @@ namespace CapnpNet
         return this.Segment[this.Pointer.DataOffset * sizeof(ulong) + index | Byte.unit];
       }
     }
+
+    public Span<byte> Span => _bytes.Span;
 
     public bool Is(out ArraySegment<byte> seg) => _bytes.Is(out seg);
 

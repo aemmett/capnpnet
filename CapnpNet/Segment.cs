@@ -22,10 +22,25 @@ namespace CapnpNet
     public int SegmentIndex { get; set; }
     public Segment Next { get; set; }
     
-    // TODO: conditionals for accessing other memory modes
-#if SPAN
-    public Span<ulong> Span => new Span(_memory).Cast<byte, ulong>();
+    public Span<byte> Span
+    {
+      get
+      {
+        if (_array.Array != null) return new Span<byte>(_array.Array, _array.Offset, _array.Count);
+        else
+        {
+#if UNSAFE
+          unsafe
+          {
+            return new Span<byte>((byte*)_fixedMemPointer.ToPointer(), _byteLength);
+          } 
+#else
+          throw new NotSupportedException();
 #endif
+        };
+      }
+    }
+
     public int WordCapacity => _byteLength / sizeof(ulong);
     public int AllocationIndex { get; set; }
 

@@ -31,7 +31,7 @@ Building
 Features (that should be mostly working)
 ----------------------------------------
 
-- Schema generation
+- Code generation from schema
 - Reading unpacked messages and their contents
   - Supports `byte[]` and `SafeBuffer`
 - (to be documented)
@@ -76,5 +76,6 @@ TODO
 - Performance analysis
 - Re-incorporate `Span<T>`-based APIs
 - Support for incremental reads?
+- Convenience builder classes? (make Message transparent to consumer, and more idomatic code esp. aroound unions)
 
 [Cap'n Proto]: https://capnproto.org

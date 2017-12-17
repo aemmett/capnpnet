@@ -150,14 +150,7 @@ namespace CapnpNet
         return ret;
       }
     }
-
-#if SPAN
-    // <summary>
-    // Note, when _upgradedListElementOffset > 0, Span will be one word long, and may comprise of multiple structs.
-    // </summary>
-    public Span<ulong> Span => _segment.Span.Slice((int)_structWordOffset, _dataWords + _pointerWords);
-#endif
-
+    
     public int StructWordOffset => _structWordOffset;
     public Segment Segment => _segment;
     public ushort DataWords => _dataWords;

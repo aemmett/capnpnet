@@ -146,6 +146,8 @@ namespace CapnpNet
       }
     }
 
+    public Span<T> Span => Span<T>.DangerousCreate(null, ref Unsafe.As<ulong, T>(ref _pointer.Data), this.Count);
+
     public T this[int index]
     {
       get
