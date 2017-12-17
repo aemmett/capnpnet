@@ -16,8 +16,7 @@ potentially be inlined by the JITter up to the point of raw memory access.
 Usage
 -----
 
-Works in frameworks: (TODO: investigate; currently targeting 4.5.2 but may be
-able to target earlier?)
+Works in frameworks: .NET Standard 1.1
 
 Acquisition: (for now) build from source.
 
@@ -68,13 +67,14 @@ TODO
 ### Nice to haves
 
 - VS integration
-- .Net Core compatibility
-  - what does this entail? Do I need to make unsafe code optional?
+  - Wait for better language server protocol support?
 - Portability improvements (data alignment, big endian support)
 - Project name
 - More optimizations: object pooling, inlining improvements?
 - Performance analysis
 - Re-incorporate `Span<T>`-based APIs
+- Use new System.IO.Pipelines abstractions
+  - Good as a more optimized stream abstraction, but maybe not suitable for shared memory RPC?
 - Support for incremental reads?
 
 [Cap'n Proto]: https://capnproto.org

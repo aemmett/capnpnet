@@ -14,6 +14,12 @@ namespace CapnpNet
       if (index < 0 || index > count) throw new ArgumentOutOfRangeException();
     }
 
+    public static void Range(int index, int count, int length)
+    {
+      Range(index, count);
+      if (index + count > length) throw new ArgumentOutOfRangeException();
+    }
+
     public static void NotNull(object obj, string name)
     {
       if (obj == null) throw new ArgumentNullException(name);
