@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace CapnpNet
@@ -8,6 +9,31 @@ namespace CapnpNet
   public struct Data : IPureAbsPointer
   {
     private readonly FlatArray<byte> _bytes;
+
+    public Data(AbsPointer pointer)
+    {
+      _bytes = new FlatArray<byte>(pointer);
+    }
+
+    public Data(Message msg, int length, out AllocationContext allocContext)
+    {
+      _bytes = new FlatArray<byte>(msg, length, out allocContext);
+    }
+
+    public Data(Message msg, byte[] data)
+    {
+      _bytes = new FlatArray<byte>(msg, data.Length, out _);
+      Unsafe.CopyBlockUnaligned(
+        ref Unsafe.As<ulong, byte>(ref _bytes.Pointer.Data),
+        ref data[0],
+        (uint)data.Length);
+    }
+
+    public Data(Message msg, Stream stream)
+    {
+      _bytes = new FlatArray<byte>(msg, (int)stream.Length, out _);
+      stream.CopyTo(this.GetStream());
+    }
 
     public Segment Segment => this.Pointer.Segment;
 

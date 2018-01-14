@@ -16,6 +16,8 @@ namespace CapnpNet.Schema.Compiler
     // TODO: annotations for namespace, name overrides, and doc comments
     public const ulong NamespaceAnnotationId = ~0UL; // TODO
 
+    public const ulong CppNamespaceAnnotationId = 0xb9c6f99ebf805f2cUL;
+
     // TODO: although it is auto-generated, I would like to remove excess qualification...
     public const string StructType = "global::CapnpNet.Struct";
     public const string MessageType = "global::CapnpNet.Message";
@@ -681,6 +683,19 @@ namespace CapnpNet.Schema.Compiler
         .Where(a => a.id == NamespaceAnnotationId && a.value.which == Value.Union.text)
         .Select(a => a.value.text.ToString())
         .FirstOrDefault();
+
+      if (string.IsNullOrEmpty(ns))
+      {
+        // try looking for the C++ annotation
+        ns = node.annotations
+          .Where(a => a.id == CppNamespaceAnnotationId)
+          .Select(a => a.value.text.ToString())
+          .FirstOrDefault()
+          ?.Split(new string[] { "::" }, StringSplitOptions.None)
+          // capitalize first letter of each namespace segment
+          .Select(w => w.Length == 0 ? w : char.ToUpperInvariant(w[0]) + w.Substring(1))
+          .StringJoin(".");
+      }
 
       return string.IsNullOrEmpty(ns) ? this.DefaultNamespace : ns;
     }
