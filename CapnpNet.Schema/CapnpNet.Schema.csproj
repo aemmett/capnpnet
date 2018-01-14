@@ -10,9 +10,6 @@
     <PackageProjectUrl>https://github.com/aemmett/capnpnet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aemmett/capnpnet</RepositoryUrl>
     <PackageTags>capnproto</PackageTags>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
