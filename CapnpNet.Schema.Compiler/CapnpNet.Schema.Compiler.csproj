@@ -15,6 +15,7 @@
     <AssemblyName>capnpc-csharp</AssemblyName>
     <PackageTags>capnproto</PackageTags>
     <RepositoryUrl>https://github.com/aemmett/capnpnet</RepositoryUrl>
+    <NuspecFile>capnpc-csharp.nuspec</NuspecFile>
   </PropertyGroup>
 
   <ItemGroup>
