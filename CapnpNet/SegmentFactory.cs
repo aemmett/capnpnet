@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -69,10 +70,16 @@ namespace CapnpNet
       returner.Init(buf, this);
       
       var seg = new Segment();
-      seg.Init(msg, new ArraySegment<byte>(buf), returner);
+      seg.Init(msg, buf, this.Return);
       seg.AllocationIndex = 0;
 
       return seg;
+    }
+
+    private void Return(Memory<byte> memory)
+    {
+      MemoryMarshal.TryGetArray<byte>(memory, out var segment);
+      _pool.Return(segment.Array);
     }
 
     private sealed class ArrayReturner : IDisposable

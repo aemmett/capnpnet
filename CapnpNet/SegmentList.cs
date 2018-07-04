@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace CapnpNet
 {
+  // consider: get rid of, wrap into Message
   public struct SegmentList : IReadOnlyList<Segment>
   {
     private readonly Segment _firstSegment;

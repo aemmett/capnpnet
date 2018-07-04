@@ -27,7 +27,7 @@ namespace CapnpNet
       var elementWords = count * (_dataWords + _pointerWords);
       msg.Allocate(elementWords + 1, out _tagOffset, out _segment);
       allocContext = new AllocationContext(_segment, _tagOffset + 1, elementWords);
-      _segment[_tagOffset | Word.unit] = tag.RawValue;
+      _segment.GetWord(_tagOffset) = tag.RawValue;
     }
 
     public CompositeList(Message msg, StructPointer tag)
@@ -36,7 +36,7 @@ namespace CapnpNet
       _dataWords = tag.DataWords;
       _pointerWords = tag.PointerWords;
       msg.Allocate(_elementCount * (_dataWords + _pointerWords) + 1, out _tagOffset, out _segment);
-      _segment[_tagOffset | Word.unit] = tag.RawValue;
+      _segment.GetWord(_tagOffset) = tag.RawValue;
     }
 
     public CompositeList(Segment segment, int baseOffset, ListPointer listPointer)
@@ -48,7 +48,7 @@ namespace CapnpNet
 
       _segment = segment;
       _tagOffset = baseOffset + listPointer.WordOffset;
-      var tag = Unsafe.As<ulong, StructPointer>(ref _segment[_tagOffset | Word.unit]);
+      var tag = Unsafe.As<ulong, StructPointer>(ref _segment.GetWord(_tagOffset));
       _elementCount = tag.WordOffset;
       _dataWords = tag.DataWords;
       _pointerWords = tag.PointerWords;
@@ -97,8 +97,8 @@ namespace CapnpNet
         });
       
       // TODO: block copy method on Segment?
-      ref ulong src = ref _segment[_tagOffset + 1 | Word.unit];
-      ref ulong dst = ref ret._segment[ret._tagOffset + 1 | Word.unit];
+      ref ulong src = ref _segment.GetWord(_tagOffset + 1);
+      ref ulong dst = ref ret._segment.GetWord(ret._tagOffset + 1);
       for (int i = 0; i < (_dataWords + _pointerWords) * _elementCount; i++)
       {
         Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);

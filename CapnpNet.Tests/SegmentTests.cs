@@ -47,7 +47,7 @@ namespace CapnpNet.Tests
           DataWords = 1,
           PointerWords = 1
         }.ToString(),
-        new Pointer(msg.Segments[0][0 | Word.unit]).ToString());
+        new Pointer(msg.Segments[0].GetWord(0)).ToString());
 
       //var ms = new MemoryStream();
       //msg.SerializeAsync(ms).Wait();

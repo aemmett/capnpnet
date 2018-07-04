@@ -65,7 +65,7 @@ namespace CapnpNet
           out var offset,
           out var segment);
 
-        segment[offset | Word.unit] = new StructPointer
+        segment.GetWord(offset) = new StructPointer
         {
           Type = PointerType.Struct,
           WordOffset = count,
@@ -158,7 +158,7 @@ namespace CapnpNet
         else if (typeof(T) == typeof(bool))
         {
           var mask = 1UL << (index & 63);
-          return (T)(object)((_pointer.Segment[index >> 6 | Word.unit] & mask) > 0);
+          return (T)(object)((_pointer.Segment.GetWord(index >> 6) & mask) > 0);
         }
 
         ref ulong listStart = ref _pointer.Data;

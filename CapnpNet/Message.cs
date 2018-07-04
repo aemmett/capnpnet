@@ -1,98 +1,13 @@
 using CapnpNet.Rpc;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections;
 
 namespace CapnpNet
 {
-  public sealed class RefList<T> : IEnumerable<T>
-  {
-    private static T _empty;
-
-    private T[] _slots = new T[16]; // TODO: pool
-    
-    public uint Count { get; private set; }
-
-    public ref T this[uint index]
-    {
-      get
-      {
-        if (index > this.Count) throw new ArgumentOutOfRangeException();
-
-        return ref _slots[index];
-      }
-    }
-    
-    public ref T Add(out uint index)
-    {
-      if (this.Count >= _slots.Length)
-      {
-        Array.Resize(ref _slots, _slots.Length * 2);
-      }
-      
-      index = this.Count;
-      this.Count++;
-      return ref _slots[index];
-    }
-
-    public ref T TryGet(uint index, out bool found)
-    {
-      if (index > this.Count)
-      {
-        found = false;
-        return ref _empty;
-      }
-
-      found = true;
-      return ref _slots[index];
-    }
-
-    public Enumerator GetEnumerator() => new Enumerator(this);
-
-    IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-    public struct Enumerator : IEnumerator<T>
-    {
-      private RefList<T> _list;
-      private uint _index;
-
-      public Enumerator(RefList<T> list)
-      {
-        _list = list;
-        _index = 0xffffffff;
-      }
-
-      public ref T Current => ref _list[_index];
-
-      T IEnumerator<T>.Current => this.Current;
-
-      object IEnumerator.Current => this.Current;
-
-      public void Dispose()
-      {
-        _list = null;
-      }
-
-      public bool MoveNext()
-      {
-        unchecked { _index++; }
-        return _index < _list.Count;
-      }
-
-      public void Reset()
-      {
-        _index = 0xffffffff;
-      }
-    }
-  }
-
   // consider struct Message<TRoot> wrapper?
   public partial class Message : IDisposable
   {
@@ -144,7 +59,7 @@ namespace CapnpNet
       get
       {
         // TOOD: follow far pointer?
-        var rootPointer = Unsafe.As<ulong, Pointer>(ref _firstSegment[0 | Word.unit]);
+        var rootPointer = Unsafe.As<ulong, Pointer>(ref _firstSegment.GetWord(0));
         return new Struct(_firstSegment, 1, (StructPointer)rootPointer);
       }
       set
@@ -265,7 +180,7 @@ namespace CapnpNet
       segment.SegmentIndex = (prevSegment?.SegmentIndex + 1) ?? 0;
 
 #if TRACE && UNSAFE
-      unsafe { Trace.WriteLine($"Adding segment {(long)Unsafe.AsPointer(ref segment[0 | Byte.unit]):X8}"); }
+      unsafe { Trace.WriteLine($"Adding segment {(long)Unsafe.AsPointer(ref segment.GetByte(0)):X8}"); }
 #endif
 
       if (prevSegment == null)
@@ -349,14 +264,14 @@ namespace CapnpNet
       segment = this.Segments[(int)farPointer.TargetSegmentId];
 
       var landingPadOffset = (int)farPointer.LandingPadOffset;
-      var landingPadPointer = Unsafe.As<ulong, Pointer>(ref segment[landingPadOffset | Word.unit]);
+      var landingPadPointer = Unsafe.As<ulong, Pointer>(ref segment.GetWord(landingPadOffset));
 
       if (pointer.IsDoubleFar)
       {
         // the pointer is in another castle
         var padFarPointer = (FarPointer)landingPadPointer;
         Debug.Assert(padFarPointer.IsDoubleFar == false);
-        pointer = Unsafe.As<ulong, Pointer>(ref segment[landingPadOffset + 1 | Word.unit]);
+        pointer = Unsafe.As<ulong, Pointer>(ref segment.GetWord(landingPadOffset));
         segment = this.Segments[(int)padFarPointer.TargetSegmentId];
         baseOffset = (int)padFarPointer.LandingPadOffset;
         Debug.Assert(pointer.WordOffset == 0);

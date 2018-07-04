@@ -41,7 +41,7 @@ namespace CapnpNet
       get
       {
         Debug.Assert(this.IsIndirect == false);
-        return ref _segment[this.DataOffset | Word.unit];
+        return ref _segment.GetWord(this.DataOffset);
       }
     }
 
@@ -94,7 +94,7 @@ namespace CapnpNet
         if (this.Segment.TryAllocate(1, out int padOffset))
         {
           tag.WordOffset = this.DataOffset - (padOffset + 1);
-          this.Segment[padOffset | Word.unit] = tag.RawValue;
+          this.Segment.GetWord(padOffset) = tag.RawValue;
 
           return new FarPointer
           {
@@ -106,14 +106,14 @@ namespace CapnpNet
         else
         {
           this.Segment.Message.Allocate(2, out padOffset, out Segment segment);
-          segment[padOffset | Word.unit] = new FarPointer
+          segment.GetWord(padOffset) = new FarPointer
           {
             Type = PointerType.Far,
             LandingPadOffset = (uint)this.DataOffset,
             TargetSegmentId = segmentIndex
           }.RawValue;
           tag.WordOffset = 0;
-          segment[padOffset + 1 | Word.unit] = tag.RawValue;
+          segment.GetWord(padOffset + 1) = tag.RawValue;
 
           return new FarPointer
           {
@@ -148,7 +148,7 @@ namespace CapnpNet
       }
       else if (this.Tag.Is(out ListPointer list))
       {
-        ref ulong src = ref this.Segment[dataOffset | Word.unit];
+        ref ulong src = ref this.Segment.GetWord(dataOffset);
         ref Pointer pointers = ref Unsafe.As<ulong, Pointer>(ref src);
 
         int elementsPerWord;
@@ -166,7 +166,7 @@ namespace CapnpNet
         if (list.ElementSize == ElementSize.Composite) words++;
 
         dest.Allocate(words, out int offset, out Segment newSeg);
-        ref ulong dst = ref newSeg[offset | Word.unit];
+        ref ulong dst = ref newSeg.GetWord(offset);
 
         int i, dataWords, pointerWords;
         if (list.ElementSize == ElementSize.EightBytesPointer)

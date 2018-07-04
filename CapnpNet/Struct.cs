@@ -66,7 +66,7 @@ namespace CapnpNet
       var seg = s.Segment;
       for (int i = 0; i < savedWords; i++)
       {
-        seg[originalEnd - i - 1 | Word.unit] = 0;
+        seg.GetWord(originalEnd - i - 1) = 0;
       }
 
       Unsafe.As<T, Struct>(ref structObj) = newStruct;
@@ -141,7 +141,7 @@ namespace CapnpNet
       get
       {
         var ret = new Pointer[_pointerWords];
-        ref var pointers = ref Unsafe.As<ulong, Pointer>(ref _segment[_structWordOffset + _dataWords | Word.unit]);
+        ref var pointers = ref Unsafe.As<ulong, Pointer>(ref _segment.GetWord(_structWordOffset + _dataWords));
         for (int i = 0; i < _pointerWords; i++)
         {
           ret[i] = Unsafe.Add(ref pointers, i);
@@ -217,8 +217,8 @@ namespace CapnpNet
       var srcMsg = srcSeg.Message;
 
       // copy data
-      ref ulong src = ref srcSeg[this.StructWordOffset | Word.unit];
-      ref ulong dst = ref destSeg[newS.StructWordOffset | Word.unit];
+      ref ulong src = ref srcSeg.GetWord(this.StructWordOffset);
+      ref ulong dst = ref destSeg.GetWord(newS.StructWordOffset);
       for (int i = 0; i < this.DataWords; i++)
       {
         Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
@@ -241,7 +241,7 @@ namespace CapnpNet
     private ref Pointer GetPointer(int index)
     {
       Check.Range(index, _pointerWords);
-      return ref Unsafe.As<ulong, Pointer>(ref _segment[_structWordOffset + _dataWords + index | Word.unit]);
+      return ref Unsafe.As<ulong, Pointer>(ref _segment.GetWord(_structWordOffset + _dataWords + index));
     }
 
 #region Read methods
@@ -343,13 +343,13 @@ namespace CapnpNet
         // this is a list element upgraded to a struct; only the first field is present
         if (index > 0) return default;
         
-        return Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + _upgradedListElementByteOffset / Unsafe.SizeOf<T>() | Byte.unit]);
+        return Unsafe.As<byte, T>(ref _segment.GetByte(_structWordOffset * sizeof(ulong) + _upgradedListElementByteOffset / Unsafe.SizeOf<T>()));
       }
       else
       {
         if (index * Unsafe.SizeOf<T>() >= _dataWords * sizeof(ulong)) return default;
 
-        return Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + index * Unsafe.SizeOf<T>() | Byte.unit]);
+        return Unsafe.As<byte, T>(ref _segment.GetByte(_structWordOffset * sizeof(ulong) + index * Unsafe.SizeOf<T>()));
       }
     }
 
@@ -378,7 +378,7 @@ namespace CapnpNet
       
       // TODO: byte-sized mask?
       var mask = 1UL << (index & 63);
-      return (_segment[_structWordOffset + wordIndex | Word.unit] & mask) > 0 != defaultValue;
+      return (_segment.GetWord(_structWordOffset + wordIndex) & mask) > 0 != defaultValue;
     }
 
 #endregion Read methods
@@ -438,7 +438,7 @@ namespace CapnpNet
         CapabilityId = capId.Value
       };
 
-      _segment[_structWordOffset + this.DataWords + pointerIndex | Word.unit] = p.RawValue;
+      _segment.GetWord(_structWordOffset + this.DataWords + pointerIndex) = p.RawValue;
     }
     
     private void WritePointerCore(int pointerIndex, Segment destSegment, int absOffset, Pointer tag)
@@ -466,7 +466,7 @@ namespace CapnpNet
         if (destSegment.TryAllocate(1, out int padOffset))
         {
           tag.WordOffset = absOffset - (padOffset + 1);
-          destSegment[padOffset | Word.unit] = tag.RawValue;
+          destSegment.GetWord(padOffset) = tag.RawValue;
 
           resultPointer = new FarPointer
           {
@@ -478,14 +478,14 @@ namespace CapnpNet
         else
         {
           _segment.Message.Allocate(2, out padOffset, out Segment segment);
-          segment[padOffset | Word.unit] = new FarPointer
+          segment.GetWord(padOffset) = new FarPointer
           {
             Type = PointerType.Far,
             LandingPadOffset = (uint)absOffset,
             TargetSegmentId = (uint)destSegment.SegmentIndex
           }.RawValue;
           tag.WordOffset = 0;
-          segment[padOffset + 1 | Word.unit] = tag.RawValue;
+          segment.GetWord(padOffset + 1) = tag.RawValue;
 
           resultPointer = new FarPointer
           {
@@ -497,7 +497,7 @@ namespace CapnpNet
         }
       }
       
-      _segment[_structWordOffset + this.DataWords + pointerIndex | Word.unit] = resultPointer.RawValue;
+      _segment.GetWord(_structWordOffset + this.DataWords + pointerIndex) = resultPointer.RawValue;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -508,10 +508,10 @@ namespace CapnpNet
       {
         if (index > 0) throw new InvalidOperationException("Cannot write to struct from a non-composite list");
 
-        Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + _upgradedListElementByteOffset | Byte.unit]) = value;
+        Unsafe.As<byte, T>(ref _segment.GetByte(_structWordOffset * sizeof(ulong) + _upgradedListElementByteOffset)) = value;
       }
       
-      Unsafe.As<byte, T>(ref _segment[_structWordOffset * sizeof(ulong) + index * Unsafe.SizeOf<T>() | Byte.unit]) = value;
+      Unsafe.As<byte, T>(ref _segment.GetByte(_structWordOffset * sizeof(ulong) + index * Unsafe.SizeOf<T>())) = value;
     }
 
     public void WriteInt8(int index, sbyte value, sbyte defaultValue = 0) => this.Write(index, value ^ defaultValue);
@@ -539,11 +539,11 @@ namespace CapnpNet
       var mask = 1UL << (index & 63);
       if (value != defaultValue)
       {
-        _segment[_structWordOffset + wordIndex | Word.unit] |= mask;
+        _segment.GetWord(_structWordOffset + wordIndex) |= mask;
       }
       else
       {
-        _segment[_structWordOffset + wordIndex | Word.unit] &= ~mask;
+        _segment.GetWord(_structWordOffset + wordIndex) &= ~mask;
       }
     }
 

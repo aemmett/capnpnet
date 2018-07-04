@@ -65,8 +65,8 @@ namespace CapnpNet
     {
       var ret = new BoolList(dest, this.Count);
       
-      ref ulong src = ref this.Segment[this.ListWordOffset | Word.unit];
-      ref ulong dst = ref ret.Segment[ret.ListWordOffset | Word.unit];
+      ref ulong src = ref this.Segment.GetWord(this.ListWordOffset);
+      ref ulong dst = ref ret.Segment.GetWord(ret.ListWordOffset);
       for (int i = 0; i < (this.Count + 63) / 64; i++)
       {
         Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);

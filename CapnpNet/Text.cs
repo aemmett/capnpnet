@@ -56,8 +56,6 @@ namespace CapnpNet
       _bytes = new FlatArray<byte>(new AbsPointer(segment, baseWordOffset, listPointer));
     }
     
-    public Span<byte> Span => _bytes.Span;
-
     public Segment Segment => _bytes.Pointer.Segment;
     public int ListWordOffset => _bytes.Pointer.DataOffset;
     /// <summary>
@@ -67,7 +65,7 @@ namespace CapnpNet
 
     public AbsPointer Pointer => _bytes.Pointer;
 
-    public byte this[int index] => this.Span[index];
+    public byte this[int index] => _bytes[index];
 
     /// <summary>
     /// Retrieves the segment of bytes encoding this Text, excluding the null terminator.

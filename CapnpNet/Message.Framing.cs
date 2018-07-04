@@ -116,7 +116,7 @@ namespace CapnpNet
           unsafe
           {
             readStream = new UnmanagedMemoryStream(
-              (byte*)Unsafe.AsPointer(ref seg[0 | Byte.unit]),
+              (byte*)Unsafe.AsPointer(ref seg.GetByte(0)),
               seg.AllocationIndex * sizeof(ulong));
           }
 

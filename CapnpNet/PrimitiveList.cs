@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CapnpNet
 {
@@ -27,7 +28,7 @@ namespace CapnpNet
     
     public Span<T> Span => this.Count == 0
       ? Span<T>.Empty
-      : this.Segment.Span.Slice(this.ListWordOffset).Cast<ulong, T>().Slice(0, this.Count); 
+      : MemoryMarshal.Cast<ulong, T>(this.Segment.Span.Slice(this.ListWordOffset)).Slice(0, this.Count); 
 
     public Segment Segment { get; }
     public int ListWordOffset { get; }
@@ -39,8 +40,8 @@ namespace CapnpNet
     {
       var ret = new PrimitiveList<T>(dest, this.Count);
       
-      ref ulong src = ref this.Segment[this.ListWordOffset | Word.unit];
-      ref ulong dst = ref ret.Segment[ret.ListWordOffset  | Word.unit];
+      ref ulong src = ref this.Segment.GetWord(this.ListWordOffset);
+      ref ulong dst = ref ret.Segment.GetWord(ret.ListWordOffset );
       for (int i = 0; i < this.Count * Unsafe.SizeOf<T>() / sizeof(ulong); i++)
       {
         Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);

@@ -52,7 +52,7 @@ namespace CapnpNet
       get
       {
         Check.Range(index, this.Length);
-        return this.Segment[this.Pointer.DataOffset * sizeof(ulong) + index | Byte.unit];
+        return this.Segment.GetByte(this.Pointer.DataOffset * sizeof(ulong) + index);
       }
     }
 
