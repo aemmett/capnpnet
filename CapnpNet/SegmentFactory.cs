@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -44,135 +45,226 @@ namespace CapnpNet
     ValueTask<Segment> CreateAsync(Message msg, int? sizeHint = null, CancellationToken cancellationToken = default);
   }
 
-  public sealed class ArraySlabSegmentFactory : ISegmentFactory
+  public sealed class ArraySlabMemoryPool : MemoryPool<byte>
   {
+    private const int DefaultSlabSize = 85000;
+
+    private ImmutableStack<Slab> _slabs = ImmutableStack<Slab>.Empty;
+
+    public override int MaxBufferSize { get; } = (int)Math.Pow(2, Math.Floor(Math.Log(DefaultSlabSize) / Math.Log(2)));
+
+    private sealed class Segment : IMemoryOwner<byte>
+    {
+      private Slab _slab;
+
+      public Segment(Slab slab, Memory<byte> memory)
+      {
+        _slab = slab;
+        this.Memory = memory;
+      }
+
+      public Memory<byte> Memory { get; internal set; }
+
+      public void Dispose()
+      {
+        _slab.Return(this);
+        _slab = null;
+        this.Memory = null;
+      }
+    }
+
     private sealed class Slab
     {
-      private const int MinSegmentSizeBytes = 128;
-      private const int DefaultSlabSize = 85000;
+      private const int MinSegmentSizeBytes = 128; // (16 words)
 
-      private readonly byte[] _slab;
-      private readonly GCHandle _handle;
-      private readonly int _alignOffset;
-      private readonly int _maxSegments;
-      private readonly int _maxOrder;
-      private readonly byte[] _allocTable;
-      private readonly List<int> _orderOffsets;
-      private readonly object _allocTableLock = new object();
+      private enum SegmentState : byte
+      {
+        Joined = 0,
+        Free = 1,
+        Split = 2,
+        Allocated = 3
+      }
 
-      public Slab()
+      private byte[] _slab;
+      private GCHandle _handle;
+      private int _alignOffset;
+      private SegmentState[][] _segments;
+      private object _segmentsLock;
+
+      public void Init()
       {
         // allocate an array large enough to be Large Object Heap
         _slab = new byte[DefaultSlabSize];
       
         // pin so we can find a 64-bit-aligned offset
-        _handle = GCHandle.Alloc(_slab, GCHandleType.Pinned);
-        _alignOffset = 0;
+        _handle = GCHandle.Alloc(_slab, GCHandleType.Pinned);        
+        _alignOffset = (int)((_handle.AddrOfPinnedObject().ToInt64() + 7) & ~7);
       
-        unsafe
+        int maxBytes = _slab.Length - _alignOffset;        
+        var remaining = maxBytes / MinSegmentSizeBytes;
+        var generations = new List<SegmentState[]>();
+        while (remaining > 0)
         {
-          fixed (byte* ptr = &_slab[0])
+          var order = new SegmentState[remaining];
+          if ((remaining & 1) == 1)
           {
-            var lowThreeBits = (int)((IntPtr)ptr).ToInt64() & 0x7;
-            if (lowThreeBits > 0)
-            {
-              _alignOffset += 8 - lowThreeBits;
-            }
+            order[remaining - 1] = SegmentState.Free;
           }
+
+          generations.Add(order);
+          remaining >>= 1;
         }
 
-        // probably a smarter way to do all of this
-        int maxBytes = _slab.Length - _alignOffset;
-        _maxSegments = maxBytes / MinSegmentSizeBytes;
-        _orderOffsets = new List<int>
-        {
-          0
-        };
-        
-        var numNodes = _maxSegments;
-        var generation = numNodes / 2;
-        _maxOrder = 0;
-        while (generation > 0)
-        {
-          _orderOffsets.Add(numNodes);
-          numNodes += generation;
-          generation /= 2;
-          _maxOrder++;
-        }
-                
-        _allocTable = new byte[numNodes];
+        generations.Reverse();
+        _segments = generations.ToArray();
       }
 
-      public ArraySegment<byte> TryAllocate(int size)
+      public IMemoryOwner<byte> TryRent(int size)
       {
         Check.NonNegative(size);
 
-        var order = (size + MinSegmentSizeBytes - 1) / MinSegmentSizeBytes;
-        if (order > _maxOrder)
+        if (_slab == null)
         {
-          return default;
+          this.Init();
         }
 
-        var startOffset = _orderOffsets[order];
-        var endOffset = order == _orderOffsets.Count ? _allocTable.Length : _orderOffsets[order + 1];
-        var orderCount = endOffset - startOffset;
+        var (level, orderSize) = this.GetOrderStats(size);
 
-        // consider: abandon the flat array approach and use some dynamic tree, try to make it more concurrent?
-        lock (_allocTableLock)
+        if (level >= _segments.Length)
         {
-          int orderOffset;
-          for (orderOffset = 0; orderOffset < orderCount; orderOffset++)
+          return null;
+        }
+
+        var order = _segments[level];
+        lock (_segmentsLock)
+        {
+          var joinedIndex = -1;
+          for (var i = 0; i < order.Length; i++)
           {
-            if (_allocTable[startOffset + orderOffset] == 0)
+            // might be able to check for free with just interlocked?
+            if (order[i] == SegmentState.Free)
             {
-              break;
+              order[i] = SegmentState.Allocated;
+              return new Segment(this, MemoryMarshal.CreateFromPinnedArray(_slab, _alignOffset + i * orderSize, orderSize));
+            }
+            else if (order[i] == SegmentState.Joined)
+            {
+              joinedIndex = i;
             }
           }
 
-          if (orderOffset == orderCount)
+          if (joinedIndex == -1)
           {
-            return default;
+            return null;
           }
 
-          var order0Start = orderOffset << order;
-          var order0Count = 1 << order;
+          var ret = new Segment(this, MemoryMarshal.CreateFromPinnedArray(_slab, _alignOffset + joinedIndex * orderSize, orderSize));
 
-          // _allocTable[startOffset + orderOffset] = 1;
-          for (int o = 0; o < _maxOrder; o++)
+          _segments[level][joinedIndex ^ 1] = SegmentState.Free;
+          _segments[level][joinedIndex] = SegmentState.Allocated;
+
+          do
           {
-            var offset = order0Start >> o;
-            var count = Math.Min(1, order0Count >> o);
-            var allocTableStart = _orderOffsets[o];
-            var allocTableEnd = Math.Min(
-              allocTableStart + offset + count,
-              o == _orderOffsets.Count ? _allocTable.Length : _orderOffsets[o + 1]);
-            for (int i = allocTableStart; i < allocTableEnd; i++)
-            {
-              _allocTable[i] = 1;
-            }
+            level--;
+            joinedIndex >>= 1;
+            _segments[level][joinedIndex ^ 1] = SegmentState.Free;
+            _segments[level][joinedIndex] = SegmentState.Split;
           }
+          while (level > 0);
+
+          return ret;
         }
       }
 
-      public void Return(ArraySegment<byte> seg)
+      public void Return(Segment segment)
       {
-        if (seg.Array != _slab)
+        if (MemoryMarshal.TryGetArray<byte>(segment.Memory, out var arraySegment) == false
+          || arraySegment.Array != _slab)
         {
+          Debug.Assert(false);
           return;
         }
 
+        var (orderNum, _) = this.GetOrderStats(arraySegment.Count);
+        var offset = (arraySegment.Offset - _alignOffset) >> orderNum;
 
+        lock (_segmentsLock)
+        {
+          while (orderNum > 0)
+          {
+            var order = _segments[orderNum];
+            if ((offset & 1) == 1 && offset == order.Length - 1)
+            {
+              order[offset] = SegmentState.Free;
+              return;
+            }
+
+            // consider: don't immediately join?
+            if (order[offset ^ 1] == SegmentState.Free)
+            {
+              order[offset ^ 1] = SegmentState.Joined;
+              order[offset] = SegmentState.Joined;
+              offset >>= 1;
+              orderNum--;
+              continue;
+            }
+            else
+            {
+              order[offset] = SegmentState.Free;
+              return;
+            }
+          }
+        }
+      }
+
+      private (int orderNum, int orderSize) GetOrderStats(int size)
+      {
+        var orderNum = 0;
+        var orderSize = MinSegmentSizeBytes;
+        while (size > orderSize && orderNum < _segments.Length)
+        {
+          orderNum++;
+          orderSize <<= 1;
+        }
+
+        return (orderNum, orderSize);
       }
     }
 
-    public ValueTask<Segment> CreateAsync(Message msg, int? sizeHint = null, CancellationToken cancellationToken = default)
+    public override IMemoryOwner<byte> Rent(int minBufferSize = -1)
     {
-      throw new NotImplementedException();
-    }
+      if (_slabs == null)
+      {
+        throw new ObjectDisposedException(nameof(ArraySlabMemoryPool));
+      }
 
-    public Segment TryCreatePrompt(Message msg, int? sizeHint = null)
+      if (minBufferSize > this.MaxBufferSize)
+      {
+        throw new ArgumentOutOfRangeException(nameof(minBufferSize));
+      }
+
+      if (minBufferSize < 0)
+      {
+        minBufferSize = 4096;
+      }
+
+      foreach (var slab in _slabs)
+      {
+        var segment = slab.TryRent(minBufferSize);
+        if (segment != null)
+        {
+          return segment;
+        }
+      }
+
+      var newSlab = new Slab();
+      _slabs.Add(newSlab);
+      return newSlab.TryRent(minBufferSize);
+    }
+    
+    protected override void Dispose(bool disposing)
     {
-      throw new NotImplementedException();
+      _slabs = null;
     }
   }
 
