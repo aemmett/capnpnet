@@ -6,37 +6,20 @@ namespace CapnpNet
 {
   public sealed class Segment : IDisposable
   {
-    // TODO: other memory modes, or a unified representation (span-like pinnable + offset)
-    private ArraySegment<byte> _array;
-
-    // or fixed memory:
-    private object _fixedMemHandle;
-    private IntPtr _fixedMemPointer;
-
-    // used by both:
-    private int _byteLength;
-
+    private Memory<byte> _memory;
+    
     private IDisposable _disposer;
     
     public Message Message { get; private set; }
     public int SegmentIndex { get; set; }
     public Segment Next { get; set; }
     
-    // TODO: conditionals for accessing other memory modes
-#if SPAN
-    public Span<ulong> Span => new Span(_memory).Cast<byte, ulong>();
-#endif
-    public int WordCapacity => _byteLength / sizeof(ulong);
-    public int AllocationIndex { get; set; }
+    public Span<ulong> Span => MemoryMarshal.Cast<byte, ulong>(_memory.Span);
 
-    public bool IsFixedMemory => _fixedMemPointer != IntPtr.Zero;
+    public int WordCapacity => _memory.Length / sizeof(ulong);
+    public int AllocationIndex { get; set; }
     
     // TODO: get rid of int wrappers and just have GetByteRef / GetWordRef methods.
-    // Although, now that I look at where I ended up, the managed pointers doesn't seem
-    // that useful over some generic Read<T>/Write<T> methods that do the pointer arithmetic
-    // and reinterpret-casting internally. The best use case for the managed pointer seems to be
-    // to avoid redundant bounds checks, but currently I haven't built the rigor into the code to
-    // do the ahead-of-time bounds checks at construction.
     internal ref ulong this[Index<Word> wordIndex] => ref Unsafe.As<byte, ulong>(ref this[wordIndex * sizeof(ulong) | Byte.unit]);
     internal ref byte this[Index<Byte> byteIndex]
     {
@@ -58,6 +41,13 @@ namespace CapnpNet
       }
     }
 
+    // consider: the managed pointers doesn't seem that useful over some generic Read<T>/Write<T>
+    // methods that do the pointer arithmetic and reinterpret-casting internally. The best use case
+    // for the managed pointer seems to be to avoid redundant bounds checks, but currently I haven't
+    // built the rigor into the code to do the ahead-of-time bounds checks at construction.
+    internal ref ulong GetWord(int i) => ref Unsafe.As<byte, ulong>(ref this.GetByte(i >> 3));
+    internal ref byte GetByte(int i) => ref _memory.Span[i];
+
     public Segment Init(Message message, byte[] memory) => this.Init(message, memory, 0, memory.Length);
 
     public Segment Init(Message message, byte[] memory, int offset, int length) => this.Init(message, new ArraySegment<byte>(memory, offset, length));
@@ -75,8 +65,7 @@ namespace CapnpNet
       _disposer = disposer;
       return this;
     }
-
-#if UNSAFE
+    
     public Segment Init(Message message, SafeBuffer safeBuffer)
     {
       if (this.Message != null) throw new InvalidOperationException("Segment already initialized");
@@ -107,8 +96,7 @@ namespace CapnpNet
           }
         }
       }
-    } 
-#endif
+    }
 
     public void Dispose()
     {
@@ -126,8 +114,7 @@ namespace CapnpNet
     
     public bool Is(out ArraySegment<byte> arraySegment)
     {
-      arraySegment = _array;
-      return _array.Array != null;
+      return MemoryMarshal.TryGetArray(_memory, out arraySegment);
     }
 
     public bool Is(out SafeBuffer safeBuffer)

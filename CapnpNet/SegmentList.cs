@@ -16,7 +16,7 @@ namespace CapnpNet
     {
       get
       {
-        Check.Positive(index);
+        Check.NonNegative(index);
 
         var segment = _firstSegment;
         while (index > 0)

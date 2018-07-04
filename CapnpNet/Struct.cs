@@ -247,7 +247,7 @@ namespace CapnpNet
 #region Read methods
     public Pointer ReadRawPointer(int pointerIndex)
     {
-      Check.Positive(pointerIndex);
+      Check.NonNegative(pointerIndex);
 
       // TODO: how to handle default?
       if (pointerIndex >= this.PointerWords) return new Pointer();
@@ -304,7 +304,7 @@ namespace CapnpNet
     // TODO: replace with AbsPointer
     private bool DereferenceCore(int pointerIndex, out Pointer pointer, out int baseOffset, out Segment targetSegment)
     {
-      Check.Positive(pointerIndex);
+      Check.NonNegative(pointerIndex);
 
       if (pointerIndex >= this.PointerWords)
       {
@@ -336,7 +336,7 @@ namespace CapnpNet
     private T GetOrDefault<T>(int index)
       where T : struct
     {
-      Check.Positive(index);
+      Check.NonNegative(index);
 
       if (_upgradedListElementByteOffset >= 0)
       {

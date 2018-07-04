@@ -28,10 +28,8 @@ namespace CapnpNet
     }
 
     public AbsPointer Pointer => _pointer;
-
-#if SPAN
-    public Span<ulong> Span => _segment.Span.Slice(_listWordOffset, (this.Count + 63) / 64); 
-#endif
+    
+    public Span<ulong> Span => this.Segment.Span.Slice(this.ListWordOffset, (this.Count + 63) / 64); 
 
     public Segment Segment => _pointer.Segment;
     public int ListWordOffset => _pointer.DataOffset;
@@ -44,18 +42,13 @@ namespace CapnpNet
         if (index < 0 || index >= this.Count) throw new ArgumentOutOfRangeException("index");
 
         var mask = 1UL << (index & 63);
-#if SPAN
-        return (this.Span[index >> 6] & mask) > 0; 
-#else
-        return (this.Segment[index >> 6 | Word.unit] & mask) > 0;
-#endif
+        return (this.Span[index >> 6] & mask) > 0;
       }
       set
       {
         if (index < 0 || index >= this.Count) throw new ArgumentOutOfRangeException("index");
 
         var mask = 1UL << (index & 63);
-#if SPAN
         var span = this.Span[index >> 6]; 
         if (value)
         {
@@ -65,17 +58,6 @@ namespace CapnpNet
         {
           span &= ~mask;
         }
-#else
-        ref var word = ref this.Segment[index >> 6 | Word.unit];
-        if (value)
-        {
-          word |= mask;
-        }
-        else
-        {
-          word &= ~mask;
-        }
-#endif
       }
     }
 

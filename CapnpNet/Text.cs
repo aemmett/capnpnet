@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Text;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -55,11 +56,7 @@ namespace CapnpNet
       _bytes = new FlatArray<byte>(new AbsPointer(segment, baseWordOffset, listPointer));
     }
     
-#if SPAN
-    public Span<byte> Span => _elementCount == 0
-      ? Span<byte>.Empty
-      : _segment.Span.Slice(_listWordOffset).Cast<ulong, byte>().Slice(0, _elementCount);
-#endif
+    public Span<byte> Span => _bytes.Span;
 
     public Segment Segment => _bytes.Pointer.Segment;
     public int ListWordOffset => _bytes.Pointer.DataOffset;
@@ -70,19 +67,7 @@ namespace CapnpNet
 
     public AbsPointer Pointer => _bytes.Pointer;
 
-    public byte this[int index]
-    {
-#if SPAN
-      get => this.Span[index];
-#else
-      get
-      {
-        Check.Range(index, this.ByteLength);
-
-        return this.Segment[this.ListWordOffset * sizeof(ulong) + index | Byte.unit];
-      }
-#endif
-    }
+    public byte this[int index] => this.Span[index];
 
     /// <summary>
     /// Retrieves the segment of bytes encoding this Text, excluding the null terminator.
@@ -106,16 +91,12 @@ namespace CapnpNet
 
     public override string ToString()
     {
-#if SPAN
-      return this.Span.DecodeUTF8();
-#else
       if (this.Is(out ArraySegment<byte> strBytes))
       {
         return Encoding.UTF8.GetString(strBytes.Array, strBytes.Offset, strBytes.Count);
       }
 
       throw new NotImplementedException();
-#endif
     }
   }
 }

@@ -24,30 +24,16 @@ namespace CapnpNet
       this.ListWordOffset = baseWordOffset + listPointer.WordOffset;
       this.Count = (int)listPointer.ElementCount;
     }
-
-#if SPAN
-    public Span<T> Span => _elementCount == 0
+    
+    public Span<T> Span => this.Count == 0
       ? Span<T>.Empty
-      : _segment.Span.Slice(_listWordOffset).Cast<ulong, T>().Slice(0, _elementCount); 
-#endif
+      : this.Segment.Span.Slice(this.ListWordOffset).Cast<ulong, T>().Slice(0, this.Count); 
 
     public Segment Segment { get; }
     public int ListWordOffset { get; }
     public int Count { get; }
-
-#if SPAN
-    public T this[int index] => this.Span[index]; 
-#else
-    public T this[int index]
-    {
-      get
-      {
-        Check.Range(index, this.Count);
-
-        return Unsafe.Add(ref Unsafe.As<ulong, T>(ref this.Segment[this.ListWordOffset | Word.unit]), index);
-      }
-    }
-#endif
+    
+    public T this[int index] => this.Span[index];
 
     public PrimitiveList<T> CopyTo(Message dest)
     {

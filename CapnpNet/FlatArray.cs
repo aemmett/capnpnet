@@ -38,7 +38,7 @@ namespace CapnpNet
   }
 
   [StructLayout(LayoutKind.Sequential)]
-  public struct FlatArray<T> : IEnumerable<T>, IPureAbsPointer
+  public struct FlatArray<T> : IReadOnlyList<T>, IPureAbsPointer
   {
     private readonly AbsPointer _pointer;
 

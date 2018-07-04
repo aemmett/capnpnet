@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -6,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace CapnpNet
 {
   [StructLayout(LayoutKind.Sequential)]
-  public struct Data : IPureAbsPointer
+  public struct Data : IReadOnlyList<byte>, IPureAbsPointer
   {
     private readonly FlatArray<byte> _bytes;
 
@@ -20,6 +22,8 @@ namespace CapnpNet
       _bytes = new FlatArray<byte>(msg, length, out allocContext);
     }
 
+    // TODO: option to use byte array as a segment itself (add either a dispose callback or wrapper type)
+    // TODO: overloads for ArraySegment, other memory types?
     public Data(Message msg, byte[] data)
     {
       _bytes = new FlatArray<byte>(msg, data.Length, out _);
@@ -40,6 +44,8 @@ namespace CapnpNet
     public AbsPointer Pointer => _bytes.Pointer;
 
     public int Length => (int)_bytes.Pointer.Tag.ElementCount;
+
+    public int Count => _bytes.Count;
 
     public byte this[int index]
     {
@@ -81,6 +87,18 @@ namespace CapnpNet
       #endif
 
       throw new NotSupportedException();
+    }
+
+    public FlatArray<byte>.Enumerator GetEnumerator() => _bytes.GetEnumerator();
+
+    IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
+    {
+      return ((IReadOnlyList<byte>)_bytes).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return ((IReadOnlyList<byte>)_bytes).GetEnumerator();
     }
   }
 }

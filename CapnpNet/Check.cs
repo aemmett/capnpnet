@@ -4,7 +4,7 @@ namespace CapnpNet
 {
   internal static class Check
   {
-    public static void Positive(int num)
+    public static void NonNegative(int num)
     {
       if (num < 0) throw new ArgumentException();
     }
