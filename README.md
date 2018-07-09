@@ -56,6 +56,7 @@ TODO
 
 - dynamic API
 - Packing/unpacking
+- JsonCodec
 
 ### Missing features
 
@@ -68,6 +69,8 @@ TODO
 
 - VS integration
   - Wait for better language server protocol support?
+- MSBuild integration
+  - 
 - Portability improvements (data alignment, big endian support)
 - Project name
 - More optimizations: object pooling, inlining improvements?

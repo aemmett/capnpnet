@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{09DCB2D4-6DEF-4F58-B8C3-3E4662CAB3D9}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,6 +16,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapnpNet.Tests", "CapnpNet.Tests\CapnpNet.Tests.csproj", "{BC1FF259-DDFF-4200-9B4A-D2F9099B6C49}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapnpNet.Schema.Compiler", "CapnpNet.Schema.Compiler\CapnpNet.Schema.Compiler.csproj", "{849D5E43-8153-45D3-BE77-04773F00B6AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapnpNet.Schema.Json", "CapnpNet.Schema.Json\CapnpNet.Schema.Json.csproj", "{B27EC5FB-BBB1-4E66-BC90-B148E597EAC0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{849D5E43-8153-45D3-BE77-04773F00B6AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{849D5E43-8153-45D3-BE77-04773F00B6AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{849D5E43-8153-45D3-BE77-04773F00B6AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B27EC5FB-BBB1-4E66-BC90-B148E597EAC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B27EC5FB-BBB1-4E66-BC90-B148E597EAC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B27EC5FB-BBB1-4E66-BC90-B148E597EAC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B27EC5FB-BBB1-4E66-BC90-B148E597EAC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
