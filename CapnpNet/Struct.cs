@@ -83,7 +83,7 @@ namespace CapnpNet
     }
   }
   
-  public struct Struct : IStruct
+  public readonly struct Struct : IStruct
   {
     private readonly Segment _segment;
     private readonly int _structWordOffset; // in the encoding spec, technically this is a uint, but currently I bottom out at an API that uses int :(

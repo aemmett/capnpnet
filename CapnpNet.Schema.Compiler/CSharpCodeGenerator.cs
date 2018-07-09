@@ -13,8 +13,8 @@ namespace CapnpNet.Schema.Compiler
   // TOOD: generate AST from FormattableString?
   public class CSharpCodeGenerator
   {
-    // TODO: annotations for namespace, name overrides, and doc comments
-    public const ulong NamespaceAnnotationId = ~0UL; // TODO
+    public const ulong NamespaceAnnotationId = 0x9a4dca993bec1664UL;
+    public const ulong NameAnnotationId = 0xc8ab69e12b5992f1UL;
 
     public const ulong CppNamespaceAnnotationId = 0xb9c6f99ebf805f2cUL;
 
@@ -104,13 +104,23 @@ namespace CapnpNet.Schema.Compiler
           x => x.content);
     }
 
+    private string GetNameAnnotation(Node node)
+    {
+      return node.annotations
+        .Where(a => a.id == NameAnnotationId && a.value.which == Value.Union.text)
+        .Select(a => a.value.text.ToString())
+        .FirstOrDefault();
+    }
+
     private void BuildNames(TypeName parent, Node node, string name)
     {
       TypeName typeName;
 
+      var nameOverride = this.GetNameAnnotation(node);
+
       if (node.Is(out Node.structGroup @struct))
       {
-        typeName = new TypeName(node, name, parent, _generator);
+        typeName = new TypeName(node, nameOverride ?? name, parent, _generator);
         _typeNames.Add(node.id, typeName);
         foreach (var groupField in @struct.fields.Where(f => f.which == Field.Union.group))
         {
@@ -119,10 +129,10 @@ namespace CapnpNet.Schema.Compiler
       }
       else if (node.Is(out Node.interfaceGroup @interface))
       {
-        typeName = new TypeName(node, "I" + name, parent, _generator);
+        typeName = new TypeName(node, nameOverride ?? ("I" + name), parent, _generator);
         _typeNames.Add(node.id, typeName);
         TypeName container = null;
-        void InitContainer() => container = container ?? new TypeName(node, name, parent, _generator);
+        void InitContainer() => container = container ?? new TypeName(node, nameOverride ?? name, parent, _generator);
         
         foreach (var method in @interface.methods)
         {
@@ -152,7 +162,7 @@ namespace CapnpNet.Schema.Compiler
       }
       else
       {
-        typeName = new TypeName(node, name, parent, _generator);
+        typeName = new TypeName(node, nameOverride ?? name, parent, _generator);
         _typeNames.Add(node.id, typeName);
       }
 
@@ -206,7 +216,7 @@ namespace CapnpNet.Schema.Compiler
       yield return $@"
         {this.GetDocComment(node)}
         [{CnNamespace}.PreferredListEncoding({CnNamespace}.ElementSize.{(CapnpNet.ElementSize)s.preferredListEncoding})]
-        public struct {name.Identifier}{genericParamSpec} : {CnNamespace}.IStruct
+        public partial struct {name.Identifier}{genericParamSpec} : {CnNamespace}.IStruct
           {this.GetGenericConstraints(genericParams)}
         {{
           public const int KnownDataWords = {s.dataWordCount.ToString()};

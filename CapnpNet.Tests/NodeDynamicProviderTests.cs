@@ -1,14 +1,24 @@
 ﻿using System;
+using System.Dynamic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using CapnpNet.Schema;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CapnpNet.Tests
 {
   public class NodeDynamicProviderTests
   {
+    private readonly ITestOutputHelper _output;
+
+    public NodeDynamicProviderTests(ITestOutputHelper output)
+    {
+      _output = output;
+    }
+
     [Fact]
     public async Task NodeDynamicProviderTest()
     {
@@ -31,7 +41,13 @@ namespace CapnpNet.Tests
       dynamic sut = msg.Root.AsDynamic(GetNode("CodeGeneratorRequest"));
       
       byte minor = sut.capnpVersion.minor;
-      Console.WriteLine(minor);
+      _output.WriteLine(minor.ToString());
+
+      _output.WriteLine(
+        string.Join(", ",
+          (sut as IDynamicMetaObjectProvider)
+            .GetMetaObject(Expression.Parameter(typeof(DynamicStruct)))
+            .GetDynamicMemberNames()));
     }
   }
 }

@@ -63,6 +63,7 @@ namespace CapnpNet.Schema
     
     public sealed class DynamicStructMetaObject : DynamicMetaObject
     {
+      // TODO: binding restrictions?
       public DynamicStructMetaObject(Expression exp, DynamicStruct ds)
         : base(exp, BindingRestrictions.Empty, ds)
       {
@@ -185,6 +186,29 @@ namespace CapnpNet.Schema
         }
 
         throw new NotImplementedException();
+      }
+
+      public override IEnumerable<string> GetDynamicMemberNames()
+      {
+        var ds = (DynamicStruct)this.Value;
+        var node = ds.SchemaNode.Node;
+        switch (node.which)
+        {
+          case Node.Union.@struct:
+            return node.@struct.fields.Select(f => f.name.ToString());
+          case Node.Union.@enum:
+            break;
+          case Node.Union.@interface:
+            break;
+          case Node.Union.@const:
+            break;
+          case Node.Union.file:
+          case Node.Union.annotation:
+          default:
+            throw new NotSupportedException();
+        }
+
+        return base.GetDynamicMemberNames();
       }
     }
   }
