@@ -14,7 +14,7 @@ namespace CapnpNet
     public int SegmentIndex { get; set; }
     public Segment Next { get; set; }
     
-    public Span<ulong> Span => MemoryMarshal.Cast<byte, ulong>(_memory.Span);
+    public Span<byte> Span => _memory.Span;
 
     public Memory<byte> Memory => _memory;
 

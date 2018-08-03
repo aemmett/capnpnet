@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace CapnpNet
@@ -10,7 +9,7 @@ namespace CapnpNet
   public struct BoolList : IPureAbsPointer, IEnumerable<bool>
   {
     private readonly AbsPointer _pointer;
-    
+
     public BoolList(Message msg, int count)
     {
       int words = (count + 63) / 64;
@@ -28,8 +27,8 @@ namespace CapnpNet
     }
 
     public AbsPointer Pointer => _pointer;
-    
-    public Span<ulong> Span => this.Segment.Span.Slice(this.ListWordOffset, (this.Count + 63) / 64); 
+
+    public Span<byte> Span => this.Segment.Span.Slice(this.ListWordOffset << 3, (this.Count + 7) / 8);
 
     public Segment Segment => _pointer.Segment;
     public int ListWordOffset => _pointer.DataOffset;
@@ -41,22 +40,22 @@ namespace CapnpNet
       {
         if (index < 0 || index >= this.Count) throw new ArgumentOutOfRangeException("index");
 
-        var mask = 1UL << (index & 63);
-        return (this.Span[index >> 6] & mask) > 0;
+        var mask = 1 << (index & 7);
+        return (this.Span[index >> 3] & mask) > 0;
       }
       set
       {
         if (index < 0 || index >= this.Count) throw new ArgumentOutOfRangeException("index");
 
-        var mask = 1UL << (index & 63);
-        var span = this.Span[index >> 6]; 
+        var mask = 1 << (index & 7);
+        ref byte span = ref this.Span[index >> 3];
         if (value)
         {
-          span |= mask;
+          span |= (byte)mask;
         }
         else
         {
-          span &= ~mask;
+          span &= (byte)~mask;
         }
       }
     }
@@ -64,14 +63,7 @@ namespace CapnpNet
     public BoolList CopyTo(Message dest)
     {
       var ret = new BoolList(dest, this.Count);
-      
-      ref ulong src = ref this.Segment.GetWord(this.ListWordOffset);
-      ref ulong dst = ref ret.Segment.GetWord(ret.ListWordOffset);
-      for (int i = 0; i < (this.Count + 63) / 64; i++)
-      {
-        Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
-      }
-
+      this.Span.CopyTo(ret.Span);
       return ret;
     }
 
@@ -84,7 +76,7 @@ namespace CapnpNet
         yield return this[i];
       }
     }
-    
+
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
     /*

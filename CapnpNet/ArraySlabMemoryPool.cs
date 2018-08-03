@@ -57,12 +57,12 @@ namespace CapnpNet
       {
         // allocate an array large enough to be Large Object Heap
         _slab = new byte[DefaultSlabSize];
-      
+
         // pin so we can find a 64-bit-aligned offset
-        _handle = GCHandle.Alloc(_slab, GCHandleType.Pinned);        
+        _handle = GCHandle.Alloc(_slab, GCHandleType.Pinned);
         _alignOffset = (int)((_handle.AddrOfPinnedObject().ToInt64() + 7) & ~7);
-      
-        int maxBytes = _slab.Length - _alignOffset;        
+
+        int maxBytes = _slab.Length - _alignOffset;
         var remaining = maxBytes / MinSegmentSizeBytes;
         var generations = new List<SegmentState[]>();
         while (remaining > 0)
@@ -223,7 +223,7 @@ namespace CapnpNet
       _slabs = _slabs.Push(newSlab);
       return newSlab.TryRent(minBufferSize);
     }
-    
+
     protected override void Dispose(bool disposing)
     {
       _slabs = null;

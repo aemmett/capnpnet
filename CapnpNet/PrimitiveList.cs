@@ -28,7 +28,7 @@ namespace CapnpNet
     
     public Span<T> Span => this.Count == 0
       ? Span<T>.Empty
-      : MemoryMarshal.Cast<ulong, T>(this.Segment.Span.Slice(this.ListWordOffset)).Slice(0, this.Count); 
+      : MemoryMarshal.Cast<byte, T>(this.Segment.Span.Slice(this.ListWordOffset << 3, this.Count * Unsafe.SizeOf<T>())); 
 
     public Segment Segment { get; }
     public int ListWordOffset { get; }
@@ -39,14 +39,7 @@ namespace CapnpNet
     public PrimitiveList<T> CopyTo(Message dest)
     {
       var ret = new PrimitiveList<T>(dest, this.Count);
-      
-      ref ulong src = ref this.Segment.GetWord(this.ListWordOffset);
-      ref ulong dst = ref ret.Segment.GetWord(ret.ListWordOffset );
-      for (int i = 0; i < this.Count * Unsafe.SizeOf<T>() / sizeof(ulong); i++)
-      {
-        Unsafe.Add(ref dst, i) = Unsafe.Add(ref src, i);
-      }
-
+      this.Span.CopyTo(ret.Span);
       return ret;
     }
 
